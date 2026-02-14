@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelancer Excel Templates — Finance Dashboard & Client Tracker | FlowDesk Studio</title>
+    <meta name="description" content="Professional Excel templates for freelancers. Track income, expenses, clients, projects, and billable hours. No macros, no subscriptions. Buy once, use forever.">
+    <meta name="keywords" content="freelancer excel template, freelance finance tracker, freelance expense tracker, freelance income tracker, client tracker excel, project tracker spreadsheet, freelance bookkeeping template, freelance budget template, freelance invoice template, billable hours tracker">
+    <link rel="canonical" href="https://flowdeskstudio.github.io/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Freelancer Excel Templates — Finance Dashboard & Client Tracker">
+    <meta property="og:description" content="Professional Excel templates for freelancers. Track income, expenses, clients, projects, and billable hours. No macros, no subscriptions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flowdeskstudio.github.io/">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Freelancer Excel Templates | FlowDesk Studio">
+    <meta name="twitter:description" content="Track income, expenses, clients, projects & billable hours in Excel. No macros, no subscriptions.">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "FlowDesk Studio",
+        "url": "https://flowdeskstudio.github.io/",
+        "description": "Professional Excel templates for freelancers"
+    }
+    </script>
+    <script type="application/ld+json">
+    [
+        {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Freelancer Finance Dashboard",
+            "description": "Excel workbook to track income, expenses, profit, tax, and invoices. 6 sheets, 124 formulas, 4 charts.",
+            "brand": {"@type": "Brand", "name": "FlowDesk Studio"},
+            "offers": {
+                "@type": "Offer",
+                "price": "19.00",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock",
+                "url": "https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard"
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Freelancer Client & Project Tracker",
+            "description": "Excel workbook to manage clients, projects, and billable hours. 5 sheets, 231 formulas, 3 charts.",
+            "brand": {"@type": "Brand", "name": "FlowDesk Studio"},
+            "offers": {
+                "@type": "Offer",
+                "price": "14.00",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock",
+                "url": "https://flowdeskst.gumroad.com/l/freelancer-client-project-tracker"
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Freelancer Business Bundle",
+            "description": "Both Excel workbooks in one bundle. 11 sheets, 355 formulas, 7 charts. Save $4.",
+            "brand": {"@type": "Brand", "name": "FlowDesk Studio"},
+            "offers": {
+                "@type": "Offer",
+                "price": "29.00",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock",
+                "url": "https://flowdeskst.gumroad.com/l/freelancer-business-bundle"
+            }
+        }
+    ]
+    </script>
+
+    <style>
+        :root {
+            --dark: #1F3864;
+            --med: #2E75B6;
+            --green: #548235;
+            --teal: #1BA8A0;
+            --orange: #ED7D31;
+            --light: #F5F7FA;
+            --white: #FFFFFF;
+            --text: #333333;
+            --text-light: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--dark) 0%, #2C5282 100%);
+            color: var(--white);
+            padding: 80px 20px 60px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            opacity: 0.9;
+            max-width: 640px;
+            margin: 0 auto 32px;
+        }
+        .hero-badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Section */
+        section {
+            padding: 64px 0;
+        }
+        section:nth-child(even) {
+            background: var(--light);
+        }
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            color: var(--dark);
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+
+        /* Product Cards */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+        .product-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        .product-card .card-header {
+            padding: 24px;
+            color: var(--white);
+        }
+        .product-card:nth-child(1) .card-header { background: var(--med); }
+        .product-card:nth-child(2) .card-header { background: var(--teal); }
+        .product-card:nth-child(3) .card-header { background: var(--green); }
+        .card-header h3 { font-size: 1.2rem; margin-bottom: 4px; }
+        .card-header .price { font-size: 2rem; font-weight: 700; }
+        .card-header .price-note { font-size: 0.85rem; opacity: 0.85; }
+        .card-body {
+            padding: 24px;
+        }
+        .card-body ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        .card-body li {
+            padding: 6px 0;
+            padding-left: 24px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+        .card-body li::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-weight: 700;
+        }
+        .card-body .stats {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--dark); color: var(--white); }
+        .btn-bundle { background: var(--green); color: var(--white); }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 32px;
+        }
+        .feature {
+            text-align: center;
+            padding: 24px;
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        .feature h3 {
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        .feature p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* FAQ */
+        .faq-list { max-width: 720px; margin: 0 auto; }
+        .faq-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 0;
+        }
+        .faq-item h3 {
+            color: var(--dark);
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .faq-item p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Perfect For */
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .use-case {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--teal);
+            font-size: 0.95rem;
+        }
+
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, var(--dark) 0%, #2C5282 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 64px 20px;
+        }
+        .cta h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin-bottom: 12px; }
+        .cta p { opacity: 0.9; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .cta .btn { width: auto; padding: 14px 40px; background: var(--green); color: var(--white); font-size: 1.1rem; }
+
+        /* Footer */
+        footer {
+            background: #1a1a2e;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 32px 20px;
+            font-size: 0.85rem;
+        }
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero { padding: 60px 16px 40px; }
+            section { padding: 48px 0; }
+            .products { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <header class="hero">
+        <div class="container">
+            <h1>Excel Templates for Freelancers</h1>
+            <p>Track income, expenses, clients, projects, and billable hours — all in Excel. No macros, no subscriptions. Buy once, use forever.</p>
+            <div class="hero-badges">
+                <span class="hero-badge">355 Formulas</span>
+                <span class="hero-badge">11 Sheets</span>
+                <span class="hero-badge">7 Auto Charts</span>
+                <span class="hero-badge">Zero Errors</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Products -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">Choose Your Template</h2>
+            <p class="section-subtitle">Professionally designed Excel workbooks that work right out of the box. Enter your data, and every formula, chart, and summary updates automatically.</p>
+            <div class="products">
+                <!-- Finance Dashboard -->
+                <div class="product-card">
+                    <div class="card-header">
+                        <h3>Finance Dashboard</h3>
+                        <div class="price">$19</div>
+                        <div class="price-note">One-time purchase</div>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Income &amp; expense tracking (200+ rows)</li>
+                            <li>Auto-calculated monthly P&amp;L</li>
+                            <li>Dashboard with 4 live charts</li>
+                            <li>Built-in invoice template</li>
+                            <li>Tax estimation &amp; deductible flagging</li>
+                            <li>6 sheets, 124 formulas</li>
+                        </ul>
+                        <p class="stats">Excel 2016+ &bull; Microsoft 365 &bull; Office for Mac</p>
+                        <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard" class="btn btn-primary" rel="noopener">Get Finance Dashboard</a>
+                    </div>
+                </div>
+
+                <!-- Client & Project Tracker -->
+                <div class="product-card">
+                    <div class="card-header">
+                        <h3>Client &amp; Project Tracker</h3>
+                        <div class="price">$14</div>
+                        <div class="price-note">One-time purchase</div>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Client database (100+ entries)</li>
+                            <li>Project tracker with status &amp; priority</li>
+                            <li>Time log with auto billable calculation</li>
+                            <li>Revenue pipeline at a glance</li>
+                            <li>Dashboard with 3 live charts</li>
+                            <li>5 sheets, 231 formulas</li>
+                        </ul>
+                        <p class="stats">Excel 2016+ &bull; Microsoft 365 &bull; Office for Mac</p>
+                        <a href="https://flowdeskst.gumroad.com/l/freelancer-client-project-tracker" class="btn btn-primary" rel="noopener">Get Client Tracker</a>
+                    </div>
+                </div>
+
+                <!-- Bundle -->
+                <div class="product-card">
+                    <div class="card-header">
+                        <h3>Business Bundle</h3>
+                        <div class="price">$29 <span style="font-size:0.9rem;font-weight:400;text-decoration:line-through;opacity:0.7;">$33</span></div>
+                        <div class="price-note">Save $4 &mdash; both templates included</div>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Finance Dashboard ($19 value)</li>
+                            <li>Client &amp; Project Tracker ($14 value)</li>
+                            <li>11 sheets, 355 formulas combined</li>
+                            <li>7 auto-updating charts total</li>
+                            <li>Complete freelance business toolkit</li>
+                            <li>Sample data included in both</li>
+                        </ul>
+                        <p class="stats">2 workbooks &bull; Excel 2016+ &bull; Microsoft 365</p>
+                        <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" class="btn btn-bundle" rel="noopener">Get the Bundle &amp; Save</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">Why Freelancers Choose FlowDesk</h2>
+            <p class="section-subtitle">Built specifically for independent professionals who want clarity without complexity.</p>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">&#9889;</div>
+                    <h3>Ready in 5 Minutes</h3>
+                    <p>Enter your business name and rate on the Setup page. Everything else is pre-built with formulas, charts, and dropdowns.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">&#128200;</div>
+                    <h3>Auto-Updating Dashboards</h3>
+                    <p>Every chart and KPI recalculates as you enter data. No pivot tables to refresh, no macros to run.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">&#128176;</div>
+                    <h3>No Monthly Fees</h3>
+                    <p>One purchase, lifetime access. No subscriptions, no upsells, no feature gates. The full workbook is yours.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">&#128274;</div>
+                    <h3>No Macros, No Risk</h3>
+                    <p>Pure Excel formulas only. No VBA, no macros, no security warnings. Works on Windows and Mac.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">&#128221;</div>
+                    <h3>Tax-Ready Tracking</h3>
+                    <p>Flag deductible expenses, estimate quarterly tax, and have organized records when tax season arrives.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">&#127919;</div>
+                    <h3>Built for Freelancers</h3>
+                    <p>Not a generic spreadsheet. Every formula, category, and layout is designed for how freelancers actually work.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Perfect For -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">Perfect For</h2>
+            <p class="section-subtitle">Whether you're just starting out or scaling up, these templates grow with you.</p>
+            <div class="use-cases">
+                <div class="use-case"><strong>Freelance Designers</strong> tracking project budgets and client payments</div>
+                <div class="use-case"><strong>Developers &amp; Consultants</strong> logging billable hours across multiple clients</div>
+                <div class="use-case"><strong>Writers &amp; Creatives</strong> managing income from multiple sources</div>
+                <div class="use-case"><strong>Side Hustlers</strong> who need simple bookkeeping without accounting software</div>
+                <div class="use-case"><strong>Agency Owners</strong> who need project visibility and pipeline tracking</div>
+                <div class="use-case"><strong>Solopreneurs</strong> who want one place for finances, clients, and projects</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">Everything you need to know before buying.</p>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h3>What software do I need?</h3>
+                    <p>Microsoft Excel 2016 or newer, or Microsoft 365 (Windows or Mac). Core formulas also work in Google Sheets, though some formatting may differ.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Are macros required?</h3>
+                    <p>No. Every template uses pure Excel formulas only. No macros, no VBA, no security warnings. Just open and start entering your data.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I customize the categories and fields?</h3>
+                    <p>Yes. Income categories, expense categories, project statuses, client statuses, and priority levels are all fully editable.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is sample data included?</h3>
+                    <p>Yes. Each workbook comes with realistic sample data so you can see exactly how everything works. Delete it when you're ready to start fresh.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I use this for multiple years?</h3>
+                    <p>Yes. Change the year in the Setup sheet and all monthly calculations adjust automatically. Or duplicate the workbook for each year.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do the two workbooks connect to each other?</h3>
+                    <p>They work independently. Each has its own Setup page and functions as a standalone tool. This keeps things simple and avoids cross-file dependency issues.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What if I only need one template?</h3>
+                    <p>Each product works perfectly on its own. The bundle simply saves you $4 if you want both. There's no pressure to buy more than you need.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Free CTA -->
+    <section style="text-align:center;padding:48px 20px;background:var(--white);">
+        <div class="container">
+            <h2 class="section-title">Not ready to buy? Start free.</h2>
+            <p class="section-subtitle">Download our free Budget Starter template — a simple monthly income vs expense tracker. No signup required.</p>
+            <a href="https://flowdeskst.gumroad.com/l/freelancer-budget-starter" class="btn" style="width:auto;padding:14px 40px;background:var(--teal);color:var(--white);font-size:1.1rem;" rel="noopener">Download Free Template</a>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <h2>Stop losing track of your freelance business.</h2>
+        <p>Get organized in 5 minutes with templates that handle the math for you.</p>
+        <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" class="btn" rel="noopener">Get the Bundle &mdash; $29</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 FlowDesk Studio. All rights reserved.</p>
+        <p style="margin-top:8px;">
+            <a href="https://flowdeskst.gumroad.com/">Visit our Gumroad store</a>
+        </p>
+    </footer>
+
+</body>
+</html>
