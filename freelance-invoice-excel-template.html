@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Create a Freelance Invoice in Excel (Free Template) | FlowDesk Studio</title>
+    <meta name="description" content="Step-by-step guide to building a professional freelance invoice in Excel. Includes auto-calculating totals, tax fields, and a free downloadable template.">
+    <meta name="keywords" content="freelance invoice template excel, how to make freelance invoice, freelance invoice spreadsheet, self employed invoice template, contractor invoice excel, invoice template for freelancers">
+    <link rel="canonical" href="https://flowdeskstudio.github.io/freelance-invoice-excel-template.html">
+    <meta property="og:title" content="How to Create a Freelance Invoice in Excel (Free Template)">
+    <meta property="og:description" content="Build a professional freelance invoice in Excel with auto-calculating totals and tax fields.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://flowdeskstudio.github.io/freelance-invoice-excel-template.html">
+    <meta property="og:image" content="https://flowdeskstudio.github.io/img-finance.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "How to Create a Freelance Invoice in Excel",
+        "description": "Step-by-step guide to building a professional freelance invoice in Excel with auto-calculating totals.",
+        "author": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "publisher": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "datePublished": "2026-02-15",
+        "image": "https://flowdeskstudio.github.io/img-finance.png"
+    }
+    </script>
+    <style>
+        :root { --dark: #1F3864; --med: #2E75B6; --green: #548235; --teal: #1BA8A0; --light: #F5F7FA; --white: #FFFFFF; --text: #333; --text-light: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); line-height: 1.7; }
+        .nav { background: var(--dark); padding: 14px 20px; text-align: center; }
+        .nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 600; }
+        .hero-article { background: linear-gradient(135deg, var(--dark), #2C5282); color: #fff; padding: 60px 20px; text-align: center; }
+        .hero-article h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); max-width: 700px; margin: 0 auto 12px; line-height: 1.2; }
+        .hero-article p { opacity: 0.85; max-width: 560px; margin: 0 auto; }
+        .container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+        article { padding: 48px 0; }
+        article h2 { color: var(--dark); font-size: 1.5rem; margin: 40px 0 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+        article h2:first-of-type { border-top: none; margin-top: 0; }
+        article h3 { color: var(--med); font-size: 1.15rem; margin: 24px 0 10px; }
+        article p { margin-bottom: 16px; color: var(--text-light); }
+        article ul, article ol { margin: 0 0 16px 24px; color: var(--text-light); }
+        article li { margin-bottom: 8px; }
+        .tip-box { background: #EBF5FB; border-left: 4px solid var(--med); padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+        .tip-box strong { color: var(--dark); }
+        .cta-box { background: var(--light); border: 2px solid var(--teal); border-radius: 12px; padding: 28px; margin: 40px 0; text-align: center; }
+        .cta-box h3 { color: var(--dark); margin-bottom: 8px; font-size: 1.2rem; }
+        .cta-box p { color: var(--text-light); margin-bottom: 16px; }
+        .btn { display: inline-block; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; color: #fff; }
+        .btn-teal { background: var(--teal); }
+        .btn-dark { background: var(--dark); }
+        .btn:hover { opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 0.93rem; }
+        th, td { padding: 10px 12px; border: 1px solid #dde3ea; text-align: left; }
+        th { background: var(--dark); color: #fff; font-weight: 600; }
+        td code { background: #f0f4f8; padding: 2px 6px; border-radius: 3px; font-size: 0.88rem; }
+        .related { background: var(--light); padding: 48px 20px; }
+        .related h2 { text-align: center; color: var(--dark); margin-bottom: 24px; }
+        .related-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+        .related-links a { background: #fff; padding: 16px 24px; border-radius: 8px; text-decoration: none; color: var(--dark); font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s; }
+        .related-links a:hover { transform: translateY(-2px); }
+        footer { background: #1a1a2e; color: rgba(255,255,255,0.6); text-align: center; padding: 32px 20px; font-size: 0.85rem; }
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+        @media (max-width: 640px) { .hero-article { padding: 40px 16px; } article { padding: 32px 0; } }
+    </style>
+</head>
+<body>
+    <nav class="nav" style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;">
+        <a href="/">FlowDesk Studio</a>
+        <a href="/track-freelance-income-expenses.html" style="font-weight:400;font-size:0.9rem;opacity:0.85;">Income Tracking</a>
+        <a href="/freelance-tax-deductions-checklist.html" style="font-weight:400;font-size:0.9rem;opacity:0.85;">Tax Deductions</a>
+    </nav>
+    <header class="hero-article">
+        <h1>How to Create a Freelance Invoice in Excel</h1>
+        <p>Build a professional, reusable invoice template with auto-calculating totals, tax fields, and payment terms.</p>
+    </header>
+    <div class="container">
+        <article>
+
+            <h2>Why You Need a Proper Invoice Template</h2>
+            <p>Getting paid on time starts with sending clear, professional invoices. Many freelancers cobble together invoices in a word processor or use free online generators, but a well-built Excel invoice gives you something those options don't: a single file you control, customize, and reuse for every client — with formulas that handle the math automatically.</p>
+            <p>A good invoice template should calculate line-item totals, subtotals, tax, and the grand total without you touching a calculator. It should also look professional enough that clients take it seriously and pay promptly.</p>
+
+            <h2>What Every Freelance Invoice Needs</h2>
+            <p>Before building the spreadsheet, make sure your invoice includes all the essential fields. Missing even one can delay payment or cause confusion.</p>
+
+            <h3>Header Section</h3>
+            <ul>
+                <li><strong>Your business name</strong> (or your legal name if you're a sole proprietor)</li>
+                <li><strong>Your contact info</strong> — email, phone, address</li>
+                <li><strong>Invoice number</strong> — sequential numbering (INV-001, INV-002, etc.)</li>
+                <li><strong>Invoice date</strong> and <strong>due date</strong></li>
+            </ul>
+
+            <h3>Client Section</h3>
+            <ul>
+                <li><strong>Client name</strong> (company or individual)</li>
+                <li><strong>Client address</strong> (some clients require this for their records)</li>
+                <li><strong>Client contact</strong> — the person who handles payments</li>
+            </ul>
+
+            <h3>Line Items Table</h3>
+            <table>
+                <tr><th>Description</th><th>Qty / Hours</th><th>Rate</th><th>Amount</th></tr>
+                <tr><td>Website redesign — homepage</td><td>12</td><td>$85.00</td><td><code>=B×C</code></td></tr>
+                <tr><td>Logo design — 3 concepts</td><td>1</td><td>$350.00</td><td><code>=B×C</code></td></tr>
+                <tr><td>Content writing — 5 pages</td><td>5</td><td>$120.00</td><td><code>=B×C</code></td></tr>
+            </table>
+            <p>The Amount column should always be a formula (<code>=Qty × Rate</code>) so it updates automatically when you change hours or rates.</p>
+
+            <h3>Totals Section</h3>
+            <ul>
+                <li><strong>Subtotal</strong> — <code>=SUM(Amount column)</code></li>
+                <li><strong>Tax</strong> (if applicable) — <code>=Subtotal × Tax Rate</code></li>
+                <li><strong>Discount</strong> (optional) — flat amount or percentage</li>
+                <li><strong>Total Due</strong> — <code>=Subtotal + Tax - Discount</code></li>
+            </ul>
+
+            <h3>Payment Information</h3>
+            <ul>
+                <li><strong>Payment methods accepted</strong> — bank transfer, PayPal, Wise, etc.</li>
+                <li><strong>Bank details</strong> — account number, routing number (or IBAN for international)</li>
+                <li><strong>Payment terms</strong> — Net 15, Net 30, Due on Receipt</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Pro Tip:</strong> Use "Due on Receipt" or "Net 15" for new clients. Net 30 is standard but gives clients more time to delay. For large projects, consider requiring a 50% deposit before starting.
+            </div>
+
+            <h2>Building the Template Step by Step</h2>
+
+            <h3>Step 1: Set Up the Layout</h3>
+            <p>Open a blank Excel workbook. Merge cells across the top row for your business name in large, bold text. Below that, add your address and contact details in smaller text. Leave a few rows of space, then add the client information section on the left and the invoice number/date on the right.</p>
+
+            <h3>Step 2: Create the Line Items Table</h3>
+            <p>Set up four columns: Description, Quantity/Hours, Rate, and Amount. Format the Rate and Amount columns as Currency. In the Amount column, enter the formula <code>=B×C</code> (adjusting cell references to match your layout). Copy this formula down for 10–15 rows to allow room for multiple line items.</p>
+
+            <h3>Step 3: Add the Totals Formulas</h3>
+            <p>Below the line items table, add three rows for Subtotal, Tax, and Total Due. Use <code>SUM</code> for the subtotal, a multiplication formula for tax, and a simple addition formula for the total. Format these cells as Currency with bold text so they stand out.</p>
+
+            <h3>Step 4: Add Payment Details</h3>
+            <p>Below the totals, add a section with your payment methods and bank details. Include your payment terms (Net 15, Net 30, etc.) and a polite note like "Thank you for your business."</p>
+
+            <h3>Step 5: Format for Printing</h3>
+            <p>Go to Page Layout and set the print area to fit on one page. Add light borders to the line items table. Use your brand colors for the header. Check Print Preview to make sure everything fits cleanly on a single page.</p>
+
+            <div class="tip-box">
+                <strong>Pro Tip:</strong> Save the template as a separate file (e.g., "Invoice_Template.xlsx"). When you need to create a new invoice, open the template, fill in the details, and Save As with the invoice number (e.g., "INV-047_ClientName.xlsx"). This keeps your blank template intact.
+            </div>
+
+            <h2>Essential Formulas for Your Invoice</h2>
+            <table>
+                <tr><th>Field</th><th>Formula</th><th>Purpose</th></tr>
+                <tr><td>Line Amount</td><td><code>=B5*C5</code></td><td>Qty × Rate per line</td></tr>
+                <tr><td>Subtotal</td><td><code>=SUM(D5:D19)</code></td><td>Sum of all line amounts</td></tr>
+                <tr><td>Tax</td><td><code>=D20*D22</code></td><td>Subtotal × tax rate cell</td></tr>
+                <tr><td>Discount</td><td><code>=D20*D23</code></td><td>Subtotal × discount rate</td></tr>
+                <tr><td>Total Due</td><td><code>=D20+D22-D23</code></td><td>Subtotal + Tax - Discount</td></tr>
+            </table>
+            <p>Put the tax rate and discount rate in their own cells so you can change them per client without modifying the formulas.</p>
+
+            <h2>Common Invoicing Mistakes to Avoid</h2>
+            <p><strong>Missing invoice numbers.</strong> Without sequential numbering, you can't track which invoices are paid and which are outstanding. Start at INV-001 and never skip a number.</p>
+            <p><strong>Vague descriptions.</strong> "Design work" tells the client nothing. Use specific descriptions like "Homepage redesign — desktop and mobile layouts, 3 revision rounds." This reduces disputes about what was delivered.</p>
+            <p><strong>No due date.</strong> An invoice without a due date has no urgency. Always include a specific date, not just "Net 30."</p>
+            <p><strong>Forgetting tax.</strong> If you're required to charge sales tax in your jurisdiction, make sure it's on the invoice. If you're not required to charge tax, you can remove the tax row entirely.</p>
+            <p><strong>Not saving copies.</strong> Keep a copy of every invoice you send. You'll need them for tax filing, and occasionally a client will claim they never received one.</p>
+
+            <h2>Tracking Invoice Status</h2>
+            <p>Creating invoices is only half the job — you also need to track which ones have been paid. The simplest approach is a separate sheet (or column) that records the invoice number, client, amount, date sent, due date, and payment date.</p>
+            <p>This payment tracking becomes essential during tax season, when you need to report all income received during the year — not just income invoiced.</p>
+
+            <div class="cta-box">
+                <h3>Want invoicing built into a complete finance system?</h3>
+                <p>The Freelancer Finance Dashboard includes a full invoice template plus income tracking, expense management, tax estimation, and auto-updating charts — all in one Excel workbook.</p>
+                <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard" class="btn btn-dark" rel="noopener">Get Finance Dashboard — $19</a>
+            </div>
+
+            <h2>Invoice Numbering Systems</h2>
+            <p>Pick a system and stick with it. Here are three popular approaches:</p>
+            <p><strong>Sequential:</strong> INV-001, INV-002, INV-003. Simple and universal. Works well for most freelancers.</p>
+            <p><strong>Date-based:</strong> INV-20260215-01 (year-month-day-sequence). Useful if you send many invoices and want to quickly see when each was created.</p>
+            <p><strong>Client-coded:</strong> INV-ACME-001, INV-ACME-002. Helpful if you work with a small number of recurring clients and want to group invoices by client.</p>
+
+            <h2>When to Send Invoices</h2>
+            <p>For project-based work, send the invoice as soon as the deliverable is approved. Don't wait until the end of the month — the longer you wait, the longer it takes to get paid.</p>
+            <p>For ongoing retainer work, invoice on the same day each month (the 1st or 15th works well). Consistency makes it easier for the client's accounting team to process your payments.</p>
+            <p>For hourly work, invoice weekly or bi-weekly. Monthly invoices for hourly work can lead to sticker shock for the client and cash flow problems for you.</p>
+
+            <div class="cta-box">
+                <h3>Start with a free budget template</h3>
+                <p>Track your monthly income and expenses with our free Budget Starter — 41 formulas, no macros, no signup.</p>
+                <a href="https://flowdeskst.gumroad.com/l/freelancer-budget-starter" class="btn btn-teal" rel="noopener">Download Free Template</a>
+            </div>
+
+        </article>
+    </div>
+
+    <section class="related">
+        <div class="container">
+            <h2>More Free Guides</h2>
+            <div class="related-links">
+                <a href="/track-freelance-income-expenses.html">How to Track Income &amp; Expenses</a>
+                <a href="/freelance-tax-deductions-checklist.html">Tax Deductions Checklist 2026</a>
+                <a href="/billable-hours-freelancer-guide.html">Billable Hours Tracking Guide</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 FlowDesk Studio &bull; <a href="/">Home</a> &bull; <a href="/track-freelance-income-expenses.html">Income Tracking</a> &bull; <a href="/freelance-tax-deductions-checklist.html">Tax Deductions</a></p>
+    </footer>
+</body>
+</html>
