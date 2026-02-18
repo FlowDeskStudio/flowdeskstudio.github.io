@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Rate Calculator — Find Your Ideal Hourly &amp; Project Rate | FlowDesk Studio</title>
+    <meta name="description" content="Free freelance rate calculator. Enter your expenses, desired income, and billable hours to instantly calculate your minimum hourly rate, project rate, and annual revenue target.">
+    <meta name="keywords" content="freelance rate calculator, freelance hourly rate calculator, freelance pricing calculator, how much to charge freelance, freelance income calculator, self employed rate calculator">
+    <link rel="canonical" href="https://flowdeskstudio.github.io/freelance-rate-calculator.html">
+    <meta property="og:title" content="Freelance Rate Calculator — Find Your Ideal Hourly & Project Rate">
+    <meta property="og:description" content="Free calculator to find your ideal freelance rate. Enter expenses, income goals, and hours to get your minimum hourly rate instantly.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flowdeskstudio.github.io/freelance-rate-calculator.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Freelance Rate Calculator",
+        "description": "Calculate your ideal freelance hourly rate based on expenses, income goals, tax obligations, and available billable hours.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "author": {"@type": "Organization", "name": "FlowDesk Studio"}
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "How do I calculate my freelance hourly rate?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Add your annual living expenses, business costs, and desired profit. Add 25-30% for taxes. Divide the total by your annual billable hours (typically 1,200-1,500 hours for full-time freelancers). This gives you your minimum hourly rate. Use our free calculator above to compute this instantly."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is a good hourly rate for freelancers?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Freelance rates vary widely by industry and experience. Web developers typically charge $75-$150/hour, graphic designers $50-$125/hour, writers $40-$100/hour, and consultants $100-$300/hour. Your rate should cover all expenses, taxes, benefits, and profit — not just match an employee salary."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How many billable hours can a freelancer realistically work?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Most full-time freelancers can bill 25-30 hours per week, or about 1,200-1,500 hours per year. The remaining time goes to non-billable work like marketing, admin, invoicing, and business development. New freelancers should estimate conservatively at 1,000-1,200 billable hours."
+            }
+        }
+        ]
+    }
+    </script>
+    <style>
+        :root { --dark: #1F3864; --med: #2E75B6; --green: #548235; --teal: #1BA8A0; --orange: #ED7D31; --light: #F5F7FA; --white: #FFFFFF; --text: #333333; --text-light: #666666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); line-height: 1.7; }
+        nav { background: var(--dark); padding: 14px 20px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+        nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.9rem; }
+        nav a:first-child { color: #fff; font-weight: 600; }
+        .hero-article { background: linear-gradient(135deg, var(--dark) 0%, #2C5282 100%); color: var(--white); padding: 60px 20px; text-align: center; }
+        .hero-article h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); max-width: 800px; margin: 0 auto 12px; }
+        .hero-article p { opacity: 0.9; max-width: 600px; margin: 0 auto; }
+        .content { max-width: 860px; margin: 0 auto; padding: 48px 20px; }
+        h2 { color: var(--dark); font-size: 1.5rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--light); }
+        h3 { color: var(--med); font-size: 1.15rem; margin: 28px 0 12px; }
+        p { margin-bottom: 16px; }
+
+        /* Calculator Styles */
+        .calc-container { background: var(--white); border: 2px solid #e2e8f0; border-radius: 16px; overflow: hidden; margin: 32px 0; }
+        .calc-header { background: linear-gradient(135deg, var(--dark), #2C5282); color: white; padding: 24px 32px; }
+        .calc-header h2 { color: white; border: none; margin: 0; padding: 0; font-size: 1.3rem; }
+        .calc-body { padding: 32px; }
+        .calc-section { margin-bottom: 28px; }
+        .calc-section-title { font-size: 1.05rem; font-weight: 700; color: var(--dark); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 4px; font-weight: 500; }
+        .input-group input, .input-group select { padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: var(--med); box-shadow: 0 0 0 3px rgba(46,117,182,0.1); }
+        .input-hint { font-size: 0.75rem; color: var(--text-light); margin-top: 2px; }
+
+        .calc-btn { background: var(--green); color: white; border: none; padding: 14px 40px; font-size: 1.1rem; font-weight: 600; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 8px; transition: background 0.2s; }
+        .calc-btn:hover { background: #466d2b; }
+
+        .results { display: none; margin-top: 28px; }
+        .results.show { display: block; }
+        .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .result-card { background: linear-gradient(135deg, var(--dark), #2C5282); color: white; padding: 24px; border-radius: 12px; text-align: center; }
+        .result-card.highlight { background: linear-gradient(135deg, var(--green), var(--teal)); }
+        .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85; margin-bottom: 4px; }
+        .result-value { font-size: 2rem; font-weight: 800; }
+        .result-sub { font-size: 0.8rem; opacity: 0.7; margin-top: 4px; }
+
+        .breakdown { background: var(--light); border-radius: 12px; padding: 24px; }
+        .breakdown h3 { margin-top: 0; color: var(--dark); }
+        .breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .breakdown-row:last-child { border-bottom: none; font-weight: 700; color: var(--dark); }
+        .breakdown-row span:last-child { font-weight: 600; }
+
+        .market-rates { margin-top: 24px; }
+        .market-rates table { width: 100%; border-collapse: collapse; }
+        .market-rates th { background: var(--dark); color: white; padding: 10px 16px; text-align: left; font-size: 0.85rem; }
+        .market-rates td { padding: 10px 16px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        .market-rates tr:nth-child(even) { background: var(--light); }
+        .your-rate { background: #e8f5e9 !important; font-weight: 600; }
+
+        .cta-box { background: linear-gradient(135deg, var(--dark), #2C5282); color: var(--white); padding: 32px; border-radius: 12px; text-align: center; margin: 40px 0; }
+        .cta-box h3 { color: var(--white); margin-bottom: 12px; }
+        .cta-box p { opacity: 0.9; margin-bottom: 16px; }
+        .cta-box a { display: inline-block; background: var(--green); color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .related { background: var(--light); padding: 32px; border-radius: 12px; margin: 40px 0; }
+        .related h3 { color: var(--dark); margin-bottom: 16px; }
+        .related a { display: block; color: var(--med); text-decoration: none; padding: 6px 0; }
+        .related a:hover { text-decoration: underline; }
+        footer { background: #1a1a2e; color: rgba(255,255,255,0.6); text-align: center; padding: 32px 20px; font-size: 0.85rem; }
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+
+        @media (max-width: 640px) {
+            .content { padding: 32px 16px; }
+            .input-grid { grid-template-columns: 1fr; }
+            .results-grid { grid-template-columns: 1fr; }
+            .calc-body { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">FlowDesk Studio</a>
+        <a href="/track-freelance-income-expenses.html">Income Tracking</a>
+        <a href="/how-to-set-freelance-rates.html">Pricing Guide</a>
+        <a href="/freelance-invoice-excel-template.html">Invoice Guide</a>
+        <a href="/freelance-contract-essentials.html">Contract Guide</a>
+        <a href="/freelance-proposal-template.html">Proposal Guide</a>
+        <a href="/freelance-late-payment-solutions.html">Late Payments</a>
+        <a href="/best-freelance-tools.html">Best Tools</a>
+    </nav>
+
+    <header class="hero-article">
+        <h1>Freelance Rate Calculator</h1>
+        <p>Find your ideal hourly rate, project rate, and annual revenue target based on your real expenses and goals.</p>
+    </header>
+
+    <div class="content">
+        <div class="calc-container">
+            <div class="calc-header">
+                <h2>Calculate Your Freelance Rate</h2>
+            </div>
+            <div class="calc-body">
+                <div class="calc-section">
+                    <div class="calc-section-title">Annual Living Expenses</div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="rent">Housing (Rent/Mortgage)</label>
+                            <input type="number" id="rent" placeholder="18000" value="">
+                            <span class="input-hint">Annual total</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="food">Food &amp; Groceries</label>
+                            <input type="number" id="food" placeholder="6000" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="transport">Transportation</label>
+                            <input type="number" id="transport" placeholder="3000" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="insurance">Health Insurance</label>
+                            <input type="number" id="insurance" placeholder="6000" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="utilities">Utilities &amp; Phone</label>
+                            <input type="number" id="utilities" placeholder="3000" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="other_personal">Other Personal Expenses</label>
+                            <input type="number" id="other_personal" placeholder="5000" value="">
+                            <span class="input-hint">Clothing, entertainment, etc.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-section">
+                    <div class="calc-section-title">Annual Business Expenses</div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="software">Software &amp; Subscriptions</label>
+                            <input type="number" id="software" placeholder="2000" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="equipment">Equipment &amp; Hardware</label>
+                            <input type="number" id="equipment" placeholder="1500" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="office">Office / Coworking</label>
+                            <input type="number" id="office" placeholder="0" value="">
+                        </div>
+                        <div class="input-group">
+                            <label for="other_biz">Other Business Costs</label>
+                            <input type="number" id="other_biz" placeholder="1000" value="">
+                            <span class="input-hint">Marketing, education, etc.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-section">
+                    <div class="calc-section-title">Income Goals &amp; Time</div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="profit">Desired Annual Profit</label>
+                            <input type="number" id="profit" placeholder="20000" value="">
+                            <span class="input-hint">Savings + investments beyond expenses</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="tax_rate">Estimated Tax Rate (%)</label>
+                            <input type="number" id="tax_rate" placeholder="28" value="" min="0" max="60">
+                            <span class="input-hint">Self-employment + income tax (25-35% typical)</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="hours_week">Billable Hours Per Week</label>
+                            <input type="number" id="hours_week" placeholder="25" value="" min="1" max="60">
+                            <span class="input-hint">25-30 typical for full-time freelancers</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="weeks_year">Working Weeks Per Year</label>
+                            <input type="number" id="weeks_year" placeholder="48" value="" min="1" max="52">
+                            <span class="input-hint">52 minus vacation and sick weeks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calc-btn" onclick="calculate()">Calculate My Rate</button>
+
+                <div class="results" id="results">
+                    <div class="results-grid">
+                        <div class="result-card highlight">
+                            <div class="result-label">Your Hourly Rate</div>
+                            <div class="result-value" id="hourly-rate">$0</div>
+                            <div class="result-sub">minimum to cover everything</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Day Rate (8hrs)</div>
+                            <div class="result-value" id="day-rate">$0</div>
+                            <div class="result-sub">for full-day engagements</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Annual Revenue Target</div>
+                            <div class="result-value" id="annual-target">$0</div>
+                            <div class="result-sub">total you need to earn</div>
+                        </div>
+                    </div>
+
+                    <div class="breakdown">
+                        <h3>Revenue Breakdown</h3>
+                        <div class="breakdown-row"><span>Living Expenses</span><span id="b-living">$0</span></div>
+                        <div class="breakdown-row"><span>Business Expenses</span><span id="b-business">$0</span></div>
+                        <div class="breakdown-row"><span>Desired Profit</span><span id="b-profit">$0</span></div>
+                        <div class="breakdown-row"><span>Tax Reserve (<span id="b-tax-pct">28</span>%)</span><span id="b-tax">$0</span></div>
+                        <div class="breakdown-row"><span>Total Annual Revenue Needed</span><span id="b-total">$0</span></div>
+                    </div>
+
+                    <div class="breakdown" style="margin-top: 16px;">
+                        <h3>Project Rate Estimates</h3>
+                        <div class="breakdown-row"><span>5-hour project</span><span id="p-5h">$0</span></div>
+                        <div class="breakdown-row"><span>10-hour project</span><span id="p-10h">$0</span></div>
+                        <div class="breakdown-row"><span>20-hour project</span><span id="p-20h">$0</span></div>
+                        <div class="breakdown-row"><span>40-hour project (1 week)</span><span id="p-40h">$0</span></div>
+                        <div class="breakdown-row"><span>Monthly retainer (80 hrs)</span><span id="p-80h">$0</span></div>
+                    </div>
+
+                    <div class="market-rates" id="market-rates-section">
+                        <h3 style="color: var(--dark); margin: 24px 0 12px;">How Does Your Rate Compare?</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Average freelance rates by profession (USD/hour). Your calculated rate is highlighted.</p>
+                        <table>
+                            <tr><th>Profession</th><th>Beginner</th><th>Mid-Level</th><th>Expert</th></tr>
+                            <tr><td>Web Developer</td><td>$50-75</td><td>$75-125</td><td>$125-200+</td></tr>
+                            <tr><td>Graphic Designer</td><td>$35-50</td><td>$50-85</td><td>$85-150+</td></tr>
+                            <tr><td>Copywriter</td><td>$30-50</td><td>$50-80</td><td>$80-150+</td></tr>
+                            <tr><td>Marketing Consultant</td><td>$50-75</td><td>$75-150</td><td>$150-300+</td></tr>
+                            <tr><td>Photographer</td><td>$35-60</td><td>$60-100</td><td>$100-250+</td></tr>
+                            <tr><td>Video Editor</td><td>$40-60</td><td>$60-100</td><td>$100-175+</td></tr>
+                            <tr class="your-rate"><td><strong>Your Rate</strong></td><td colspan="3" style="text-align:center;" id="your-rate-compare">—</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>How to Use This Calculator</h2>
+
+        <p>This calculator works by adding up everything you need to earn, then dividing by your available billable hours. Here's the formula:</p>
+
+        <p style="background: var(--light); padding: 16px 24px; border-radius: 8px; font-family: monospace; text-align: center; font-size: 1.05rem;">
+            Hourly Rate = (Living Expenses + Business Costs + Profit + Taxes) &divide; Annual Billable Hours
+        </p>
+
+        <h3>Step 1: Enter Your Living Expenses</h3>
+        <p>Include everything you need to live comfortably: rent or mortgage, food, transportation, health insurance, utilities, and personal expenses. Use annual totals. If you're unsure, check your bank statements for the past 3 months and multiply by 4.</p>
+
+        <h3>Step 2: Add Business Expenses</h3>
+        <p>These are costs specific to running your freelance business: software subscriptions, equipment depreciation, office or coworking space, professional development, and marketing costs. For a complete list of deductible business expenses, see our <a href="/freelance-tax-deductions-checklist.html">Tax Deductions Checklist</a>.</p>
+
+        <h3>Step 3: Set Your Profit Goal</h3>
+        <p>Profit is what's left after all expenses and taxes — it's your savings, investments, and financial growth. Don't set this to zero. Even $10,000-$20,000 in annual profit gives you a financial buffer and allows you to invest in your business. See our <a href="/freelance-retirement-savings-guide.html">Retirement Savings Guide</a> for how to invest your profit wisely.</p>
+
+        <h3>Step 4: Estimate Billable Hours Honestly</h3>
+        <p>This is where most freelancers make mistakes. You cannot bill 40 hours per week. Non-billable time includes marketing, invoicing, admin, email, and prospecting. Full-time freelancers typically bill 25-30 hours per week. New freelancers should estimate 20-25. Learn more about tracking your billable hours in our <a href="/billable-hours-freelancer-guide.html">Billable Hours Guide</a>.</p>
+
+        <h2>What to Do With Your Calculated Rate</h2>
+
+        <p>Your calculated rate is your <strong>minimum</strong> hourly rate — the floor below which you lose money. In practice, you should charge above this number for several reasons:</p>
+
+        <ul style="margin: 0 0 16px 24px;">
+            <li><strong>Market positioning.</strong> Pricing too low signals inexperience. Clients often associate higher rates with higher quality.</li>
+            <li><strong>Negotiation room.</strong> Some clients will negotiate. Starting higher gives you room to offer a "discount" and still hit your minimum.</li>
+            <li><strong>Scope creep buffer.</strong> Projects almost always take longer than estimated. A higher rate absorbs unexpected time.</li>
+            <li><strong>Income growth.</strong> Your expenses and goals will increase over time. Build growth into your rate from day one.</li>
+        </ul>
+
+        <p>For a deep dive into pricing strategies including project-based and value-based pricing, see our complete <a href="/how-to-set-freelance-rates.html">How to Set Freelance Rates</a> guide.</p>
+
+        <div class="cta-box">
+            <h3>Track Your Actual Rate in Real Time</h3>
+            <p>Knowing your target rate is step one. Our Finance Dashboard automatically calculates your effective hourly rate based on real income and hours logged — so you always know if you're hitting your targets.</p>
+            <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard">Get Finance Dashboard — $19</a>
+        </div>
+
+        <div class="cta-box" style="background: linear-gradient(135deg, var(--green), var(--teal));">
+            <h3>Start Tracking for Free</h3>
+            <p>Not ready to commit? Download our free Budget Starter template to begin tracking your income and expenses in Excel today.</p>
+            <a href="https://flowdeskst.gumroad.com/l/freelancer-budget-starter" style="background: var(--dark);">Download Free Budget Starter</a>
+        </div>
+
+        <div class="related">
+            <h3>Related Guides</h3>
+            <a href="/how-to-set-freelance-rates.html">How to Set Freelance Rates: Complete Pricing Guide</a>
+            <a href="/freelance-proposal-template.html">How to Write a Freelance Proposal That Wins Clients</a>
+            <a href="/billable-hours-freelancer-guide.html">How to Track Billable Hours as a Freelancer</a>
+            <a href="/track-freelance-income-expenses.html">How to Track Freelance Income &amp; Expenses</a>
+            <a href="/freelance-invoice-excel-template.html">How to Create a Freelance Invoice in Excel</a>
+            <a href="/freelance-late-payment-solutions.html">How to Handle Late Payments as a Freelancer</a>
+            <a href="/freelance-contract-essentials.html">Freelance Contract Essentials: 10 Must-Have Clauses</a>
+            <a href="/freelance-tax-deductions-checklist.html">Freelance Tax Deductions Checklist 2026</a>
+            <a href="/freelance-quarterly-tax-guide.html">Quarterly Tax Payments Guide</a>
+            <a href="/freelance-budget-plan-template.html">Freelance Monthly Budget Plan Template</a>
+            <a href="/freelance-retirement-savings-guide.html">Freelance Retirement Savings Guide</a>
+            <a href="/freelance-llc-vs-sole-proprietor.html">LLC vs Sole Proprietor for Freelancers</a>
+            <a href="/best-freelance-tools.html">Best Tools for Freelancers 2026</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 FlowDesk Studio. All rights reserved.</p>
+        <p style="margin-top:8px;">
+            <a href="https://flowdeskst.gumroad.com/">Gumroad Store</a> &bull;
+            <a href="/freelance-rate-calculator.html">Rate Calculator</a> &bull;
+            <a href="/track-freelance-income-expenses.html">Income Tracking</a> &bull;
+            <a href="/freelance-tax-deductions-checklist.html">Tax Deductions</a> &bull;
+            <a href="/freelance-invoice-excel-template.html">Invoice Guide</a> &bull;
+            <a href="/billable-hours-freelancer-guide.html">Billable Hours</a> &bull;
+            <a href="/freelance-quarterly-tax-guide.html">Quarterly Taxes</a> &bull;
+            <a href="/freelance-budget-plan-template.html">Budget Plan</a> &bull;
+            <a href="/best-freelance-tools.html">Best Tools</a> &bull;
+            <a href="/how-to-set-freelance-rates.html">Pricing Guide</a> &bull;
+            <a href="/freelance-contract-essentials.html">Contract Guide</a> &bull;
+            <a href="/freelance-retirement-savings-guide.html">Retirement</a> &bull;
+            <a href="/freelance-llc-vs-sole-proprietor.html">LLC vs Sole Prop</a> &bull;
+            <a href="/freelance-proposal-template.html">Proposal Guide</a> &bull;
+            <a href="/freelance-late-payment-solutions.html">Late Payments</a>
+        </p>
+    </footer>
+
+    <script>
+    function getVal(id) {
+        return parseFloat(document.getElementById(id).value) || 0;
+    }
+    function fmt(n) {
+        return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function calculate() {
+        var living = getVal('rent') + getVal('food') + getVal('transport') + getVal('insurance') + getVal('utilities') + getVal('other_personal');
+        var business = getVal('software') + getVal('equipment') + getVal('office') + getVal('other_biz');
+        var profit = getVal('profit');
+        var taxRate = getVal('tax_rate') / 100;
+        var hoursWeek = getVal('hours_week');
+        var weeksYear = getVal('weeks_year');
+
+        if (hoursWeek <= 0 || weeksYear <= 0) {
+            alert('Please enter valid billable hours and working weeks.');
+            return;
+        }
+
+        var preTax = living + business + profit;
+        var taxAmount = preTax * taxRate / (1 - taxRate);
+        var totalRevenue = preTax + taxAmount;
+        var annualHours = hoursWeek * weeksYear;
+        var hourlyRate = totalRevenue / annualHours;
+        var dayRate = hourlyRate * 8;
+
+        document.getElementById('hourly-rate').textContent = fmt(hourlyRate);
+        document.getElementById('day-rate').textContent = fmt(dayRate);
+        document.getElementById('annual-target').textContent = fmt(totalRevenue);
+
+        document.getElementById('b-living').textContent = fmt(living);
+        document.getElementById('b-business').textContent = fmt(business);
+        document.getElementById('b-profit').textContent = fmt(profit);
+        document.getElementById('b-tax-pct').textContent = Math.round(taxRate * 100);
+        document.getElementById('b-tax').textContent = fmt(taxAmount);
+        document.getElementById('b-total').textContent = fmt(totalRevenue);
+
+        document.getElementById('p-5h').textContent = fmt(hourlyRate * 5);
+        document.getElementById('p-10h').textContent = fmt(hourlyRate * 10);
+        document.getElementById('p-20h').textContent = fmt(hourlyRate * 20);
+        document.getElementById('p-40h').textContent = fmt(hourlyRate * 40);
+        document.getElementById('p-80h').textContent = fmt(hourlyRate * 80);
+
+        document.getElementById('your-rate-compare').textContent = fmt(hourlyRate) + '/hr';
+
+        document.getElementById('results').classList.add('show');
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    </script>
+</body>
+</html>
