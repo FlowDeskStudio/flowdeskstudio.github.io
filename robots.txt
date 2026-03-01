@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://flowdeskstudio.github.io/sitemap.xml
+Sitemap: https://flowdeskstudio.com/sitemap.xml
