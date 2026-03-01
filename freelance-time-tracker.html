@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Time Tracker: Free Excel Template to Log Hours & Invoice Faster (2026) | FlowDesk Studio</title>
+    <meta name="description" content="Free freelance time tracker spreadsheet for Excel. Log hours by client and project, auto-calculate invoices, and spot your most profitable work. No app required.">
+    <meta name="keywords" content="freelance time tracker, freelance time tracking excel, time tracking spreadsheet, log hours freelance, billable hours tracker, freelancer time log">
+    <link rel="canonical" href="https://flowdeskstudio.net/freelance-time-tracker.html">
+    <meta property="og:title" content="Freelance Time Tracker: Free Excel Template to Log Hours & Invoice Faster (2026)">
+    <meta property="og:description" content="Free Excel time tracker for freelancers. Log billable hours by client, auto-calculate invoice totals, and analyze your most profitable work.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://flowdeskstudio.net/freelance-time-tracker.html">
+    <meta property="og:image" content="https://flowdeskstudio.net/img-finance.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Freelance Time Tracker: Free Excel Template for 2026",
+        "description": "How to build and use a freelance time tracker in Excel to log billable hours, auto-calculate invoice totals, and identify your most profitable clients.",
+        "author": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "publisher": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "datePublished": "2026-03-01",
+        "dateModified": "2026-03-01",
+        "url": "https://flowdeskstudio.net/freelance-time-tracker.html",
+        "image": "https://flowdeskstudio.net/img-finance.png"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the best free time tracker for freelancers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Excel or Google Sheets is the best free option for most freelancers. A well-built spreadsheet gives you full control, works offline, requires no subscription, and doubles as a billing tool. Paid apps like Toggl or Harvest are useful if you need team features or client-facing timers, but a spreadsheet covers 90% of freelance needs."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I track billable hours in Excel?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Create a log sheet with columns for Date, Client, Project, Description, Start Time, End Time, Hours, and Rate. Use =TEXT(E2-D2,\"h:mm\") to calculate duration and =HOUR(F2-E2)+(MINUTE(F2-E2)/60) to convert to decimal hours. Use SUMIF to total hours by client for invoicing."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should freelancers track time even on fixed-price projects?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Tracking time on fixed-price projects reveals your actual hourly rate and scope creep. If a $1,000 project takes 20 hours, you earned $50/hr. If it takes 40 hours, you earned $25/hr. This data is essential for pricing future projects accurately and knowing when to renegotiate."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How often should freelancers invoice clients?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Most freelancers invoice weekly or bi-weekly for ongoing work, and upon milestone completion for project work. Weekly invoicing improves cash flow, reduces large unpaid balances, and keeps clients aware of accumulating costs. Monthly invoicing is simpler but creates larger gaps in cash flow."
+                }
+            }
+        ]
+    }
+    </script>
+    <style>
+        :root {
+            --dark: #0F172A;
+            --med: #6366F1;
+            --light: #F8FAFC;
+            --accent: #10B981;
+            --text: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); background: #fff; line-height: 1.7; }
+        a { color: var(--med); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* NAV */
+        nav { position: sticky; top: 0; z-index: 100; background: rgba(15,23,42,0.97); backdrop-filter: blur(8px); padding: 0 24px; }
+        .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { color: #fff; font-weight: 800; font-size: 1.05rem; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; gap: 24px; }
+        .nav-links a { color: #cbd5e1; font-size: 0.9rem; text-decoration: none; transition: color .2s; }
+        .nav-links a:hover { color: #fff; }
+        .nav-cta { background: var(--med); color: #fff !important; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem !important; }
+        .nav-cta:hover { background: #4f46e5; text-decoration: none !important; }
+
+        /* HERO */
+        .hero { background: linear-gradient(135deg, #0F172A 0%, #1e1b4b 100%); color: #fff; padding: 64px 24px 56px; text-align: center; }
+        .hero-badge { display: inline-block; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 20px; }
+        .hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.2; max-width: 820px; margin: 0 auto 20px; }
+        .hero-sub { font-size: 1.1rem; color: #94a3b8; max-width: 640px; margin: 0 auto 36px; }
+        .hero-stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+        .hero-stat strong { display: block; font-size: 1.6rem; font-weight: 800; color: #818cf8; }
+        .hero-stat span { font-size: 0.82rem; color: #94a3b8; }
+
+        /* LAYOUT */
+        .container { max-width: 820px; margin: 0 auto; padding: 56px 24px; }
+        h2 { font-size: 1.55rem; font-weight: 800; color: var(--dark); margin: 48px 0 16px; line-height: 1.3; }
+        h3 { font-size: 1.15rem; font-weight: 700; color: var(--dark); margin: 32px 0 12px; }
+        p { margin-bottom: 16px; }
+
+        /* CALLOUT */
+        .callout { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+        .callout strong { color: #1d4ed8; }
+        .callout.green { background: #ecfdf5; border-color: var(--accent); }
+        .callout.green strong { color: #065f46; }
+        .callout.amber { background: #fffbeb; border-color: #f59e0b; }
+        .callout.amber strong { color: #92400e; }
+
+        /* TABLES */
+        .tbl-wrap { overflow-x: auto; margin: 24px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        th { background: var(--dark); color: #fff; padding: 10px 14px; text-align: left; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+        td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        tr:hover td { background: #f8fafc; }
+        .tag-req { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 4px; padding: 1px 7px; font-size: 0.75rem; font-weight: 600; }
+        .tag-opt { display: inline-block; background: #dcfce7; color: #166534; border-radius: 4px; padding: 1px 7px; font-size: 0.75rem; font-weight: 600; }
+        .tag-adv { display: inline-block; background: #ede9fe; color: #5b21b6; border-radius: 4px; padding: 1px 7px; font-size: 0.75rem; font-weight: 600; }
+
+        /* CODE */
+        code { background: #f1f5f9; color: #0f172a; padding: 2px 7px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.88em; }
+        .code-block { background: #0f172a; color: #e2e8f0; padding: 20px 24px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.87rem; line-height: 1.6; margin: 20px 0; overflow-x: auto; }
+        .code-block .cm { color: #64748b; }
+        .code-block .fn { color: #a5b4fc; }
+        .code-block .st { color: #86efac; }
+        .code-block .nu { color: #fbbf24; }
+
+        /* STEP BOX */
+        .steps { counter-reset: step; }
+        .step { display: flex; gap: 20px; margin-bottom: 28px; }
+        .step-num { counter-increment: step; flex-shrink: 0; width: 36px; height: 36px; background: var(--med); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; margin-top: 2px; }
+        .step-body h3 { margin: 0 0 8px; font-size: 1rem; }
+        .step-body p { margin: 0; font-size: 0.93rem; }
+
+        /* COMPARISON */
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+        .compare-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; }
+        .compare-box h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
+        .compare-box ul { list-style: none; padding: 0; }
+        .compare-box li { font-size: 0.88rem; padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+        .compare-box li:last-child { border: none; }
+        .pro .compare-box { border-color: #bbf7d0; }
+        .pro .compare-box h4 { color: #15803d; }
+        .con .compare-box { border-color: #fecaca; }
+        .con .compare-box h4 { color: #b91c1c; }
+        @media (max-width: 560px) { .compare-grid { grid-template-columns: 1fr; } }
+
+        /* CTA BOX */
+        .cta-box { background: linear-gradient(135deg, #0F172A, #1e1b4b); color: #fff; padding: 44px 36px; border-radius: 16px; text-align: center; margin: 48px 0; }
+        .cta-box h2 { color: #fff; font-size: 1.55rem; margin: 0 0 12px; }
+        .cta-box p { color: #94a3b8; margin: 0 0 28px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .cta-btn { display: inline-block; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: background .2s; }
+        .cta-btn:hover { background: #059669; text-decoration: none; }
+        .cta-price { font-size: 0.85rem; color: #64748b; margin-top: 12px; }
+
+        /* RELATED */
+        .related { background: #f8fafc; padding: 48px 24px; }
+        .related-inner { max-width: 820px; margin: 0 auto; }
+        .related h3 { font-size: 1.25rem; color: var(--dark); margin-bottom: 20px; }
+        .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+        .rlink { display: block; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; font-size: 0.88rem; font-weight: 600; color: var(--dark); text-decoration: none; transition: border-color .2s, box-shadow .2s; }
+        .rlink:hover { border-color: var(--med); box-shadow: 0 2px 12px rgba(99,102,241,.12); text-decoration: none; }
+        .rlink span { display: block; font-size: 0.78rem; color: #64748b; font-weight: 400; margin-top: 4px; }
+
+        /* FOOTER */
+        footer { background: var(--dark); color: #94a3b8; padding: 48px 24px 24px; font-size: 0.85rem; }
+        .footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-col h4 { color: #fff; font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
+        .footer-col a { display: block; color: #94a3b8; text-decoration: none; font-size: 0.85rem; margin-bottom: 8px; }
+        .footer-col a:hover { color: #fff; }
+        .footer-bottom { max-width: 1100px; margin: 0 auto; border-top: 1px solid #1e293b; padding-top: 24px; font-size: 0.82rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">FlowDesk Studio</a>
+    <div class="nav-links">
+      <a href="/#guides">Free Guides</a>
+      <a href="/#downloads">Free Downloads</a>
+      <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" class="nav-cta" rel="noopener">Get Templates →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+    <div class="hero-badge">Free Excel Template</div>
+    <h1>Freelance Time Tracker:<br>Log Hours, Invoice Faster, Earn More</h1>
+    <p class="hero-sub">A complete guide to tracking billable hours in Excel — no app subscription required. Know exactly where your time goes and turn logs into invoices in minutes.</p>
+    <div class="hero-stats">
+        <div class="hero-stat"><strong>$0</strong><span>Cost</span></div>
+        <div class="hero-stat"><strong>7 min</strong><span>Setup time</span></div>
+        <div class="hero-stat"><strong>100%</strong><span>Excel &amp; Sheets</span></div>
+    </div>
+</div>
+
+<div class="container">
+
+    <p>Most freelancers undercharge because they undercount. They estimate a project will take 8 hours, it takes 14, and they invoice for the original quote. Without a time log, there's no data to push back with — and no way to price the next similar project accurately.</p>
+
+    <p>This guide walks you through building a complete freelance time tracker in Excel or Google Sheets. You'll have a working log sheet by the end, plus formulas that turn raw time entries into invoice-ready totals automatically.</p>
+
+    <div class="callout">
+        <strong>Who this is for:</strong> Freelancers billing by the hour, those on retainer, and project-based freelancers who want to know their real effective hourly rate. If you use any productivity app for tasks, a time log is the missing financial layer.
+    </div>
+
+    <h2>Why Freelancers Need a Time Tracker</h2>
+
+    <p>Time tracking is not just about invoicing. Done consistently, it becomes one of the most powerful business intelligence tools available to a freelancer.</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Benefit</th><th>What you learn</th><th>Business impact</th></tr>
+        <tr><td>Accurate invoicing</td><td>Exact billable hours per client</td><td>Reduce under-billing by 10–25%</td></tr>
+        <tr><td>Scope creep detection</td><td>Hours vs. original estimate</td><td>Know when to renegotiate or decline revision requests</td></tr>
+        <tr><td>Real hourly rate on fixed projects</td><td>Total hours × effective rate</td><td>Set better project minimums</td></tr>
+        <tr><td>Client profitability ranking</td><td>Revenue ÷ hours by client</td><td>Identify which clients to grow and which to drop</td></tr>
+        <tr><td>Tax log (W-2 offset)</td><td>Home office, equipment use hours</td><td>Support deduction claims if audited</td></tr>
+        <tr><td>Pricing future work</td><td>Average hours per project type</td><td>Quote with confidence, not guesswork</td></tr>
+    </table>
+    </div>
+
+    <div class="callout amber">
+        <strong>The scope creep problem:</strong> Studies of freelance billing patterns consistently show that 60–80% of hourly workers under-log time — rounding down, forgetting short sessions, or skipping admin tasks. A systematic time tracker recovers that lost revenue.
+    </div>
+
+    <h2>The 7-Column Time Log Setup</h2>
+
+    <p>Open a new Excel workbook. Name the first sheet <strong>Time Log</strong>. Create these seven columns starting in row 1:</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Col</th><th>Header</th><th>Format</th><th>Type</th><th>Example</th></tr>
+        <tr><td>A</td><td>Date</td><td>yyyy-mm-dd</td><td><span class="tag-req">Required</span></td><td>2026-03-01</td></tr>
+        <tr><td>B</td><td>Client</td><td>Text</td><td><span class="tag-req">Required</span></td><td>Acme Corp</td></tr>
+        <tr><td>C</td><td>Project</td><td>Text</td><td><span class="tag-req">Required</span></td><td>Brand Refresh</td></tr>
+        <tr><td>D</td><td>Description</td><td>Text</td><td><span class="tag-req">Required</span></td><td>Logo revisions — round 2</td></tr>
+        <tr><td>E</td><td>Start</td><td>h:mm AM/PM</td><td><span class="tag-opt">Optional</span></td><td>10:00 AM</td></tr>
+        <tr><td>F</td><td>End</td><td>h:mm AM/PM</td><td><span class="tag-opt">Optional</span></td><td>12:30 PM</td></tr>
+        <tr><td>G</td><td>Hours</td><td>Number (2 dec)</td><td><span class="tag-req">Required</span></td><td>2.50</td></tr>
+        <tr><td>H</td><td>Rate ($/hr)</td><td>Currency</td><td><span class="tag-opt">Optional</span></td><td>$95</td></tr>
+        <tr><td>I</td><td>Amount</td><td>Currency</td><td><span class="tag-adv">Formula</span></td><td>$237.50</td></tr>
+        <tr><td>J</td><td>Invoiced?</td><td>Yes / No / —</td><td><span class="tag-opt">Optional</span></td><td>No</td></tr>
+    </table>
+    </div>
+
+    <div class="callout green">
+        <strong>Shortcut:</strong> If you don't want to track start/end times, just log the total hours directly in column G. Many freelancers find this faster — especially for short sessions under 30 minutes.
+    </div>
+
+    <h2>Key Formulas for Your Time Log</h2>
+
+    <h3>Auto-Calculate Hours from Start and End Time</h3>
+    <p>If you track start and end times in columns E and F, use this formula in column G to convert to decimal hours:</p>
+
+    <div class="code-block">
+<span class="cm">// G2 — Convert start/end time to decimal hours</span>
+=<span class="fn">HOUR</span>(F2-E2)+(<span class="fn">MINUTE</span>(F2-E2)/<span class="nu">60</span>)
+
+<span class="cm">// If the session spans midnight, use:</span>
+=<span class="fn">MOD</span>(F2-E2,<span class="nu">1</span>)*<span class="nu">24</span>
+    </div>
+
+    <h3>Auto-Calculate Invoice Amount</h3>
+    <div class="code-block">
+<span class="cm">// I2 — Multiply hours by rate</span>
+=G2*H2
+    </div>
+
+    <h3>Total Uninvoiced Hours by Client (for billing runs)</h3>
+    <div class="code-block">
+<span class="cm">// Paste in Billing Summary sheet</span>
+<span class="cm">// Total hours for "Acme Corp" not yet invoiced</span>
+=<span class="fn">SUMIFS</span>(TimeLog!G:G, TimeLog!B:B, <span class="st">"Acme Corp"</span>, TimeLog!J:J, <span class="st">"No"</span>)
+    </div>
+
+    <h3>Total Billable Amount by Client (current period)</h3>
+    <div class="code-block">
+<span class="cm">// Total uninvoiced amount for a client</span>
+=<span class="fn">SUMIFS</span>(TimeLog!I:I, TimeLog!B:B, <span class="st">"Acme Corp"</span>, TimeLog!J:J, <span class="st">"No"</span>)
+
+<span class="cm">// Filter by date range (replace B2/B3 with actual dates)</span>
+=<span class="fn">SUMPRODUCT</span>((TimeLog!B:B=<span class="st">"Acme Corp"</span>)*(TimeLog!A:A>=B2)*(TimeLog!A:A<=B3)*TimeLog!I:I)
+    </div>
+
+    <h3>Effective Hourly Rate on a Fixed-Price Project</h3>
+    <div class="code-block">
+<span class="cm">// If "Brand Refresh" was quoted at $2,500 flat</span>
+<span class="cm">// Hours logged for that project:</span>
+=<span class="fn">SUMIFS</span>(TimeLog!G:G, TimeLog!C:C, <span class="st">"Brand Refresh"</span>)
+
+<span class="cm">// Effective rate (put $2500 in cell D1)</span>
+=D1/<span class="fn">SUMIFS</span>(TimeLog!G:G, TimeLog!C:C, <span class="st">"Brand Refresh"</span>)
+    </div>
+
+    <h2>Build a Billing Summary Sheet</h2>
+
+    <p>Add a second sheet named <strong>Billing Summary</strong>. This is where you generate invoice totals at billing time without manually searching the log.</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Column</th><th>Content</th><th>Formula / Source</th></tr>
+        <tr><td>A</td><td>Client Name</td><td>Manual list of your active clients</td></tr>
+        <tr><td>B</td><td>Unbilled Hours</td><td><code>=SUMIFS(TimeLog!G:G, TimeLog!B:B, A2, TimeLog!J:J, "No")</code></td></tr>
+        <tr><td>C</td><td>Unbilled Amount</td><td><code>=SUMIFS(TimeLog!I:I, TimeLog!B:B, A2, TimeLog!J:J, "No")</code></td></tr>
+        <tr><td>D</td><td>Last Entry Date</td><td><code>=MAXIFS(TimeLog!A:A, TimeLog!B:B, A2)</code></td></tr>
+        <tr><td>E</td><td>Invoice Ready?</td><td><code>=IF(C2>0, "YES ✓", "—")</code></td></tr>
+    </table>
+    </div>
+
+    <p>When you invoice a client, go to the Time Log and change the "Invoiced?" column from "No" to "Yes" for all billed rows. The summary will automatically clear to zero for that client.</p>
+
+    <h2>Add a Client Profitability Sheet</h2>
+
+    <p>This optional but powerful sheet ranks clients by effective hourly revenue — revealing which relationships are worth growing and which are quietly draining your time.</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Column</th><th>Header</th><th>Formula</th></tr>
+        <tr><td>A</td><td>Client</td><td>Client names</td></tr>
+        <tr><td>B</td><td>Total Hours (YTD)</td><td><code>=SUMIF(TimeLog!B:B, A2, TimeLog!G:G)</code></td></tr>
+        <tr><td>C</td><td>Total Billed (YTD)</td><td><code>=SUMIF(TimeLog!B:B, A2, TimeLog!I:I)</code></td></tr>
+        <tr><td>D</td><td>Effective Rate</td><td><code>=IFERROR(C2/B2, 0)</code></td></tr>
+        <tr><td>E</td><td>% of Total Hours</td><td><code>=B2/SUM($B$2:$B$20)</code></td></tr>
+        <tr><td>F</td><td>% of Total Revenue</td><td><code>=C2/SUM($C$2:$C$20)</code></td></tr>
+    </table>
+    </div>
+
+    <div class="callout">
+        <strong>The profitability insight:</strong> Sort column D descending. Any client where effective rate is below your target rate is a candidate for renegotiation, a rate increase, or eventually offboarding in favor of better-paying work.
+    </div>
+
+    <h2>Time Tracking for Fixed-Price Freelancers</h2>
+
+    <p>If most of your work is project-based rather than hourly, time tracking is still worth doing — the purpose just shifts from invoicing to pricing intelligence.</p>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num"></div>
+            <div class="step-body">
+                <h3>Log hours as you work, even if you won't bill them</h3>
+                <p>Track every project the same way. After 6 months, you'll know that "brand identity projects" average 18 hours and "website audits" average 6 hours. This data is worth more than any pricing guide.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num"></div>
+            <div class="step-body">
+                <h3>Add a "Quoted" column to track estimate accuracy</h3>
+                <p>Log your original estimate in a "Quoted Hours" column next to actual hours. Track the ratio over time. If you consistently deliver in 80% of quoted time, you're leaving room. If you consistently hit 130%, you're underquoting.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num"></div>
+            <div class="step-body">
+                <h3>Flag revision rounds separately</h3>
+                <p>Add "R1", "R2", "R3" to the project description. This makes it easy to spot which project types generate the most revision work — often a sign that scope or brief quality needs addressing upstream.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num"></div>
+            <div class="step-body">
+                <h3>Set a scope-creep threshold</h3>
+                <p>Define in your contract that work exceeding quoted hours by more than 15% triggers a change order. Your time log gives you the documented evidence to enforce this professionally.</p>
+            </div>
+        </div>
+    </div>
+
+    <h2>Hourly Billing vs. App vs. Spreadsheet: Which Method?</h2>
+
+    <div class="compare-grid">
+        <div class="pro">
+            <div class="compare-box">
+                <h4>✅ Excel / Sheets (this guide)</h4>
+                <ul>
+                    <li>Free forever, no account</li>
+                    <li>Works offline</li>
+                    <li>Fully customizable</li>
+                    <li>Doubles as billing tool</li>
+                    <li>No vendor lock-in</li>
+                    <li>Consolidates with expense tracker</li>
+                </ul>
+            </div>
+        </div>
+        <div class="con">
+            <div class="compare-box">
+                <h4>⚠️ Paid Apps (Toggl, Harvest, Clockify)</h4>
+                <ul>
+                    <li>Free tier often limited</li>
+                    <li>Best for teams / agencies</li>
+                    <li>Browser/phone timer integration</li>
+                    <li>Client-facing reports</li>
+                    <li>$9–$14/mo for full features</li>
+                    <li>Data export needed for taxes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout green">
+        <strong>Our recommendation:</strong> Start with a spreadsheet. If you're billing 5+ clients regularly or working with a team, then evaluate an app. Most solo freelancers never need more than a well-built spreadsheet.
+    </div>
+
+    <h2>Weekly Time Tracking Routine</h2>
+
+    <p>The biggest failure mode with time tracking is inconsistency — logging faithfully for two weeks then abandoning it. Build a minimal weekly habit instead of trying to log in real-time every day.</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>When</th><th>Action</th><th>Time</th></tr>
+        <tr><td>Start of work session</td><td>Note the time and what you're starting (sticky note or phone)</td><td>30 sec</td></tr>
+        <tr><td>End of work session</td><td>Log the entry in your Time Log sheet</td><td>1–2 min</td></tr>
+        <tr><td>Friday afternoon</td><td>Review weekly totals on Billing Summary sheet, flag anything unbilled</td><td>5 min</td></tr>
+        <tr><td>Billing day (weekly or bi-weekly)</td><td>Use Billing Summary to generate invoices, mark rows as "Yes" in Time Log</td><td>10–20 min</td></tr>
+        <tr><td>Monthly</td><td>Review Client Profitability sheet — sort by effective rate</td><td>10 min</td></tr>
+    </table>
+    </div>
+
+    <h2>Common Time Tracking Mistakes</h2>
+
+    <h3>1. Rounding down too aggressively</h3>
+    <p>Many freelancers round 45-minute sessions to 0.5 hours "to be fair to the client." Over a year, this giveaway compounds. Bill in 0.25-hour (15-minute) increments at minimum. If you spent 45 minutes, log 0.75.</p>
+
+    <h3>2. Skipping admin and communication time</h3>
+    <p>Emails, calls, revision communication, and project management are work. If your contract covers it (or if you're tracking for pricing purposes), log it. A 2-hour project that generates 45 minutes of email follow-up is really a 2.75-hour project.</p>
+
+    <h3>3. Losing partial logs when context-switching</h3>
+    <p>Use a single scratch note (physical or digital) to jot start times throughout the day. Enter them into Excel once at end of day rather than switching tabs constantly. Batch logging takes under 3 minutes per day.</p>
+
+    <h3>4. Not categorizing by project type</h3>
+    <p>Logging client and project is enough for invoicing, but adding a "Type" column (Design / Writing / Strategy / Admin / Development) lets you see where your hours actually go — and which service lines are most time-efficient.</p>
+
+    <h3>5. Treating the tracker as invoicing-only</h3>
+    <p>The profitability data is the long game. Revisit your Client Profitability sheet quarterly. It will tell you more about your business than any dashboard.</p>
+
+    <h2>Monthly Time Tracking Benchmarks</h2>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Freelance Stage</th><th>Billable Hours Target</th><th>Admin + Business Dev</th><th>Total Work Hours</th></tr>
+        <tr><td>New (first year)</td><td>60–80 hrs/mo</td><td>40–60 hrs/mo</td><td>100–140 hrs/mo</td></tr>
+        <tr><td>Growing (1–3 yrs)</td><td>80–120 hrs/mo</td><td>20–40 hrs/mo</td><td>100–160 hrs/mo</td></tr>
+        <tr><td>Established (3+ yrs)</td><td>100–140 hrs/mo</td><td>15–25 hrs/mo</td><td>115–165 hrs/mo</td></tr>
+        <tr><td>At capacity</td><td>130–160 hrs/mo</td><td>10–20 hrs/mo</td><td>140–180 hrs/mo</td></tr>
+    </table>
+    </div>
+
+    <div class="callout">
+        <strong>Capacity warning:</strong> Consistently logging more than 160 billable hours per month is a strong signal to raise rates, hire a subcontractor, or productize a service. Sustainable capacity is around 120–140 billable hours for most solo freelancers.
+    </div>
+
+    <h2>Connecting Your Time Tracker to Invoices</h2>
+
+    <p>Add a third sheet named <strong>Invoice Generator</strong>. This sheet pulls from the Time Log and formats a printable invoice automatically.</p>
+
+    <div class="tbl-wrap">
+    <table>
+        <tr><th>Cell</th><th>Content</th><th>Formula / Source</th></tr>
+        <tr><td>B1</td><td>Your Name / Business</td><td>Hardcoded text</td></tr>
+        <tr><td>B3</td><td>Invoice Number</td><td>Increment manually: INV-001, INV-002...</td></tr>
+        <tr><td>B4</td><td>Invoice Date</td><td><code>=TODAY()</code></td></tr>
+        <tr><td>B5</td><td>Due Date</td><td><code>=TODAY()+30</code></td></tr>
+        <tr><td>B7</td><td>Client Name</td><td>Dropdown from client list</td></tr>
+        <tr><td>B10</td><td>Line items</td><td>SUMIFS from Time Log filtered by client + "No" invoiced</td></tr>
+        <tr><td>B15</td><td>Subtotal</td><td><code>=SUM(B10:B14)</code></td></tr>
+        <tr><td>B16</td><td>Tax (if applicable)</td><td><code>=B15*0.0</code> (adjust to local rate)</td></tr>
+        <tr><td>B17</td><td>Total Due</td><td><code>=B15+B16</code></td></tr>
+    </table>
+    </div>
+
+    <p>When ready to send, File → Export as PDF and email directly. After sending, update the Time Log rows to "Yes" in the Invoiced? column.</p>
+
+    <div class="cta-box">
+        <h2>Want a Done-For-You Time Tracker?</h2>
+        <p>The FlowDesk Finance Dashboard includes a pre-built time tracker, billing summary, invoice generator, and client profitability report — all connected and ready to use in 10 minutes.</p>
+        <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard" class="cta-btn" rel="noopener">Get Finance Dashboard — $19</a>
+        <p class="cta-price">One-time purchase · Instant Excel download · Free updates</p>
+    </div>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <h3>What is the best free time tracker for freelancers?</h3>
+    <p>Excel or Google Sheets is the best free option for most freelancers. A well-built spreadsheet gives you full control, works offline, requires no subscription, and doubles as a billing tool. Paid apps like Toggl or Harvest are useful if you need team features or client-facing timers, but a spreadsheet covers 90% of freelance needs.</p>
+
+    <h3>How do I track billable hours in Excel?</h3>
+    <p>Create a log sheet with columns for Date, Client, Project, Description, Start Time, End Time, Hours, and Rate. Use <code>=HOUR(F2-E2)+(MINUTE(F2-E2)/60)</code> to convert start/end times to decimal hours. Use SUMIFS to total hours by client for invoicing. See the full setup above.</p>
+
+    <h3>Should freelancers track time even on fixed-price projects?</h3>
+    <p>Yes. Tracking time on fixed-price projects reveals your actual hourly rate and scope creep. If a $1,000 project takes 20 hours, you earned $50/hr. If it takes 40 hours, you earned $25/hr. This data is essential for pricing future projects accurately and knowing when to renegotiate.</p>
+
+    <h3>How often should freelancers invoice clients?</h3>
+    <p>Most freelancers invoice weekly or bi-weekly for ongoing work, and upon milestone completion for project work. Weekly invoicing improves cash flow, reduces large unpaid balances, and keeps clients aware of accumulating costs. Monthly invoicing is simpler but creates larger gaps in cash flow.</p>
+
+    <h3>What counts as billable time for freelancers?</h3>
+    <p>Billable time includes any work done on behalf of a client: core deliverable work, revisions, client calls, briefing review, research specific to their project, and project management time. Non-billable time includes business development, your own admin, networking, and general skill development. Clarify your billing policy in your contract upfront.</p>
+
+</div>
+
+<div class="related">
+    <div class="related-inner">
+        <h3>Related Guides</h3>
+        <div class="related-grid">
+            <a href="/track-freelance-income-expenses.html" class="rlink">Income &amp; Expense Tracker<span>Free Excel template</span></a>
+            <a href="/freelance-expense-tracker.html" class="rlink">Freelance Expense Tracker<span>Schedule C categories</span></a>
+            <a href="/freelance-invoice-excel-template.html" class="rlink">Invoice Template<span>Free Excel invoice</span></a>
+            <a href="/freelance-rate-calculator.html" class="rlink">Rate Calculator<span>Set your hourly rate</span></a>
+            <a href="/freelance-bookkeeping-spreadsheet.html" class="rlink">Bookkeeping Spreadsheet<span>Monthly P&amp;L setup</span></a>
+            <a href="/freelance-quarterly-tax-guide.html" class="rlink">Quarterly Tax Guide<span>Estimated tax guide</span></a>
+        </div>
+    </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>FlowDesk Studio</h4>
+      <p style="font-size:0.85rem;line-height:1.6;">Free Excel templates and guides for independent freelancers.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Free Guides</h4>
+      <a href="/track-freelance-income-expenses.html">Income Tracker</a>
+      <a href="/freelance-expense-tracker.html">Expense Tracker</a>
+      <a href="/freelance-time-tracker.html">Time Tracker</a>
+      <a href="/freelance-bookkeeping-spreadsheet.html">Bookkeeping Spreadsheet</a>
+      <a href="/freelance-tax-deductions-checklist.html">Tax Deductions</a>
+    </div>
+    <div class="footer-col">
+      <h4>More Guides</h4>
+      <a href="/freelance-invoice-excel-template.html">Invoice Template</a>
+      <a href="/freelance-rate-calculator.html">Rate Calculator</a>
+      <a href="/freelance-budget-plan-template.html">Budget Template</a>
+      <a href="/freelance-1099-tracker.html">1099 Tracker</a>
+      <a href="/freelance-quarterly-tax-guide.html">Quarterly Tax Guide</a>
+    </div>
+    <div class="footer-col">
+      <h4>Templates</h4>
+      <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard" rel="noopener">Finance Dashboard — $19</a>
+      <a href="https://flowdeskst.gumroad.com/l/freelancer-client-project-tracker" rel="noopener">Client Tracker — $14</a>
+      <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" rel="noopener">Business Bundle — $29</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 FlowDesk Studio · <a href="/" style="color:#94a3b8;">Home</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
