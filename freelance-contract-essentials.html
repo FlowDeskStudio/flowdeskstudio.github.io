@@ -41,10 +41,7 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); line-height: 1.7; }
-        nav { background: var(--dark); padding: 12px 20px; display: flex; justify-content: center; gap: 8px 20px; flex-wrap: wrap; }
-        nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.82rem; }
-        nav a:first-child { color: #fff; font-weight: 600; }
-        nav a.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+        nav { all: unset; }
         .hero-article { background: linear-gradient(135deg, var(--dark) 0%, #2C5282 100%); color: var(--white); padding: 60px 20px; text-align: center; }
         .hero-article h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); max-width: 800px; margin: 0 auto 12px; }
         .hero-article p { opacity: 0.9; max-width: 600px; margin: 0 auto; }
@@ -106,22 +103,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <a href="/">FlowDesk Studio</a>
-        <a href="/freelance-rate-calculator.html">Rate Calculator</a>
-        <a href="/how-to-set-freelance-rates.html">Pricing Guide</a>
-        <a href="/freelance-proposal-template.html">Proposal Guide</a>
-        <a href="/freelance-contract-essentials.html" class="active">Contract Guide</a>
-        <a href="/freelance-invoice-excel-template.html">Invoice Guide</a>
-        <a href="/freelance-late-payment-solutions.html">Late Payments</a>
-        <a href="/billable-hours-freelancer-guide.html">Billable Hours</a>
-        <a href="/track-freelance-income-expenses.html">Income Tracking</a>
-        <a href="/freelance-tax-deductions-checklist.html">Tax Deductions</a>
-        <a href="/freelance-quarterly-tax-guide.html">Quarterly Taxes</a>
-        <a href="/freelance-budget-plan-template.html">Budget Plan</a>
-        <a href="/freelance-retirement-savings-guide.html">Retirement</a>
-        <a href="/freelance-llc-vs-sole-proprietor.html">LLC vs Sole Prop</a>
-        <a href="/best-freelance-tools.html">Best Tools</a>
+    <nav style="position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0;font-family:'Inter',-apple-system,sans-serif;">
+        <div style="max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;">
+            <a href="/" style="color:#6366F1;font-weight:800;font-size:1.1rem;text-decoration:none;letter-spacing:-0.02em;">FlowDesk Studio</a>
+            <div style="display:flex;align-items:center;gap:20px;">
+                <a href="/#guides" style="color:#64748B;text-decoration:none;font-size:0.88rem;font-weight:500;">Free Guides</a>
+                <a href="/#downloads" style="color:#64748B;text-decoration:none;font-size:0.88rem;font-weight:500;">Free Downloads</a>
+                <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" style="background:#6366F1;color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;" rel="noopener">Get Templates →</a>
+            </div>
+        </div>
     </nav>
 
     <header class="hero-article">
@@ -278,25 +268,41 @@
         </div>
     </article>
 
-    <footer>
-        <p>&copy; 2026 FlowDesk Studio. All rights reserved.</p>
-        <p style="margin-top:8px;">
-            <a href="https://flowdeskst.gumroad.com/">Gumroad Store</a> &bull;
-            <a href="/freelance-rate-calculator.html">Rate Calculator</a> &bull;
-            <a href="/track-freelance-income-expenses.html">Income Tracking</a> &bull;
-            <a href="/freelance-tax-deductions-checklist.html">Tax Deductions</a> &bull;
-            <a href="/freelance-invoice-excel-template.html">Invoice Guide</a> &bull;
-            <a href="/billable-hours-freelancer-guide.html">Billable Hours</a> &bull;
-            <a href="/freelance-quarterly-tax-guide.html">Quarterly Taxes</a> &bull;
-            <a href="/freelance-budget-plan-template.html">Budget Plan</a> &bull;
-            <a href="/best-freelance-tools.html">Best Tools</a> &bull;
-            <a href="/how-to-set-freelance-rates.html">Pricing Guide</a> &bull;
-            <a href="/freelance-contract-essentials.html">Contract Guide</a> &bull;
-            <a href="/freelance-retirement-savings-guide.html">Retirement</a> &bull;
-            <a href="/freelance-llc-vs-sole-proprietor.html">LLC vs Sole Prop</a> &bull;
-            <a href="/freelance-proposal-template.html">Proposal Guide</a> &bull;
-            <a href="/freelance-late-payment-solutions.html">Late Payments</a>
-        </p>
+    <footer style="background:#0F172A;color:rgba(255,255,255,0.6);padding:48px 24px 32px;font-family:'Inter',-apple-system,sans-serif;">
+        <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-bottom:40px;">
+            <div>
+                <div style="color:#fff;font-weight:800;font-size:1.1rem;margin-bottom:12px;letter-spacing:-0.02em;">FlowDesk Studio</div>
+                <p style="font-size:0.85rem;line-height:1.6;margin-bottom:16px;">Free Excel templates and guides for freelancers.</p>
+                <a href="https://flowdeskst.gumroad.com/" style="color:#10B981;text-decoration:none;font-size:0.85rem;font-weight:600;">Gumroad Store →</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">Finance Guides</div>
+                <a href="/track-freelance-income-expenses.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Income Tracking</a>
+                <a href="/freelance-invoice-excel-template.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Invoice Template</a>
+                <a href="/freelance-tax-deductions-checklist.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Tax Deductions</a>
+                <a href="/freelance-quarterly-tax-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Quarterly Taxes</a>
+                <a href="/freelance-budget-plan-template.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Budget Template</a>
+                <a href="/freelance-bookkeeping-spreadsheet.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Bookkeeping Guide</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">Business Guides</div>
+                <a href="/freelance-rate-calculator.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Rate Calculator</a>
+                <a href="/how-to-set-freelance-rates.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Pricing Guide</a>
+                <a href="/freelance-proposal-template.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Proposal Template</a>
+                <a href="/freelance-contract-essentials.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Contract Guide</a>
+                <a href="/billable-hours-freelancer-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Billable Hours</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">More</div>
+                <a href="/freelance-retirement-savings-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Retirement Savings</a>
+                <a href="/freelance-llc-vs-sole-proprietor.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">LLC vs Sole Prop</a>
+                <a href="/freelance-late-payment-solutions.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Late Payments</a>
+                <a href="/best-freelance-tools.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Best Tools</a>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:24px;text-align:center;font-size:0.82rem;">
+            &copy; 2026 FlowDesk Studio. All rights reserved.
+        </div>
     </footer>
 </body>
 </html>

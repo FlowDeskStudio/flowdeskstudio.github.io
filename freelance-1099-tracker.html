@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance 1099 Tracker: Free Excel Spreadsheet for Self-Employed (2026) | FlowDesk Studio</title>
+    <meta name="description" content="Free freelance 1099 tracker spreadsheet for Excel. Track 1099 income by client, match against bank deposits, and prepare for Schedule C. Free .xlsx download included.">
+    <meta name="keywords" content="freelance 1099 tracker, 1099 income tracker, 1099 expense tracker, self employed 1099 spreadsheet, track 1099 income excel, freelancer 1099 template">
+    <link rel="canonical" href="https://flowdeskstudio.github.io/freelance-1099-tracker.html">
+    <meta property="og:title" content="Freelance 1099 Tracker: Free Excel Spreadsheet (2026)">
+    <meta property="og:description" content="Track your 1099 income by client, reconcile with bank deposits, and organize expenses for Schedule C. Free Excel spreadsheet included.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://flowdeskstudio.github.io/freelance-1099-tracker.html">
+    <meta property="og:image" content="https://flowdeskstudio.github.io/img-finance.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Freelance 1099 Tracker: Free Excel Spreadsheet for Self-Employed 2026",
+        "description": "How to track 1099 income and expenses in Excel, match Form 1099s from clients, and prepare Schedule C accurately.",
+        "author": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "publisher": {"@type": "Organization", "name": "FlowDesk Studio"},
+        "datePublished": "2026-03-01",
+        "image": "https://flowdeskstudio.github.io/img-finance.png"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Do I need to track 1099 income separately from other income?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The IRS requires you to report all self-employment income on Schedule C, and 1099-NEC forms from clients let the IRS cross-check your return. Track each client's payments separately so you can verify your 1099 totals match your records before filing."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What if a client doesn't send a 1099?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You still owe taxes on the income. Clients only send 1099-NEC forms when they pay you $600 or more in a calendar year. But all income — whether or not a 1099 is issued — is taxable and must be reported on Schedule C."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What expenses can I deduct against my 1099 income?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Common deductible expenses include software and tools, home office, internet and phone (business portion), professional development, business travel, health insurance premiums, and retirement contributions (SEP IRA or Solo 401k). These are reported on Schedule C and reduce your taxable self-employment income."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I reconcile my 1099s with my bank statements?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Add up all deposits from each client in your bank statement. Compare that total to the 1099-NEC you received from them. If they don't match, identify the cause — it could be payments made in December that the client 1099'd in the current year, or a timing mismatch. Keep your own records so you can reconcile regardless of what the 1099 says."
+            }
+        }
+        ]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #6366F1;
+            --brand-dark: #4F46E5;
+            --cta: #10B981;
+            --dark: #0F172A;
+            --medium: #1E293B;
+            --muted: #64748B;
+            --border: #E2E8F0;
+            --light: #F8FAFC;
+            --white: #FFFFFF;
+            --text: #1E293B;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); line-height: 1.7; }
+        .hero-article { background: linear-gradient(135deg, var(--dark) 0%, #312e81 100%); color: #fff; padding: 64px 20px; text-align: center; }
+        .hero-article h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); max-width: 820px; margin: 0 auto 14px; font-weight: 800; letter-spacing: -0.02em; }
+        .hero-article p { opacity: 0.85; max-width: 620px; margin: 0 auto; font-size: 1.05rem; }
+        .content { max-width: 780px; margin: 0 auto; padding: 48px 20px; }
+        h2 { color: var(--dark); font-size: 1.5rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--light); font-weight: 700; letter-spacing: -0.01em; }
+        h3 { color: var(--brand); font-size: 1.1rem; margin: 28px 0 12px; font-weight: 600; }
+        p { margin-bottom: 16px; }
+        ul, ol { margin: 0 0 16px 24px; }
+        li { margin-bottom: 8px; }
+        code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: 'Courier New', monospace; }
+        .tip-box { background: #ecfdf5; border-left: 4px solid var(--cta); padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+        .tip-box strong { color: var(--dark); }
+        .warning-box { background: #fffbeb; border-left: 4px solid #F59E0B; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+        .warning-box strong { color: var(--dark); }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.95rem; }
+        th { background: var(--dark); color: #fff; padding: 12px 16px; text-align: left; font-weight: 600; }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        tr:nth-child(even) { background: var(--light); }
+        .download-box { background: linear-gradient(135deg, #2d6a4f, #40916c); color: #fff; padding: 28px 32px; border-radius: 12px; text-align: center; margin: 32px 0; }
+        .download-box h3 { color: #fff; font-size: 1.2rem; margin-bottom: 8px; }
+        .download-box p { opacity: 0.92; margin-bottom: 16px; }
+        .download-box a.dl-btn { display: inline-block; background: #fff; color: #2d6a4f; padding: 13px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; }
+        .download-box .sub { font-size: 0.83rem; opacity: 0.8; margin-top: 10px; margin-bottom: 0; }
+        .cta-box { background: var(--brand); color: #fff; padding: 36px; border-radius: 12px; text-align: center; margin: 40px 0; }
+        .cta-box h3 { color: #fff; font-size: 1.25rem; margin-bottom: 12px; }
+        .cta-box p { opacity: 0.9; margin-bottom: 20px; }
+        .cta-box a.primary { display: inline-block; background: var(--cta); color: #fff; padding: 13px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; }
+        .cta-box a.secondary { display: block; margin-top: 14px; color: rgba(255,255,255,0.8); font-size: 0.88rem; text-decoration: underline; }
+        .related { background: var(--light); padding: 32px; border-radius: 12px; margin: 40px 0; }
+        .related h3 { color: var(--dark); margin-bottom: 16px; font-size: 1.1rem; }
+        .related a { display: block; color: var(--brand); text-decoration: none; padding: 5px 0; font-size: 0.95rem; }
+        .related a:hover { text-decoration: underline; }
+        .badge { display: inline-block; background: #fef3c7; color: #92400e; font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+        @media (max-width: 640px) { .content { padding: 32px 16px; } table { font-size: 0.85rem; } th, td { padding: 8px 10px; } .download-box, .cta-box { padding: 24px 20px; } }
+    </style>
+</head>
+<body>
+    <nav style="position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0;font-family:'Inter',-apple-system,sans-serif;">
+        <div style="max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;">
+            <a href="/" style="color:#6366F1;font-weight:800;font-size:1.1rem;text-decoration:none;letter-spacing:-0.02em;">FlowDesk Studio</a>
+            <div style="display:flex;align-items:center;gap:20px;">
+                <a href="/#guides" style="color:#64748B;text-decoration:none;font-size:0.88rem;font-weight:500;">Free Guides</a>
+                <a href="/#downloads" style="color:#64748B;text-decoration:none;font-size:0.88rem;font-weight:500;">Free Downloads</a>
+                <a href="https://flowdeskst.gumroad.com/l/freelancer-business-bundle" style="background:#6366F1;color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;" rel="noopener">Get Templates →</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-article">
+        <h1>Freelance 1099 Tracker: Free Excel Spreadsheet (2026)</h1>
+        <p>Track 1099 income by client, reconcile against bank deposits, and organize expenses for Schedule C — all in one spreadsheet.</p>
+    </header>
+
+    <article class="content">
+
+        <div class="download-box">
+            <h3>📥 Free Freelance 1099 Income Tracker Spreadsheet</h3>
+            <p>Track 1099 income by client, log deductible expenses, and auto-calculate your net profit. No signup required.</p>
+            <a href="/freelance-income-tracker-spreadsheet.xlsx" download class="dl-btn">Download Free Spreadsheet</a>
+            <p class="sub">Excel .xlsx &bull; Works in Google Sheets &bull; Updated for 2026 tax year</p>
+        </div>
+
+        <h2>What Is a 1099 and Why Track It Separately?</h2>
+        <p>Form 1099-NEC (Non-Employee Compensation) is what clients send you when they've paid you $600 or more during the calendar year. It goes to both you and the IRS — which means the IRS can see exactly how much income each client reported paying you.</p>
+        <p>If your tax return doesn't match the 1099s on file, the IRS may flag your return for review. This is why a freelance 1099 tracker is more than a convenience — it's your paper trail for proving your numbers are correct.</p>
+
+        <div class="warning-box">
+            <strong>Important:</strong> You owe taxes on <em>all</em> self-employment income, even if a client doesn't send a 1099. Clients are only required to file 1099-NEC for payments of $600+, but there is no minimum threshold for what you must report as income.
+        </div>
+
+        <h2>The 5 Columns Your 1099 Tracker Needs</h2>
+        <p>A good freelance 1099 tracker doesn't need to be complicated. One sheet with five columns covers most situations:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>What to Enter</th>
+                    <th>Why It Matters</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Date</strong></td>
+                    <td>Date payment was received</td>
+                    <td>Determines which tax year the income belongs to</td>
+                </tr>
+                <tr>
+                    <td><strong>Client Name</strong></td>
+                    <td>Name as it appears on your 1099</td>
+                    <td>Lets you match your records to each 1099 form</td>
+                </tr>
+                <tr>
+                    <td><strong>Amount</strong></td>
+                    <td>Gross amount received</td>
+                    <td>Should match Box 1 on your 1099-NEC</td>
+                </tr>
+                <tr>
+                    <td><strong>Invoice #</strong></td>
+                    <td>Your invoice reference number</td>
+                    <td>Links payment to your issued invoice for reconciliation</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Method</strong></td>
+                    <td>ACH, check, PayPal, Stripe, etc.</td>
+                    <td>Helps match to bank deposits during reconciliation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Add a running total at the bottom with <code>=SUM(C2:C500)</code> and you have a live view of your year-to-date 1099 income.</p>
+
+        <h2>How to Reconcile 1099 Forms Against Your Records</h2>
+        <p>Every January you'll receive 1099-NEC forms from clients who paid you $600+. Before you file, you need to verify that each 1099 matches your own records. Here's a step-by-step process:</p>
+
+        <ol>
+            <li><strong>Total your records per client.</strong> In your tracker, filter by client name and sum the amounts received throughout the year.</li>
+            <li><strong>Compare to Box 1 on the 1099-NEC.</strong> The client's figure and yours should match. Small differences (under $1) are usually rounding.</li>
+            <li><strong>Investigate discrepancies.</strong> Common causes: a December payment the client recorded in January, or a payment the client forgot. Contact the client if needed.</li>
+            <li><strong>Report the higher of the two figures.</strong> If the 1099 is higher than your records due to a timing difference, report the 1099 amount and note the difference. If your records show more, report your own total.</li>
+            <li><strong>Check for missing 1099s.</strong> Any client who paid you $600+ should send one. If you haven't received it by mid-February, follow up — the IRS expects you to report the income regardless.</li>
+        </ol>
+
+        <div class="tip-box">
+            <strong>Tip:</strong> Don't wait until January for this process. Update your 1099 tracker monthly throughout the year so reconciliation in tax season takes minutes, not hours.
+        </div>
+
+        <h2>Tracking Expenses Against Your 1099 Income</h2>
+        <p>Your 1099 shows gross income — but you pay self-employment tax and income tax on <em>net</em> profit (income minus deductible expenses). A complete 1099 tracker includes an expense log alongside the income log.</p>
+
+        <h3>Expense Categories That Offset 1099 Income (Schedule C)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Examples</th>
+                    <th>Schedule C Line</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Software &amp; Tools</td>
+                    <td>Adobe CC, Figma, Notion, hosting</td>
+                    <td>Line 22 – Supplies</td>
+                </tr>
+                <tr>
+                    <td>Home Office</td>
+                    <td>Dedicated workspace (rent or $5/sq ft)</td>
+                    <td>Line 30 – Home office</td>
+                </tr>
+                <tr>
+                    <td>Internet &amp; Phone</td>
+                    <td>Business-use percentage only</td>
+                    <td>Line 25 – Utilities</td>
+                </tr>
+                <tr>
+                    <td>Professional Development</td>
+                    <td>Courses, books, conferences</td>
+                    <td>Line 22 – Supplies / Other</td>
+                </tr>
+                <tr>
+                    <td>Health Insurance</td>
+                    <td>Self-employed premiums</td>
+                    <td>Schedule 1 (not Sch C)</td>
+                </tr>
+                <tr>
+                    <td>Retirement Contributions</td>
+                    <td>SEP IRA, Solo 401(k)</td>
+                    <td>Schedule 1 (not Sch C)</td>
+                </tr>
+                <tr>
+                    <td>Vehicle / Mileage</td>
+                    <td>72.5 cents/mile (2026)</td>
+                    <td>Line 9 – Car and truck</td>
+                </tr>
+                <tr>
+                    <td>Professional Services</td>
+                    <td>Accountant, attorney fees</td>
+                    <td>Line 17 – Legal &amp; professional</td>
+                </tr>
+                <tr>
+                    <td>Marketing</td>
+                    <td>Website, ads, business cards</td>
+                    <td>Line 8 – Advertising</td>
+                </tr>
+                <tr>
+                    <td>Equipment</td>
+                    <td>Computer, camera, desk (depreciated)</td>
+                    <td>Line 13 – Depreciation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>One-Sheet 1099 Tracker vs. Multi-Sheet Dashboard</h2>
+        <p>If you have fewer than three clients and simple expenses, a single-sheet tracker with income on the top half and expenses on the bottom is enough. Total income minus total deductible expenses gives you Schedule C net profit.</p>
+        <p>As your business grows, you'll benefit from separate sheets:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Sheet</th>
+                    <th>Contents</th>
+                    <th>When You Need It</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1099 Income Log</strong></td>
+                    <td>Payments by date, client, amount</td>
+                    <td>Always</td>
+                </tr>
+                <tr>
+                    <td><strong>Expense Log</strong></td>
+                    <td>Expenses by date, category, deductible flag</td>
+                    <td>Always</td>
+                </tr>
+                <tr>
+                    <td><strong>Client Summary</strong></td>
+                    <td>Annual total per client, 1099 match status</td>
+                    <td>3+ clients</td>
+                </tr>
+                <tr>
+                    <td><strong>Monthly P&amp;L</strong></td>
+                    <td>Income vs. expenses by month</td>
+                    <td>Running a real business</td>
+                </tr>
+                <tr>
+                    <td><strong>Tax Estimate</strong></td>
+                    <td>Quarterly tax payment calculator</td>
+                    <td>Any time you pay quarterly taxes</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>1099 Tracker vs. Full Accounting Software</h2>
+        <p>For most freelancers earning under $100K/year, a well-structured Excel or Google Sheets tracker is entirely sufficient. Accounting software like QuickBooks or FreshBooks offers bank syncing and automatic categorization, but costs $15–$50/month and often includes features you don't need.</p>
+        <p>Move to dedicated software when:</p>
+        <ul>
+            <li>You have 10+ active clients and manually logging every transaction is taking more than 30 minutes per week</li>
+            <li>You're billing internationally with currency conversion</li>
+            <li>You need formal financial statements for a loan or investor</li>
+            <li>Your accountant explicitly recommends it</li>
+        </ul>
+        <p>Until then, a good spreadsheet beats paid software for simplicity and cost.</p>
+
+        <h2>Quarterly Tax Payments and Your 1099 Tracker</h2>
+        <p>One of the most valuable uses of your 1099 tracker is estimating quarterly taxes. As a freelancer, you're required to pay estimated taxes four times per year — or face an underpayment penalty.</p>
+
+        <div class="tip-box">
+            <strong>2026 Quarterly Tax Deadlines:</strong><br>
+            Q1 (Jan–Mar): April 15 &bull; Q2 (Apr–May): June 16 &bull; Q3 (Jun–Aug): September 15 &bull; Q4 (Sep–Dec): January 15, 2027
+        </div>
+
+        <p>A simple estimate: take your net profit (1099 income minus expenses) for the quarter, multiply by 25–30%, and set that aside. The <a href="/freelance-quarterly-tax-guide.html" style="color:var(--brand);">full quarterly tax guide</a> has precise formulas for self-employment tax and income tax combined.</p>
+
+        <h2>Common 1099 Mistakes and How to Avoid Them</h2>
+        <ul>
+            <li><strong>Reporting 1099 amounts instead of actual income.</strong> If a client's 1099 is wrong (too high due to reimbursements included, for example), report your actual income and keep documentation explaining the difference.</li>
+            <li><strong>Missing non-1099 income.</strong> Cash payments, Venmo, PayPal under $600 — all taxable, even without a 1099. Track everything in your spreadsheet.</li>
+            <li><strong>Counting business expenses as personal.</strong> Only expenses with a genuine business purpose are deductible. Keep receipts and a brief note of the business reason.</li>
+            <li><strong>Forgetting the self-employment tax deduction.</strong> You can deduct half of self-employment tax from gross income (on Schedule 1). This requires a separate calculation but reduces your taxable income.</li>
+            <li><strong>Using cash-basis vs. accrual inconsistently.</strong> Most freelancers use cash basis (record income when received, expenses when paid). Pick one method and stick to it.</li>
+        </ul>
+
+        <div class="cta-box">
+            <h3>Need a More Complete System?</h3>
+            <p>The Freelancer Finance Dashboard includes a full 1099 income log, expense tracker, client summary, quarterly tax estimator, and invoice template — all in one Excel workbook.</p>
+            <a href="https://flowdeskst.gumroad.com/l/freelancer-finance-dashboard" class="primary" rel="noopener">Get the Finance Dashboard — $19</a>
+            <a href="/freelance-income-tracker-spreadsheet.xlsx" download class="secondary">Or download the free income tracker spreadsheet above</a>
+        </div>
+
+        <div class="related">
+            <h3>Related Guides</h3>
+            <a href="/track-freelance-income-expenses.html">Freelance Income Tracker Spreadsheet: Free Excel Template</a>
+            <a href="/freelance-tax-deductions-checklist.html">Freelance Tax Deductions Checklist 2026</a>
+            <a href="/freelance-quarterly-tax-guide.html">Quarterly Tax Payment Guide for Freelancers</a>
+            <a href="/freelance-bookkeeping-spreadsheet.html">Freelance Bookkeeping Spreadsheet: Complete Guide</a>
+            <a href="/freelance-budget-plan-template.html">Freelance Monthly Budget Plan Template</a>
+            <a href="/freelance-invoice-excel-template.html">How to Create a Freelance Invoice in Excel</a>
+            <a href="/freelance-retirement-savings-guide.html">SEP IRA vs Solo 401(k) for Freelancers</a>
+            <a href="/freelance-llc-vs-sole-proprietor.html">LLC vs Sole Proprietor: Which Is Better for Freelancers?</a>
+            <a href="/billable-hours-freelancer-guide.html">How to Track Billable Hours as a Freelancer</a>
+        </div>
+
+    </article>
+
+    <footer style="background:#0F172A;color:rgba(255,255,255,0.6);padding:48px 24px 32px;font-family:'Inter',-apple-system,sans-serif;">
+        <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-bottom:40px;">
+            <div>
+                <div style="color:#fff;font-weight:800;font-size:1.1rem;margin-bottom:12px;letter-spacing:-0.02em;">FlowDesk Studio</div>
+                <p style="font-size:0.85rem;line-height:1.6;margin-bottom:16px;">Free Excel templates and guides for freelancers.</p>
+                <a href="https://flowdeskst.gumroad.com/" style="color:#10B981;text-decoration:none;font-size:0.85rem;font-weight:600;">Gumroad Store →</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">Finance Guides</div>
+                <a href="/track-freelance-income-expenses.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Income Tracking</a>
+                <a href="/freelance-1099-tracker.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">1099 Tracker</a>
+                <a href="/freelance-invoice-excel-template.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Invoice Template</a>
+                <a href="/freelance-tax-deductions-checklist.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Tax Deductions</a>
+                <a href="/freelance-quarterly-tax-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Quarterly Taxes</a>
+                <a href="/freelance-bookkeeping-spreadsheet.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Bookkeeping Guide</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">Business Guides</div>
+                <a href="/freelance-rate-calculator.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Rate Calculator</a>
+                <a href="/how-to-set-freelance-rates.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Pricing Guide</a>
+                <a href="/freelance-proposal-template.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Proposal Template</a>
+                <a href="/freelance-contract-essentials.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Contract Guide</a>
+                <a href="/billable-hours-freelancer-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Billable Hours</a>
+            </div>
+            <div>
+                <div style="color:#fff;font-weight:600;font-size:0.9rem;margin-bottom:12px;">More</div>
+                <a href="/freelance-retirement-savings-guide.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Retirement Savings</a>
+                <a href="/freelance-llc-vs-sole-proprietor.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">LLC vs Sole Prop</a>
+                <a href="/freelance-late-payment-solutions.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Late Payments</a>
+                <a href="/best-freelance-tools.html" style="display:block;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;padding:3px 0;">Best Tools</a>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:24px;text-align:center;font-size:0.82rem;">
+            &copy; 2026 FlowDesk Studio. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>
