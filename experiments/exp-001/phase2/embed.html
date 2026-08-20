@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'sha256-A6UYxnSoJrBISxKWNVixnw210kSemqIqQlr2bfEspO0='; style-src-attr 'none'; script-src 'sha256-0ckLGZFES7+u6a1a4E8WB7ezAQJPBYXWxauFt/69ef8='; script-src-attr 'none'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'">
+  <meta name="referrer" content="no-referrer">
+  <title>PUDDING PANIC — Human Feedback Edition</title>
+  <!-- Self-contained so the iframe can use an opaque sandboxed origin. -->
+  <style>:root {
+  --ink: #11120f;
+  --paper: #f4f0e5;
+  --white: #fffef8;
+  --acid: #c8ff43;
+  --blue: #7482ff;
+  --coral: #ff705b;
+  --custard: #ffd86e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--blue);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.6;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 4px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.game-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 32px;
+  padding: 30px 0 34px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.experiment-label,
+.scoreboard span,
+.overlay-kicker,
+.keyboard-help,
+footer {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.experiment-label {
+  margin: 0 0 18px;
+  font-size: 0.74rem;
+}
+
+h1 {
+  margin: 0;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+  font-size: clamp(3.8rem, 11vw, 8.5rem);
+  line-height: 0.72;
+  letter-spacing: -0.09em;
+}
+
+h1 span {
+  color: var(--coral);
+  -webkit-text-stroke: 2px var(--ink);
+}
+
+.tagline {
+  margin: 0 0 2px;
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.game-panel {
+  margin-top: 28px;
+  border: 2px solid var(--ink);
+  background: var(--white);
+  box-shadow: 12px 12px 0 var(--ink);
+}
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 2px solid var(--ink);
+}
+
+.scoreboard p {
+  min-width: 0;
+  margin: 0;
+  padding: 15px 20px;
+}
+
+.scoreboard p + p {
+  border-left: 2px solid var(--ink);
+}
+
+.scoreboard span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.65rem;
+}
+
+.scoreboard strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(1rem, 2.4vw, 1.5rem);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scoreboard b {
+  font: inherit;
+}
+
+.canvas-wrap {
+  position: relative;
+  background: var(--paper);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  touch-action: none;
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(17, 18, 15, 0.72);
+}
+
+.game-overlay[hidden] {
+  display: none;
+}
+
+.overlay-card {
+  width: min(570px, 100%);
+  padding: clamp(24px, 5vw, 46px);
+  border: 2px solid var(--ink);
+  background: var(--acid);
+  box-shadow: 10px 10px 0 var(--coral);
+  text-align: center;
+}
+
+.overlay-kicker {
+  margin: 0 0 12px;
+  font-size: 0.68rem;
+}
+
+.overlay-card h2 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.overlay-card > p:not(.overlay-kicker) {
+  margin: 20px 0;
+  font-weight: 700;
+}
+
+.rules {
+  margin: 24px 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+  list-style: none;
+  text-align: left;
+}
+
+.rules li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.rules span {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+#start-button {
+  min-height: 54px;
+  padding: 13px 24px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--white);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 var(--blue);
+}
+
+#start-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--blue);
+}
+
+.controls-row {
+  min-height: 126px;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-top: 2px solid var(--ink);
+  background: var(--custard);
+}
+
+.keyboard-help {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.keyboard-help strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.d-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 5px;
+}
+
+.d-pad button {
+  border: 2px solid var(--ink);
+  background: var(--white);
+  font-size: 1.25rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.d-pad button:active,
+.d-pad button.is-active {
+  background: var(--blue);
+  transform: translate(1px, 1px);
+}
+
+.control-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.control-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.control-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.control-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+footer {
+  padding: 28px 0 10px;
+  font-size: 0.64rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 680px) {
+  .game-shell {
+    padding: 14px;
+  }
+
+  .game-header {
+    padding-top: 12px;
+  }
+
+  .tagline {
+    font-size: 0.92rem;
+  }
+
+  .scoreboard p {
+    padding: 10px;
+  }
+
+  .scoreboard strong {
+    font-size: 0.86rem;
+  }
+
+  .game-overlay {
+    padding: 12px;
+  }
+
+  .overlay-card {
+    max-height: 94%;
+    padding: 18px;
+    overflow-y: auto;
+    box-shadow: 6px 6px 0 var(--coral);
+  }
+
+  .overlay-card > p:not(.overlay-kicker) {
+    margin: 10px 0;
+    font-size: 0.82rem;
+  }
+
+  .rules {
+    margin: 12px 0;
+  }
+
+  .rules li {
+    padding: 5px 0;
+    font-size: 0.75rem;
+  }
+
+  #start-button {
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+  }
+
+  .controls-row {
+    min-height: 112px;
+  }
+
+  .keyboard-help {
+    display: none;
+  }
+
+  .d-pad {
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.scoreboard-phase2 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.run-info {
+  display: grid;
+  grid-template-columns: 150px 150px minmax(0, 1fr);
+  border-top: 2px solid var(--ink);
+  background: var(--blue);
+}
+
+.run-info p {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 18px;
+}
+
+.run-info p + p {
+  border-left: 2px solid var(--ink);
+}
+
+.run-info span {
+  display: block;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.run-info strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls-row {
+  border-top: 0;
+}
+
+.upgrade-panel {
+  width: min(820px, 100%);
+  background: var(--white);
+  box-shadow: 10px 10px 0 var(--blue);
+}
+
+.upgrade-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.skill-card {
+  min-height: 178px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.skill-card:nth-child(2) {
+  background: var(--acid);
+}
+
+.skill-card:nth-child(3) {
+  background: var(--coral);
+}
+
+.skill-card:hover,
+.skill-card:focus-visible {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.skill-code {
+  margin-bottom: auto;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.skill-name {
+  display: block;
+  margin: 18px 0 6px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.skill-description {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+  .scoreboard-phase2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .scoreboard-phase2 p:nth-child(3) {
+    border-top: 2px solid var(--ink);
+    border-left: 0;
+  }
+
+  .scoreboard-phase2 p:nth-child(4) {
+    border-top: 2px solid var(--ink);
+  }
+
+  .run-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .run-info .skills-line {
+    grid-column: 1 / -1;
+    border-top: 2px solid var(--ink);
+    border-left: 0;
+  }
+
+  .upgrade-choices {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .skill-card {
+    min-height: 94px;
+    padding: 12px;
+  }
+
+  .skill-name {
+    margin: 8px 0 2px;
+  }
+}</style>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="game-header">
+      <div>
+        <p class="experiment-label">EXPERIMENT #001 / HUMAN FEEDBACK EDITION</p>
+        <h1>PUDDING<br><span>PANIC</span></h1>
+      </div>
+      <p class="tagline">冷やせるだけ<br>冷やし続けろ</p>
+    </header>
+
+    <section class="game-panel" aria-labelledby="game-title">
+      <h2 id="game-title" class="visually-hidden">Pudding Panic 改善版ゲーム画面</h2>
+      <div class="scoreboard scoreboard-phase2" aria-live="polite">
+        <p><span>STAGE</span><strong id="stage-count">1</strong></p>
+        <p><span>SAVED</span><strong><b id="saved-count">0</b> / <b id="target-count">6</b></strong></p>
+        <p><span>TIME</span><strong><b id="time-count">51</b> SEC</strong></p>
+        <p><span>STATUS</span><strong id="status-text">STANDBY</strong></p>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game-canvas" width="960" height="600" aria-label="ステージを進みながらプリンを冷蔵庫へ運ぶゲーム"></canvas>
+        <div class="game-overlay" id="game-overlay">
+          <div class="overlay-card" id="intro-panel">
+            <p class="overlay-kicker" id="overlay-kicker">ENDLESS PUDDING RESPONSE</p>
+            <h2 id="overlay-title">冷蔵庫に終わりはない</h2>
+            <p id="overlay-copy">プリンをすべて戻して次のステージへ<br>進むほど逃げ足とスプーンが強くなる</p>
+            <ul class="rules" id="overlay-rules">
+              <li><span>01</span>プリンをすべて冷蔵</li>
+              <li><span>02</span>クリア後にスキルをひとつ選択</li>
+              <li><span>03</span>時間切れまでエンドレス</li>
+            </ul>
+            <button id="start-button" type="button">START RUN <span aria-hidden="true">↗</span></button>
+          </div>
+
+          <div class="overlay-card upgrade-panel" id="upgrade-panel" hidden>
+            <p class="overlay-kicker">STAGE CLEAR / CHOOSE ONE</p>
+            <h2>冷蔵係を強化</h2>
+            <p>次のステージへ持っていくスキルを選択</p>
+            <div class="upgrade-choices" id="upgrade-choices"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="run-info">
+        <p><span>TOTAL SAVED</span><strong id="total-count">0</strong></p>
+        <p><span>CARRY</span><strong id="carry-count">0 / 1</strong></p>
+        <p class="skills-line"><span>SKILLS</span><strong id="skills-text">NONE</strong></p>
+      </div>
+
+      <div class="controls-row">
+        <p class="keyboard-help"><strong>MOVE</strong> 矢印キー / WASD</p>
+        <div class="d-pad" aria-label="画面操作ボタン">
+          <button type="button" class="control-up" data-direction="up" aria-label="上へ移動">↑</button>
+          <button type="button" class="control-left" data-direction="left" aria-label="左へ移動">←</button>
+          <button type="button" class="control-down" data-direction="down" aria-label="下へ移動">↓</button>
+          <button type="button" class="control-right" data-direction="right" aria-label="右へ移動">→</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>PHASE 2 / HUMAN GAME DESIGN / AI IMPLEMENTATION / VERDICT PENDING</p>
+    </footer>
+  </main>
+  <script>const experimentHasOpaqueOrigin = window.top !== window && window.origin === "null";
+if (experimentHasOpaqueOrigin) {
+  (() => {
+"use strict";
+
+(() => {
+  const canvas = document.querySelector("#game-canvas");
+  const context = canvas.getContext("2d");
+  const overlay = document.querySelector("#game-overlay");
+  const introPanel = document.querySelector("#intro-panel");
+  const upgradePanel = document.querySelector("#upgrade-panel");
+  const upgradeChoices = document.querySelector("#upgrade-choices");
+  const overlayKicker = document.querySelector("#overlay-kicker");
+  const overlayTitle = document.querySelector("#overlay-title");
+  const overlayCopy = document.querySelector("#overlay-copy");
+  const overlayRules = document.querySelector("#overlay-rules");
+  const startButton = document.querySelector("#start-button");
+  const stageCount = document.querySelector("#stage-count");
+  const savedCount = document.querySelector("#saved-count");
+  const targetCount = document.querySelector("#target-count");
+  const timeCount = document.querySelector("#time-count");
+  const statusText = document.querySelector("#status-text");
+  const totalCount = document.querySelector("#total-count");
+  const carryCount = document.querySelector("#carry-count");
+  const skillsText = document.querySelector("#skills-text");
+  const directionButtons = document.querySelectorAll("[data-direction]");
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const fridge = { x: 380, y: 24, width: 200, height: 94 };
+  const input = { up: false, down: false, left: false, right: false };
+  const colors = ["#ffd86e", "#ffba61", "#ffe49a", "#f7c85f", "#ffd174", "#ffc75f"];
+
+  const skillCatalog = [
+    { id: "speed", code: "MOTOR+", name: "高速冷蔵係", description: "移動速度が10%上がる" },
+    { id: "time", code: "TIME+", name: "冷却猶予", description: "毎ステージの制限時間が6秒増える" },
+    { id: "reach", code: "REACH+", name: "ロングキャッチ", description: "プリンを捕まえる距離が広がる" },
+    { id: "slow", code: "SPOON-", name: "重たいスプーン", description: "スプーンの速度が10%下がる" },
+    { id: "capacity", code: "CARRY+", name: "二段トレー", description: "一度に運べるプリンが1個増える" },
+    { id: "headStart", code: "SAVED+", name: "先回り冷蔵", description: "各ステージ開始時に1個救出済みになる" }
+  ];
+
+  let mode = "standby";
+  let lastFrame = performance.now();
+  let stage = 1;
+  let stageTarget = 6;
+  let stageSaved = 0;
+  let totalSaved = 0;
+  let timeLeft = 51;
+  let carriedIds = [];
+  let puddings = [];
+  let spoons = [];
+  let particles = [];
+  let audioContext = null;
+  let currentPuddingSpeed = 65;
+
+  const upgrades = { speed: 0, time: 0, reach: 0, slow: 0, capacity: 0, headStart: 0 };
+  const player = { x: width / 2, y: height - 76, radius: 23, speed: 285 };
+
+  function randomBetween(minimum, maximum) {
+    return minimum + Math.random() * (maximum - minimum);
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.max(minimum, Math.min(maximum, value));
+  }
+
+  function distanceBetween(first, second) {
+    return Math.hypot(first.x - second.x, first.y - second.y);
+  }
+
+  function carryCapacity() {
+    return Math.min(4, 1 + upgrades.capacity);
+  }
+
+  function pickupReach() {
+    return Math.min(50, 5 + upgrades.reach * 9);
+  }
+
+  function createPuddings(count) {
+    return Array.from({ length: count }, (_, index) => ({
+      id: index,
+      x: randomBetween(72, width - 72),
+      y: randomBetween(170, height - 92),
+      vx: randomBetween(-currentPuddingSpeed, currentPuddingSpeed) || 38,
+      vy: randomBetween(-currentPuddingSpeed, currentPuddingSpeed) || -42,
+      radius: 22,
+      color: colors[index % colors.length],
+      carried: false,
+      delivered: false,
+      wobble: randomBetween(0, Math.PI * 2)
+    }));
+  }
+
+  function createSpoons(count) {
+    const baseSpeed = (160 + stage * 24) * Math.max(0.55, 1 - upgrades.slow * 0.1);
+    return Array.from({ length: count }, (_, index) => ({
+      x: index % 2 === 0 ? 80 : width - 80,
+      y: 220 + index * 78,
+      vx: (index % 2 === 0 ? 1 : -1) * baseSpeed * (1 + index * 0.07),
+      radius: 22,
+      phase: index * 1.7,
+      cooldown: 0
+    }));
+  }
+
+  function setupStage() {
+    stageTarget = Math.min(12, 5 + stage);
+    currentPuddingSpeed = 58 + stage * 7;
+    const baseTime = Math.max(24, 54 - stage * 3);
+    timeLeft = baseTime + Math.min(24, upgrades.time * 6);
+    stageSaved = Math.min(3, upgrades.headStart, stageTarget - 1);
+    totalSaved += stageSaved;
+    carriedIds = [];
+    puddings = createPuddings(stageTarget);
+    puddings.slice(0, stageSaved).forEach((pudding) => {
+      pudding.delivered = true;
+    });
+    const spoonCount = Math.min(4, 1 + Math.floor((stage - 1) / 2));
+    spoons = createSpoons(spoonCount);
+    particles = [];
+    player.x = width / 2;
+    player.y = height - 76;
+    player.speed = 285 * Math.min(1.6, 1 + upgrades.speed * 0.1);
+    stageCount.textContent = String(stage);
+    savedCount.textContent = String(stageSaved);
+    targetCount.textContent = String(stageTarget);
+    timeCount.textContent = String(Math.ceil(timeLeft));
+    totalCount.textContent = String(totalSaved);
+    statusText.textContent = "RUNNING";
+    updateCarryDisplay();
+    updateSkillDisplay();
+  }
+
+  function resetUpgrades() {
+    Object.keys(upgrades).forEach((key) => {
+      upgrades[key] = 0;
+    });
+  }
+
+  function startRun() {
+    stage = 1;
+    totalSaved = 0;
+    resetUpgrades();
+    setupStage();
+    mode = "playing";
+    overlay.hidden = true;
+    introPanel.hidden = false;
+    upgradePanel.hidden = true;
+    overlayRules.hidden = false;
+    lastFrame = performance.now();
+    playTone(260, 0.08);
+  }
+
+  function beginNextStage(skillId) {
+    upgrades[skillId] += 1;
+    stage += 1;
+    setupStage();
+    mode = "playing";
+    overlay.hidden = true;
+    playTone(520, 0.12);
+  }
+
+  function showUpgradeChoice() {
+    mode = "choosing";
+    statusText.textContent = "STAGE CLEAR";
+    introPanel.hidden = true;
+    upgradePanel.hidden = false;
+    upgradeChoices.replaceChildren();
+    const available = skillCatalog.filter((skill) => {
+      if (skill.id === "capacity") return upgrades.capacity < 3;
+      if (skill.id === "headStart") return upgrades.headStart < 3;
+      return true;
+    });
+    const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, 3);
+    shuffled.forEach((skill) => {
+      const button = document.createElement("button");
+      const code = document.createElement("span");
+      const name = document.createElement("strong");
+      const description = document.createElement("span");
+      button.type = "button";
+      button.className = "skill-card";
+      code.className = "skill-code";
+      name.className = "skill-name";
+      description.className = "skill-description";
+      code.textContent = skill.code;
+      name.textContent = skill.name;
+      description.textContent = skill.description;
+      button.append(code, name, description);
+      button.addEventListener("click", () => beginNextStage(skill.id));
+      upgradeChoices.append(button);
+    });
+    overlay.hidden = false;
+    const firstChoice = upgradeChoices.querySelector("button");
+    if (firstChoice) firstChoice.focus();
+    playTone(690, 0.15);
+  }
+
+  function finishRun() {
+    mode = "gameover";
+    statusText.textContent = "TIME UP";
+    introPanel.hidden = false;
+    upgradePanel.hidden = true;
+    overlayRules.hidden = true;
+    overlayKicker.textContent = "RUN COMPLETE";
+    overlayTitle.textContent = `STAGE ${stage}`;
+    overlayCopy.textContent = `累計${totalSaved}個を冷蔵しました`;
+    startButton.firstChild.textContent = "RESTART RUN ";
+    overlay.hidden = false;
+    playTone(130, 0.35);
+  }
+
+  function playTone(frequency, duration) {
+    try {
+      if (!audioContext) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        audioContext = new AudioContext();
+      }
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = "square";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.035, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (_error) {
+      audioContext = null;
+    }
+  }
+
+  function updateCarryDisplay() {
+    carryCount.textContent = `${carriedIds.length} / ${carryCapacity()}`;
+  }
+
+  function updateSkillDisplay() {
+    const active = skillCatalog
+      .filter((skill) => upgrades[skill.id] > 0)
+      .map((skill) => `${skill.code}${upgrades[skill.id]}`);
+    skillsText.textContent = active.length ? active.join(" / ") : "NONE";
+  }
+
+  function updatePlayer(delta) {
+    let horizontal = Number(input.right) - Number(input.left);
+    let vertical = Number(input.down) - Number(input.up);
+    if (horizontal !== 0 && vertical !== 0) {
+      horizontal *= Math.SQRT1_2;
+      vertical *= Math.SQRT1_2;
+    }
+    player.x = clamp(player.x + horizontal * player.speed * delta, player.radius, width - player.radius);
+    player.y = clamp(player.y + vertical * player.speed * delta, player.radius + 118, height - player.radius);
+  }
+
+  function updatePuddings(delta, elapsed) {
+    puddings.forEach((pudding) => {
+      if (pudding.delivered) return;
+
+      if (pudding.carried) {
+        const carryIndex = carriedIds.indexOf(pudding.id);
+        const row = Math.floor(carryIndex / 2);
+        const side = carryIndex % 2 === 0 ? -1 : 1;
+        const targetX = player.x + side * (18 + row * 8);
+        const targetY = player.y + 38 + row * 16;
+        pudding.x += (targetX - pudding.x) * Math.min(1, delta * 11);
+        pudding.y += (targetY - pudding.y) * Math.min(1, delta * 11);
+        return;
+      }
+
+      const playerDistance = distanceBetween(pudding, player);
+      if (playerDistance < 140 && playerDistance > 0) {
+        pudding.vx += ((pudding.x - player.x) / playerDistance) * 110 * delta;
+        pudding.vy += ((pudding.y - player.y) / playerDistance) * 110 * delta;
+      }
+
+      const speed = Math.hypot(pudding.vx, pudding.vy);
+      if (speed > currentPuddingSpeed) {
+        pudding.vx = (pudding.vx / speed) * currentPuddingSpeed;
+        pudding.vy = (pudding.vy / speed) * currentPuddingSpeed;
+      }
+
+      pudding.x += pudding.vx * delta;
+      pudding.y += pudding.vy * delta;
+      pudding.wobble += delta * 4.5;
+
+      if (pudding.x < pudding.radius || pudding.x > width - pudding.radius) {
+        pudding.vx *= -1;
+        pudding.x = clamp(pudding.x, pudding.radius, width - pudding.radius);
+      }
+      if (pudding.y < 148 || pudding.y > height - pudding.radius) {
+        pudding.vy *= -1;
+        pudding.y = clamp(pudding.y, 148, height - pudding.radius);
+      }
+
+      const canCarryMore = carriedIds.length < carryCapacity();
+      if (canCarryMore && distanceBetween(pudding, player) < pudding.radius + player.radius + pickupReach()) {
+        carriedIds.push(pudding.id);
+        pudding.carried = true;
+        statusText.textContent = carriedIds.length === carryCapacity() ? "TRAY FULL" : "CARRYING";
+        updateCarryDisplay();
+        playTone(390 + carriedIds.length * 35, 0.07);
+      }
+
+      pudding.x += Math.sin(elapsed * 0.0017 + pudding.id) * 0.18;
+    });
+  }
+
+  function spoonHead(spoon) {
+    const direction = spoon.vx >= 0 ? 1 : -1;
+    return { x: spoon.x + direction * 34, y: spoon.y - 18, radius: 22 };
+  }
+
+  function updateSpoons(delta) {
+    spoons.forEach((spoon, index) => {
+      spoon.x += spoon.vx * delta;
+      spoon.y = 238 + index * 66 + Math.sin(spoon.x * 0.011 + spoon.phase) * 76;
+      spoon.cooldown = Math.max(0, spoon.cooldown - delta);
+      if (spoon.x < 52 || spoon.x > width - 52) {
+        spoon.vx *= -1;
+        spoon.x = clamp(spoon.x, 52, width - 52);
+      }
+
+      const head = spoonHead(spoon);
+      if (spoon.cooldown === 0 && carriedIds.length > 0 && distanceBetween(head, player) < head.radius + player.radius) {
+        const droppedId = carriedIds.pop();
+        const dropped = puddings.find((pudding) => pudding.id === droppedId);
+        if (dropped) {
+          dropped.carried = false;
+          dropped.x = clamp(player.x - Math.sign(spoon.vx) * 64, 40, width - 40);
+          dropped.y = clamp(player.y + 48, 155, height - 40);
+          dropped.vx = -spoon.vx * 0.38;
+          dropped.vy = 62;
+        }
+        spoon.cooldown = 0.85;
+        statusText.textContent = "DROPPED";
+        updateCarryDisplay();
+        playTone(110, 0.16);
+      }
+    });
+  }
+
+  function depositPuddings() {
+    if (carriedIds.length === 0) return;
+    const insideFridge = player.x > fridge.x && player.x < fridge.x + fridge.width && player.y < fridge.y + fridge.height + 34;
+    if (!insideFridge) return;
+
+    const deposited = [...carriedIds];
+    carriedIds = [];
+    deposited.forEach((id, index) => {
+      const pudding = puddings.find((item) => item.id === id);
+      if (!pudding) return;
+      pudding.carried = false;
+      pudding.delivered = true;
+      createCelebration(player.x + index * 8, player.y, pudding.color);
+    });
+    stageSaved += deposited.length;
+    totalSaved += deposited.length;
+    savedCount.textContent = String(stageSaved);
+    totalCount.textContent = String(totalSaved);
+    statusText.textContent = stageSaved >= stageTarget ? "STAGE CLEAR" : "FIND ANOTHER";
+    updateCarryDisplay();
+    playTone(620, 0.1);
+    if (stageSaved >= stageTarget) showUpgradeChoice();
+  }
+
+  function createCelebration(x, y, color) {
+    for (let index = 0; index < 14; index += 1) {
+      particles.push({
+        x,
+        y,
+        vx: randomBetween(-170, 170),
+        vy: randomBetween(-230, -70),
+        life: randomBetween(0.55, 1),
+        color
+      });
+    }
+  }
+
+  function updateParticles(delta) {
+    particles.forEach((particle) => {
+      particle.x += particle.vx * delta;
+      particle.y += particle.vy * delta;
+      particle.vy += 380 * delta;
+      particle.life -= delta;
+    });
+    particles = particles.filter((particle) => particle.life > 0);
+  }
+
+  function update(delta, elapsed) {
+    if (mode !== "playing") return;
+    timeLeft = Math.max(0, timeLeft - delta);
+    timeCount.textContent = String(Math.ceil(timeLeft));
+    updatePlayer(delta);
+    updatePuddings(delta, elapsed);
+    updateSpoons(delta);
+    updateParticles(delta);
+    depositPuddings();
+    if (timeLeft <= 0 && mode === "playing") finishRun();
+  }
+
+  function roundedRectangle(x, y, rectangleWidth, rectangleHeight, radius) {
+    context.beginPath();
+    context.roundRect(x, y, rectangleWidth, rectangleHeight, radius);
+  }
+
+  function drawBackground() {
+    context.fillStyle = "#f4f0e5";
+    context.fillRect(0, 0, width, height);
+    context.strokeStyle = "rgba(17, 18, 15, 0.10)";
+    context.lineWidth = 1;
+    for (let x = 0; x <= width; x += 48) {
+      context.beginPath();
+      context.moveTo(x, 0);
+      context.lineTo(x, height);
+      context.stroke();
+    }
+    for (let y = 0; y <= height; y += 48) {
+      context.beginPath();
+      context.moveTo(0, y);
+      context.lineTo(width, y);
+      context.stroke();
+    }
+    context.fillStyle = "rgba(116, 130, 255, 0.14)";
+    context.fillRect(0, 120, width, 8);
+  }
+
+  function drawFridge() {
+    context.fillStyle = "#11120f";
+    roundedRectangle(fridge.x, fridge.y, fridge.width, fridge.height, 8);
+    context.fill();
+    context.fillStyle = "#fffef8";
+    roundedRectangle(fridge.x + 10, fridge.y + 10, fridge.width - 20, fridge.height - 20, 4);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 5;
+    context.beginPath();
+    context.moveTo(fridge.x + fridge.width / 2, fridge.y + 10);
+    context.lineTo(fridge.x + fridge.width / 2, fridge.y + fridge.height - 10);
+    context.stroke();
+    context.fillStyle = "#7482ff";
+    context.fillRect(fridge.x + 28, fridge.y + 38, 8, 28);
+    context.fillRect(fridge.x + fridge.width - 36, fridge.y + 38, 8, 28);
+    context.fillStyle = "#11120f";
+    context.font = "900 15px Consolas, monospace";
+    context.textAlign = "center";
+    context.fillText(`STAGE ${stage} FRIDGE`, fridge.x + fridge.width / 2, fridge.y + fridge.height + 24);
+  }
+
+  function drawPudding(pudding) {
+    if (pudding.delivered) return;
+    const bounce = Math.sin(pudding.wobble) * 2;
+    context.save();
+    context.translate(pudding.x, pudding.y + bounce);
+    context.fillStyle = pudding.color;
+    context.beginPath();
+    context.moveTo(-20, -10);
+    context.quadraticCurveTo(-23, 8, -16, 20);
+    context.quadraticCurveTo(0, 27, 16, 20);
+    context.quadraticCurveTo(23, 8, 20, -10);
+    context.closePath();
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 3;
+    context.stroke();
+    context.fillStyle = "#8f4a27";
+    context.beginPath();
+    context.ellipse(0, -10, 20, 8, 0, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+    context.fillStyle = "#11120f";
+    context.beginPath();
+    context.arc(-7, 3, 2.3, 0, Math.PI * 2);
+    context.arc(7, 3, 2.3, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(0, 9, 5, 0, Math.PI);
+    context.stroke();
+    context.restore();
+  }
+
+  function drawPlayer() {
+    context.save();
+    context.translate(player.x, player.y);
+    context.fillStyle = "#7482ff";
+    context.beginPath();
+    context.arc(0, 0, player.radius, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 4;
+    context.stroke();
+    context.fillStyle = "#fffef8";
+    context.fillRect(-10, -7, 6, 6);
+    context.fillRect(4, -7, 6, 6);
+    context.fillRect(-8, 8, 16, 4);
+    context.fillStyle = "#11120f";
+    context.font = "900 11px Consolas, monospace";
+    context.textAlign = "center";
+    context.fillText(`YOU ×${carryCapacity()}`, 0, 42);
+    context.restore();
+  }
+
+  function drawSpoon(spoon) {
+    context.save();
+    context.translate(spoon.x, spoon.y);
+    if (spoon.vx < 0) context.scale(-1, 1);
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 10;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(-32, 18);
+    context.lineTo(25, -13);
+    context.stroke();
+    context.fillStyle = spoon.cooldown > 0 ? "#c8ff43" : "#ff705b";
+    context.beginPath();
+    context.ellipse(34, -18, 22, 15, -0.35, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 4;
+    context.stroke();
+    context.restore();
+  }
+
+  function drawParticles() {
+    particles.forEach((particle) => {
+      context.globalAlpha = Math.max(0, particle.life);
+      context.fillStyle = particle.color;
+      context.fillRect(particle.x - 4, particle.y - 4, 8, 8);
+    });
+    context.globalAlpha = 1;
+  }
+
+  function draw() {
+    drawBackground();
+    drawFridge();
+    puddings.forEach(drawPudding);
+    spoons.forEach(drawSpoon);
+    drawPlayer();
+    drawParticles();
+  }
+
+  function frame(now) {
+    const delta = Math.min(0.035, (now - lastFrame) / 1000);
+    lastFrame = now;
+    update(delta, now);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  const keyMap = {
+    ArrowUp: "up", w: "up", W: "up",
+    ArrowDown: "down", s: "down", S: "down",
+    ArrowLeft: "left", a: "left", A: "left",
+    ArrowRight: "right", d: "right", D: "right"
+  };
+
+  window.addEventListener("keydown", (event) => {
+    const direction = keyMap[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    input[direction] = true;
+  });
+
+  window.addEventListener("keyup", (event) => {
+    const direction = keyMap[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    input[direction] = false;
+  });
+
+  window.addEventListener("blur", () => {
+    Object.keys(input).forEach((direction) => {
+      input[direction] = false;
+    });
+  });
+
+  directionButtons.forEach((button) => {
+    const direction = button.dataset.direction;
+    const release = () => {
+      input[direction] = false;
+      button.classList.remove("is-active");
+    };
+    button.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      input[direction] = true;
+      button.classList.add("is-active");
+      button.setPointerCapture(event.pointerId);
+    });
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", release);
+  });
+
+  startButton.addEventListener("click", startRun);
+
+  stageTarget = 6;
+  currentPuddingSpeed = 65;
+  puddings = createPuddings(stageTarget);
+  spoons = createSpoons(1);
+  requestAnimationFrame(frame);
+})();
+  })();
+} else {
+  const warning = document.createElement("main");
+  warning.textContent = "This experiment runs only inside the sandboxed FlowDeskStudio player.";
+  document.body.replaceChildren(warning);
+}</script>
+</body>
+</html>

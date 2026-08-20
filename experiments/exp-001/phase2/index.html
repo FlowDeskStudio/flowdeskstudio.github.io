@@ -3,76 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'none'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <title>PUDDING PANIC — Human Feedback Edition</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="phase2.css">
-  <script src="phase2.js" defer></script>
+  <link rel="stylesheet" href="../embed-shell.css">
 </head>
 <body>
-  <main class="game-shell">
-    <header class="game-header">
-      <div>
-        <p class="experiment-label">EXPERIMENT #001 / HUMAN FEEDBACK EDITION</p>
-        <h1>PUDDING<br><span>PANIC</span></h1>
-      </div>
-      <p class="tagline">冷やせるだけ<br>冷やし続けろ</p>
-    </header>
-
-    <section class="game-panel" aria-labelledby="game-title">
-      <h2 id="game-title" class="visually-hidden">Pudding Panic 改善版ゲーム画面</h2>
-      <div class="scoreboard scoreboard-phase2" aria-live="polite">
-        <p><span>STAGE</span><strong id="stage-count">1</strong></p>
-        <p><span>SAVED</span><strong><b id="saved-count">0</b> / <b id="target-count">6</b></strong></p>
-        <p><span>TIME</span><strong><b id="time-count">51</b> SEC</strong></p>
-        <p><span>STATUS</span><strong id="status-text">STANDBY</strong></p>
-      </div>
-
-      <div class="canvas-wrap">
-        <canvas id="game-canvas" width="960" height="600" aria-label="ステージを進みながらプリンを冷蔵庫へ運ぶゲーム"></canvas>
-        <div class="game-overlay" id="game-overlay">
-          <div class="overlay-card" id="intro-panel">
-            <p class="overlay-kicker" id="overlay-kicker">ENDLESS PUDDING RESPONSE</p>
-            <h2 id="overlay-title">冷蔵庫に終わりはない</h2>
-            <p id="overlay-copy">プリンをすべて戻して次のステージへ<br>進むほど逃げ足とスプーンが強くなる</p>
-            <ul class="rules" id="overlay-rules">
-              <li><span>01</span>プリンをすべて冷蔵</li>
-              <li><span>02</span>クリア後にスキルをひとつ選択</li>
-              <li><span>03</span>時間切れまでエンドレス</li>
-            </ul>
-            <button id="start-button" type="button">START RUN <span aria-hidden="true">↗</span></button>
-          </div>
-
-          <div class="overlay-card upgrade-panel" id="upgrade-panel" hidden>
-            <p class="overlay-kicker">STAGE CLEAR / CHOOSE ONE</p>
-            <h2>冷蔵係を強化</h2>
-            <p>次のステージへ持っていくスキルを選択</p>
-            <div class="upgrade-choices" id="upgrade-choices"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="run-info">
-        <p><span>TOTAL SAVED</span><strong id="total-count">0</strong></p>
-        <p><span>CARRY</span><strong id="carry-count">0 / 1</strong></p>
-        <p class="skills-line"><span>SKILLS</span><strong id="skills-text">NONE</strong></p>
-      </div>
-
-      <div class="controls-row">
-        <p class="keyboard-help"><strong>MOVE</strong> 矢印キー / WASD</p>
-        <div class="d-pad" aria-label="画面操作ボタン">
-          <button type="button" class="control-up" data-direction="up" aria-label="上へ移動">↑</button>
-          <button type="button" class="control-left" data-direction="left" aria-label="左へ移動">←</button>
-          <button type="button" class="control-down" data-direction="down" aria-label="下へ移動">↓</button>
-          <button type="button" class="control-right" data-direction="right" aria-label="右へ移動">→</button>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <p>PHASE 2 / HUMAN GAME DESIGN / AI IMPLEMENTATION / VERDICT PENDING</p>
-    </footer>
+  <main class="play-shell">
+    <iframe src="embed.html" title="PUDDING PANIC 改善版" sandbox="allow-scripts" allow="autoplay" referrerpolicy="no-referrer"></iframe>
   </main>
 </body>
 </html>

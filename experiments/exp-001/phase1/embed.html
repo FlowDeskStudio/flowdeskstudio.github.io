@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'sha256-m9zWMkZ5TYxnsGZvoq+WvFVNVKXYQ/N/54JrVCFO/Bs='; style-src-attr 'none'; script-src 'sha256-YbhYVD0+Q4uP53SV2aWL5wt75uScdXCc7l26sLm9pJQ='; script-src-attr 'none'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'">
+  <meta name="referrer" content="no-referrer">
+  <title>PUDDING PANIC — Experiment #001</title>
+  <!-- Self-contained so the iframe can use an opaque sandboxed origin. -->
+  <style>:root {
+  --ink: #11120f;
+  --paper: #f4f0e5;
+  --white: #fffef8;
+  --acid: #c8ff43;
+  --blue: #7482ff;
+  --coral: #ff705b;
+  --custard: #ffd86e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--blue);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.6;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 4px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.game-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 32px;
+  padding: 30px 0 34px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.experiment-label,
+.scoreboard span,
+.overlay-kicker,
+.keyboard-help,
+footer {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.experiment-label {
+  margin: 0 0 18px;
+  font-size: 0.74rem;
+}
+
+h1 {
+  margin: 0;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+  font-size: clamp(3.8rem, 11vw, 8.5rem);
+  line-height: 0.72;
+  letter-spacing: -0.09em;
+}
+
+h1 span {
+  color: var(--coral);
+  -webkit-text-stroke: 2px var(--ink);
+}
+
+.tagline {
+  margin: 0 0 2px;
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.game-panel {
+  margin-top: 28px;
+  border: 2px solid var(--ink);
+  background: var(--white);
+  box-shadow: 12px 12px 0 var(--ink);
+}
+
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 2px solid var(--ink);
+}
+
+.scoreboard p {
+  min-width: 0;
+  margin: 0;
+  padding: 15px 20px;
+}
+
+.scoreboard p + p {
+  border-left: 2px solid var(--ink);
+}
+
+.scoreboard span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.65rem;
+}
+
+.scoreboard strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(1rem, 2.4vw, 1.5rem);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scoreboard b {
+  font: inherit;
+}
+
+.canvas-wrap {
+  position: relative;
+  background: var(--paper);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  touch-action: none;
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(17, 18, 15, 0.72);
+}
+
+.game-overlay[hidden] {
+  display: none;
+}
+
+.overlay-card {
+  width: min(570px, 100%);
+  padding: clamp(24px, 5vw, 46px);
+  border: 2px solid var(--ink);
+  background: var(--acid);
+  box-shadow: 10px 10px 0 var(--coral);
+  text-align: center;
+}
+
+.overlay-kicker {
+  margin: 0 0 12px;
+  font-size: 0.68rem;
+}
+
+.overlay-card h2 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.overlay-card > p:not(.overlay-kicker) {
+  margin: 20px 0;
+  font-weight: 700;
+}
+
+.rules {
+  margin: 24px 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+  list-style: none;
+  text-align: left;
+}
+
+.rules li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.rules span {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+#start-button {
+  min-height: 54px;
+  padding: 13px 24px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--white);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 var(--blue);
+}
+
+#start-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--blue);
+}
+
+.controls-row {
+  min-height: 126px;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-top: 2px solid var(--ink);
+  background: var(--custard);
+}
+
+.keyboard-help {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.keyboard-help strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.d-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 5px;
+}
+
+.d-pad button {
+  border: 2px solid var(--ink);
+  background: var(--white);
+  font-size: 1.25rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.d-pad button:active,
+.d-pad button.is-active {
+  background: var(--blue);
+  transform: translate(1px, 1px);
+}
+
+.control-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.control-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.control-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.control-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+footer {
+  padding: 28px 0 10px;
+  font-size: 0.64rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 680px) {
+  .game-shell {
+    padding: 14px;
+  }
+
+  .game-header {
+    padding-top: 12px;
+  }
+
+  .tagline {
+    font-size: 0.92rem;
+  }
+
+  .scoreboard p {
+    padding: 10px;
+  }
+
+  .scoreboard strong {
+    font-size: 0.86rem;
+  }
+
+  .game-overlay {
+    padding: 12px;
+  }
+
+  .overlay-card {
+    max-height: 94%;
+    padding: 18px;
+    overflow-y: auto;
+    box-shadow: 6px 6px 0 var(--coral);
+  }
+
+  .overlay-card > p:not(.overlay-kicker) {
+    margin: 10px 0;
+    font-size: 0.82rem;
+  }
+
+  .rules {
+    margin: 12px 0;
+  }
+
+  .rules li {
+    padding: 5px 0;
+    font-size: 0.75rem;
+  }
+
+  #start-button {
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+  }
+
+  .controls-row {
+    min-height: 112px;
+  }
+
+  .keyboard-help {
+    display: none;
+  }
+
+  .d-pad {
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}</style>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="game-header">
+      <div>
+        <p class="experiment-label">FLOWDESKSTUDIO / EXPERIMENT #001</p>
+        <h1>PUDDING<br><span>PANIC</span></h1>
+      </div>
+      <p class="tagline">逃げるプリンを<br>冷蔵庫へ戻せ</p>
+    </header>
+
+    <section class="game-panel" aria-labelledby="game-title">
+      <h2 id="game-title" class="visually-hidden">Pudding Panic ゲーム画面</h2>
+      <div class="scoreboard" aria-live="polite">
+        <p><span>SAVED</span><strong><b id="saved-count">0</b> / 5</strong></p>
+        <p><span>TIME</span><strong><b id="time-count">60</b> SEC</strong></p>
+        <p><span>STATUS</span><strong id="status-text">STANDBY</strong></p>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game-canvas" width="960" height="600" aria-label="冷蔵係を操作してプリンを冷蔵庫へ運ぶゲーム"></canvas>
+        <div class="game-overlay" id="game-overlay">
+          <div class="overlay-card">
+            <p class="overlay-kicker" id="overlay-kicker">THE FRIDGE IS OPEN</p>
+            <h2 id="overlay-title">プリンが逃げた</h2>
+            <p id="overlay-copy">青い冷蔵係を動かしてプリンに触れ<br>画面上部の冷蔵庫まで運ぼう</p>
+            <ul class="rules" id="overlay-rules">
+              <li><span>01</span>プリンは一度にひとつ</li>
+              <li><span>02</span>スプーンに触れると落とす</li>
+              <li><span>03</span>60秒で5個救出</li>
+            </ul>
+            <button id="start-button" type="button">START GAME <span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <p class="keyboard-help"><strong>MOVE</strong> 矢印キー / WASD</p>
+        <div class="d-pad" aria-label="画面操作ボタン">
+          <button type="button" class="control-up" data-direction="up" aria-label="上へ移動">↑</button>
+          <button type="button" class="control-left" data-direction="left" aria-label="左へ移動">←</button>
+          <button type="button" class="control-down" data-direction="down" aria-label="下へ移動">↓</button>
+          <button type="button" class="control-right" data-direction="right" aria-label="右へ移動">→</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>ONE PROMPT / ZERO EXTERNAL ASSETS / HUMAN VERDICT PENDING</p>
+    </footer>
+  </main>
+  <script>const experimentHasOpaqueOrigin = window.top !== window && window.origin === "null";
+if (experimentHasOpaqueOrigin) {
+  (() => {
+"use strict";
+
+(() => {
+  const canvas = document.querySelector("#game-canvas");
+  const context = canvas.getContext("2d");
+  const overlay = document.querySelector("#game-overlay");
+  const overlayKicker = document.querySelector("#overlay-kicker");
+  const overlayTitle = document.querySelector("#overlay-title");
+  const overlayCopy = document.querySelector("#overlay-copy");
+  const overlayRules = document.querySelector("#overlay-rules");
+  const startButton = document.querySelector("#start-button");
+  const savedCount = document.querySelector("#saved-count");
+  const timeCount = document.querySelector("#time-count");
+  const statusText = document.querySelector("#status-text");
+  const directionButtons = document.querySelectorAll("[data-direction]");
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const fridge = { x: 380, y: 24, width: 200, height: 94 };
+  const input = { up: false, down: false, left: false, right: false };
+  const colors = ["#ffd86e", "#ffba61", "#ffe49a", "#f7c85f", "#ffd174"];
+
+  let mode = "standby";
+  let lastFrame = performance.now();
+  let timeLeft = 60;
+  let saved = 0;
+  let carriedId = null;
+  let puddings = [];
+  let particles = [];
+  let audioContext = null;
+
+  const player = { x: width / 2, y: height - 76, radius: 23, speed: 285 };
+  const spoon = { x: 120, y: 245, vx: 185, radius: 24 };
+
+  function randomBetween(minimum, maximum) {
+    return minimum + Math.random() * (maximum - minimum);
+  }
+
+  function createPuddings() {
+    return Array.from({ length: 5 }, (_, index) => ({
+      id: index,
+      x: randomBetween(90, width - 90),
+      y: randomBetween(190, height - 120),
+      vx: randomBetween(-72, 72) || 42,
+      vy: randomBetween(-72, 72) || -38,
+      radius: 22,
+      color: colors[index],
+      carried: false,
+      delivered: false,
+      wobble: randomBetween(0, Math.PI * 2)
+    }));
+  }
+
+  function resetGame() {
+    timeLeft = 60;
+    saved = 0;
+    carriedId = null;
+    puddings = createPuddings();
+    particles = [];
+    player.x = width / 2;
+    player.y = height - 76;
+    spoon.x = 120;
+    spoon.y = 245;
+    spoon.vx = 185;
+    savedCount.textContent = "0";
+    timeCount.textContent = "60";
+    statusText.textContent = "RUNNING";
+  }
+
+  function startGame() {
+    resetGame();
+    mode = "playing";
+    overlay.hidden = true;
+    overlayRules.hidden = false;
+    lastFrame = performance.now();
+    playTone(260, 0.08);
+  }
+
+  function finishGame(didWin) {
+    mode = didWin ? "won" : "lost";
+    statusText.textContent = didWin ? "ALL SAFE" : "TIME UP";
+    overlayKicker.textContent = didWin ? "MISSION COMPLETE" : "THEY ARE STILL WARM";
+    overlayTitle.textContent = didWin ? "全員ひんやり" : `${saved}個は救出`;
+    overlayCopy.textContent = didWin
+      ? "5個のプリンが冷蔵庫へ戻りました"
+      : "逃げたプリンは次の機会を待っています";
+    overlayRules.hidden = true;
+    startButton.firstChild.textContent = "PLAY AGAIN ";
+    overlay.hidden = false;
+    playTone(didWin ? 520 : 130, didWin ? 0.22 : 0.35);
+  }
+
+  function playTone(frequency, duration) {
+    try {
+      if (!audioContext) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        audioContext = new AudioContext();
+      }
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = "square";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.035, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (_error) {
+      audioContext = null;
+    }
+  }
+
+  function distanceBetween(first, second) {
+    return Math.hypot(first.x - second.x, first.y - second.y);
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.max(minimum, Math.min(maximum, value));
+  }
+
+  function updatePlayer(delta) {
+    let horizontal = Number(input.right) - Number(input.left);
+    let vertical = Number(input.down) - Number(input.up);
+    if (horizontal !== 0 && vertical !== 0) {
+      horizontal *= Math.SQRT1_2;
+      vertical *= Math.SQRT1_2;
+    }
+    player.x = clamp(player.x + horizontal * player.speed * delta, player.radius, width - player.radius);
+    player.y = clamp(player.y + vertical * player.speed * delta, player.radius + 118, height - player.radius);
+  }
+
+  function updatePuddings(delta, elapsed) {
+    puddings.forEach((pudding) => {
+      if (pudding.delivered) return;
+
+      if (pudding.carried) {
+        pudding.x += (player.x - pudding.x) * Math.min(1, delta * 10);
+        pudding.y += (player.y + 38 - pudding.y) * Math.min(1, delta * 10);
+        return;
+      }
+
+      const playerDistance = distanceBetween(pudding, player);
+      if (playerDistance < 125 && playerDistance > 0) {
+        pudding.vx += ((pudding.x - player.x) / playerDistance) * 95 * delta;
+        pudding.vy += ((pudding.y - player.y) / playerDistance) * 95 * delta;
+      }
+
+      const speed = Math.hypot(pudding.vx, pudding.vy);
+      if (speed > 92) {
+        pudding.vx = (pudding.vx / speed) * 92;
+        pudding.vy = (pudding.vy / speed) * 92;
+      }
+
+      pudding.x += pudding.vx * delta;
+      pudding.y += pudding.vy * delta;
+      pudding.wobble += delta * 4;
+
+      if (pudding.x < pudding.radius || pudding.x > width - pudding.radius) {
+        pudding.vx *= -1;
+        pudding.x = clamp(pudding.x, pudding.radius, width - pudding.radius);
+      }
+      if (pudding.y < 148 || pudding.y > height - pudding.radius) {
+        pudding.vy *= -1;
+        pudding.y = clamp(pudding.y, 148, height - pudding.radius);
+      }
+
+      if (carriedId === null && distanceBetween(pudding, player) < pudding.radius + player.radius + 5) {
+        carriedId = pudding.id;
+        pudding.carried = true;
+        statusText.textContent = "CARRYING";
+        playTone(390, 0.07);
+      }
+
+      pudding.x += Math.sin(elapsed * 0.0015 + pudding.id) * 0.15;
+    });
+  }
+
+  function updateSpoon(delta) {
+    spoon.x += spoon.vx * delta;
+    spoon.y = 270 + Math.sin(spoon.x * 0.012) * 92;
+    if (spoon.x < 50 || spoon.x > width - 50) {
+      spoon.vx *= -1;
+      spoon.x = clamp(spoon.x, 50, width - 50);
+    }
+
+    if (carriedId !== null && distanceBetween(spoon, player) < spoon.radius + player.radius) {
+      const carried = puddings.find((pudding) => pudding.id === carriedId);
+      if (carried) {
+        carried.carried = false;
+        carried.x = clamp(player.x + (spoon.vx > 0 ? -60 : 60), 40, width - 40);
+        carried.y = clamp(player.y + 48, 155, height - 40);
+        carried.vx = -spoon.vx * 0.35;
+        carried.vy = 55;
+      }
+      carriedId = null;
+      statusText.textContent = "DROPPED";
+      playTone(110, 0.16);
+    }
+  }
+
+  function depositPudding() {
+    if (carriedId === null) return;
+    const insideFridge = player.x > fridge.x && player.x < fridge.x + fridge.width && player.y < fridge.y + fridge.height + 34;
+    if (!insideFridge) return;
+
+    const carried = puddings.find((pudding) => pudding.id === carriedId);
+    if (!carried) return;
+    carried.carried = false;
+    carried.delivered = true;
+    carriedId = null;
+    saved += 1;
+    savedCount.textContent = String(saved);
+    statusText.textContent = saved === 5 ? "ALL SAFE" : "FIND ANOTHER";
+    createCelebration(player.x, player.y, carried.color);
+    playTone(620, 0.1);
+    if (saved === 5) finishGame(true);
+  }
+
+  function createCelebration(x, y, color) {
+    for (let index = 0; index < 18; index += 1) {
+      particles.push({
+        x,
+        y,
+        vx: randomBetween(-170, 170),
+        vy: randomBetween(-230, -70),
+        life: randomBetween(0.55, 1),
+        color
+      });
+    }
+  }
+
+  function updateParticles(delta) {
+    particles.forEach((particle) => {
+      particle.x += particle.vx * delta;
+      particle.y += particle.vy * delta;
+      particle.vy += 380 * delta;
+      particle.life -= delta;
+    });
+    particles = particles.filter((particle) => particle.life > 0);
+  }
+
+  function update(delta, elapsed) {
+    if (mode !== "playing") return;
+    timeLeft = Math.max(0, timeLeft - delta);
+    timeCount.textContent = String(Math.ceil(timeLeft));
+    updatePlayer(delta);
+    updatePuddings(delta, elapsed);
+    updateSpoon(delta);
+    updateParticles(delta);
+    depositPudding();
+    if (timeLeft <= 0 && mode === "playing") finishGame(false);
+  }
+
+  function roundedRectangle(x, y, rectangleWidth, rectangleHeight, radius) {
+    context.beginPath();
+    context.roundRect(x, y, rectangleWidth, rectangleHeight, radius);
+  }
+
+  function drawBackground() {
+    context.fillStyle = "#f4f0e5";
+    context.fillRect(0, 0, width, height);
+    context.strokeStyle = "rgba(17, 18, 15, 0.10)";
+    context.lineWidth = 1;
+    for (let x = 0; x <= width; x += 48) {
+      context.beginPath();
+      context.moveTo(x, 0);
+      context.lineTo(x, height);
+      context.stroke();
+    }
+    for (let y = 0; y <= height; y += 48) {
+      context.beginPath();
+      context.moveTo(0, y);
+      context.lineTo(width, y);
+      context.stroke();
+    }
+  }
+
+  function drawFridge() {
+    context.fillStyle = "#11120f";
+    roundedRectangle(fridge.x, fridge.y, fridge.width, fridge.height, 8);
+    context.fill();
+    context.fillStyle = "#fffef8";
+    roundedRectangle(fridge.x + 10, fridge.y + 10, fridge.width - 20, fridge.height - 20, 4);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 5;
+    context.beginPath();
+    context.moveTo(fridge.x + fridge.width / 2, fridge.y + 10);
+    context.lineTo(fridge.x + fridge.width / 2, fridge.y + fridge.height - 10);
+    context.stroke();
+    context.fillStyle = "#7482ff";
+    context.fillRect(fridge.x + 28, fridge.y + 38, 8, 28);
+    context.fillRect(fridge.x + fridge.width - 36, fridge.y + 38, 8, 28);
+    context.fillStyle = "#11120f";
+    context.font = "900 15px Consolas, monospace";
+    context.textAlign = "center";
+    context.fillText("FRIDGE", fridge.x + fridge.width / 2, fridge.y + fridge.height + 24);
+  }
+
+  function drawPudding(pudding) {
+    if (pudding.delivered) return;
+    const bounce = Math.sin(pudding.wobble) * 2;
+    context.save();
+    context.translate(pudding.x, pudding.y + bounce);
+    context.fillStyle = pudding.color;
+    context.beginPath();
+    context.moveTo(-20, -10);
+    context.quadraticCurveTo(-23, 8, -16, 20);
+    context.quadraticCurveTo(0, 27, 16, 20);
+    context.quadraticCurveTo(23, 8, 20, -10);
+    context.closePath();
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 3;
+    context.stroke();
+    context.fillStyle = "#8f4a27";
+    context.beginPath();
+    context.ellipse(0, -10, 20, 8, 0, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+    context.fillStyle = "#11120f";
+    context.beginPath();
+    context.arc(-7, 3, 2.3, 0, Math.PI * 2);
+    context.arc(7, 3, 2.3, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(0, 9, 5, 0, Math.PI);
+    context.stroke();
+    context.restore();
+  }
+
+  function drawPlayer() {
+    context.save();
+    context.translate(player.x, player.y);
+    context.fillStyle = "#7482ff";
+    context.beginPath();
+    context.arc(0, 0, player.radius, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 4;
+    context.stroke();
+    context.fillStyle = "#fffef8";
+    context.fillRect(-10, -7, 6, 6);
+    context.fillRect(4, -7, 6, 6);
+    context.fillRect(-8, 8, 16, 4);
+    context.fillStyle = "#11120f";
+    context.font = "900 11px Consolas, monospace";
+    context.textAlign = "center";
+    context.fillText("YOU", 0, 42);
+    context.restore();
+  }
+
+  function drawSpoon() {
+    context.save();
+    context.translate(spoon.x, spoon.y);
+    if (spoon.vx < 0) context.scale(-1, 1);
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 10;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(-32, 18);
+    context.lineTo(25, -13);
+    context.stroke();
+    context.fillStyle = "#ff705b";
+    context.beginPath();
+    context.ellipse(34, -18, 22, 15, -0.35, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = "#11120f";
+    context.lineWidth = 4;
+    context.stroke();
+    context.fillStyle = "#11120f";
+    context.font = "900 11px Consolas, monospace";
+    context.textAlign = "center";
+    context.fillText("SPOON", 0, 46);
+    context.restore();
+  }
+
+  function drawParticles() {
+    particles.forEach((particle) => {
+      context.globalAlpha = Math.max(0, particle.life);
+      context.fillStyle = particle.color;
+      context.fillRect(particle.x - 4, particle.y - 4, 8, 8);
+    });
+    context.globalAlpha = 1;
+  }
+
+  function draw() {
+    drawBackground();
+    drawFridge();
+    puddings.forEach(drawPudding);
+    drawSpoon();
+    drawPlayer();
+    drawParticles();
+  }
+
+  function frame(now) {
+    const delta = Math.min(0.035, (now - lastFrame) / 1000);
+    lastFrame = now;
+    update(delta, now);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  const keyMap = {
+    ArrowUp: "up",
+    w: "up",
+    W: "up",
+    ArrowDown: "down",
+    s: "down",
+    S: "down",
+    ArrowLeft: "left",
+    a: "left",
+    A: "left",
+    ArrowRight: "right",
+    d: "right",
+    D: "right"
+  };
+
+  window.addEventListener("keydown", (event) => {
+    const direction = keyMap[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    input[direction] = true;
+  });
+
+  window.addEventListener("keyup", (event) => {
+    const direction = keyMap[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    input[direction] = false;
+  });
+
+  window.addEventListener("blur", () => {
+    Object.keys(input).forEach((direction) => {
+      input[direction] = false;
+    });
+  });
+
+  directionButtons.forEach((button) => {
+    const direction = button.dataset.direction;
+    const release = () => {
+      input[direction] = false;
+      button.classList.remove("is-active");
+    };
+    button.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      input[direction] = true;
+      button.classList.add("is-active");
+      button.setPointerCapture(event.pointerId);
+    });
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", release);
+  });
+
+  startButton.addEventListener("click", startGame);
+
+  puddings = createPuddings();
+  requestAnimationFrame(frame);
+})();
+  })();
+} else {
+  const warning = document.createElement("main");
+  warning.textContent = "This experiment runs only inside the sandboxed FlowDeskStudio player.";
+  document.body.replaceChildren(warning);
+}</script>
+</body>
+</html>
