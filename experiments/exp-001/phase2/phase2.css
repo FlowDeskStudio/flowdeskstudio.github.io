@@ -1,0 +1,140 @@
+.scoreboard-phase2 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.run-info {
+  display: grid;
+  grid-template-columns: 150px 150px minmax(0, 1fr);
+  border-top: 2px solid var(--ink);
+  background: var(--blue);
+}
+
+.run-info p {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 18px;
+}
+
+.run-info p + p {
+  border-left: 2px solid var(--ink);
+}
+
+.run-info span {
+  display: block;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.run-info strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls-row {
+  border-top: 0;
+}
+
+.upgrade-panel {
+  width: min(820px, 100%);
+  background: var(--white);
+  box-shadow: 10px 10px 0 var(--blue);
+}
+
+.upgrade-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.skill-card {
+  min-height: 178px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.skill-card:nth-child(2) {
+  background: var(--acid);
+}
+
+.skill-card:nth-child(3) {
+  background: var(--coral);
+}
+
+.skill-card:hover,
+.skill-card:focus-visible {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.skill-code {
+  margin-bottom: auto;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.skill-name {
+  display: block;
+  margin: 18px 0 6px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.skill-description {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+  .scoreboard-phase2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .scoreboard-phase2 p:nth-child(3) {
+    border-top: 2px solid var(--ink);
+    border-left: 0;
+  }
+
+  .scoreboard-phase2 p:nth-child(4) {
+    border-top: 2px solid var(--ink);
+  }
+
+  .run-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .run-info .skills-line {
+    grid-column: 1 / -1;
+    border-top: 2px solid var(--ink);
+    border-left: 0;
+  }
+
+  .upgrade-choices {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .skill-card {
+    min-height: 94px;
+    padding: 12px;
+  }
+
+  .skill-name {
+    margin: 8px 0 2px;
+  }
+}

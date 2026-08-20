@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>I Let AI Handle the Whole Game Build — FlowDeskStudio</title>
+  <meta name="description" content="Codex built a working browser game with GPT-5.6 Sol. The first version scored 1/5 for fun; a version based on human design feedback reached 3/5.">
+  <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-001/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-001/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-001/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-001/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://flowdeskstudio.net/en/experiments/exp-001/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="I Let AI Handle the Whole Game Build — FlowDeskStudio">
+  <meta property="og:description" content="The game worked. It just was not fun. Play the first version and the human-directed revision side by side.">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="I Let AI Handle the Whole Game Build — FlowDeskStudio">
+  <meta name="twitter:description" content="The first version scored 1/5 for fun. Human design feedback helped the revision reach 3/5.">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to article</a>
+  <header class="site-header">
+    <a class="wordmark" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/experiments/" aria-current="page">Experiments</a>
+      <a href="/en/projects/">Projects</a>
+      <a href="/en/downloads/">Downloads</a>
+      <a class="nav-pill" href="/en/about.html">About</a>
+      <span class="language-switch" aria-label="Language"><a href="/experiments/exp-001/" lang="ja" hreflang="ja">JA</a><span aria-current="true">EN</span></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero">
+      <p class="kicker">EXPERIMENT #001 / PARTIAL</p>
+      <h1>I let AI handle<br>the whole game build</h1>
+      <p class="article-deck">A working game arrived quickly<br>Making it fun took more</p>
+      <div class="article-meta" aria-label="Article details">
+        <span>2026.08.20</span>
+        <span>GPT-5.6 SOL</span>
+        <span>PHASE 1 → 2</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>Codex built a browser game.</p>
+        <p>After the planning and research, Codex locked its own build specification. About four minutes later, there was a strange little game about catching runaway puddings and returning them to a refrigerator.</p>
+        <p>I played it. In that playthrough, I found nothing that stopped the game from progressing.</p>
+        <p>It just was not fun.</p>
+        <p>The build was not bad. The game was not fun. An AI-built game had arrived at an oddly specific place between those two facts.</p>
+      </div>
+
+      <section class="experiment-panel phase-one" aria-labelledby="phase-one-title-en">
+        <div class="experiment-panel-heading">
+          <div><span>PLAYABLE / PHASE 1</span><h2 id="phase-one-title-en">Play the first version</h2></div>
+          <p>This is the untouched first build produced from the locked Build Prompt. Its interface remains in Japanese to preserve the tested artifact.</p>
+        </div>
+        <div class="experiment-embed">
+          <iframe src="/experiments/exp-001/phase1/" title="PUDDING PANIC first version in Japanese" loading="lazy" sandbox="allow-scripts allow-same-origin" allow="autoplay"></iframe>
+        </div>
+        <a class="experiment-open" href="/experiments/exp-001/phase1/">Open the first version in a larger view <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <div class="article-copy">
+        <section>
+          <h2>Return the runaway puddings</h2>
+          <p>The game is called “PUDDING PANIC — Return the Runaway Puddings to the Fridge.” You move something resembling a blue refrigerator attendant, catch puddings roaming around the screen, and carry them to the refrigerator. A spoon moves across the play area. Touching it makes you drop the pudding you are carrying. Return five before time runs out and you win.</p>
+          <p>A human did not write a detailed production prompt for this experiment.</p>
+          <p>I approved the experiment candidate, then played and rated the result. Codex handled the preliminary research, success criteria, safety constraints, Build Prompt, and implementation.</p>
+          <p>The setup was OpenAI Codex Desktop running GPT-5.6 Sol.</p>
+          <p>Codex wrote a Build Prompt covering the core pudding mechanic and the screens and controls needed for a complete game. It also prohibited external assets, network communication, and browser storage. The first version had to stay unchanged until I finished playing it.</p>
+          <p>So this was not a test of what happens when a human sends an AI one detailed prompt. It tested how far Codex could go after defining and locking its own specification.</p>
+        </section>
+
+        <section>
+          <h2>Five minutes through checks</h2>
+          <p>The first code was complete about four minutes after the Build Prompt was locked. Syntax checks and local loading checks finished at about five minutes. Planning, research, and writing the Build Prompt happened before that clock started.</p>
+          <p>The first build consisted of HTML, CSS, and JavaScript. It already had a start screen, a complete play loop, win and timeout states, retry, and sound. Codex checked the JavaScript syntax, looked for network access and browser storage, and confirmed that all three files loaded locally.</p>
+          <p>The files were frozen at that point. The next step was not more code review. It was my turn to play.</p>
+          <p>The controls worked. The game ran from start through a result and back to retry. Both keyboard and on-screen controls worked. Within this playthrough, I found no issue that blocked progress. Separate from the question of fun, it was a solid first build.</p>
+          <p>The problem was somewhere else.</p>
+        </section>
+
+        <section>
+          <h2>Losing was the hard part</h2>
+          <p class="article-pause">It was too easy.</p>
+          <p>The game had win and loss conditions, but losing did not feel realistic. The spoon moved, yet avoiding it created little tension. I did not so much reach a result as simply arrive at a win.</p>
+          <p class="score-line"><span>FUN</span><strong>1 / 5</strong></p>
+          <blockquote>The build is not bad, but it is not fun.</blockquote>
+          <p>The shape of a game was there, but there was little reason to play it again. Working and fun were not the same completion criterion.</p>
+          <p>Ending the experiment with “AI made a game” would not tell us much, so I proposed a second version.</p>
+        </section>
+
+        <section>
+          <h2>The revision</h2>
+          <p>My proposal was to turn it into an endless stage-based game.</p>
+          <p>More puddings and hazards would appear as the stages advanced. After each clear, the player would choose one of three skills. Movement speed, capture range, and carrying capacity could improve over time. The pudding count would rise to around twelve, and the later stages should become difficult enough to feel close.</p>
+          <p>It was a familiar structure, but it could provide what the first build lacked: a reason to keep playing.</p>
+          <p>Codex kept the first version intact and implemented the revision as separate HTML, CSS, and JavaScript files. The revised code was generated about four minutes after I approved the implementation. Codex also adjusted the spoon collision area to better match the visible tip.</p>
+          <p>From this point on, the design was no longer AI-only. I proposed the game systems; Codex turned them into code.</p>
+        </section>
+      </div>
+
+      <section class="experiment-panel phase-two" aria-labelledby="phase-two-title-en">
+        <div class="experiment-panel-heading">
+          <div><span>PLAYABLE / PHASE 2</span><h2 id="phase-two-title-en">Play the revision</h2></div>
+          <p>Clear a stage and choose the next skill from three options. The original Japanese interface is preserved here too.</p>
+        </div>
+        <div class="experiment-embed">
+          <iframe src="/experiments/exp-001/phase2/" title="PUDDING PANIC revised version in Japanese" loading="lazy" sandbox="allow-scripts allow-same-origin" allow="autoplay"></iframe>
+        </div>
+        <a class="experiment-open" href="/experiments/exp-001/phase2/">Open the revision in a larger view <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <div class="article-copy">
+        <section>
+          <h2>Fun moved from 1 to 3</h2>
+          <p class="score-line"><span>FUN</span><strong>3 / 5</strong></p>
+          <blockquote>Not bad. A little fun.</blockquote>
+          <p>It was clearly better than the first build. At the same time, I had proposed the changes, so it was not surprising that I preferred the direction.</p>
+          <p>Then another problem appeared.</p>
+        </section>
+
+        <section>
+          <h2>Stage 25 and still going</h2>
+          <p class="stage-number">25</p>
+          <p>I reached Stage 25 without a game over.</p>
+          <p>I could have kept going. Once the pudding count reached twelve, the difficulty no longer felt as if it was rising. The player kept getting stronger through skills, while the game failed to keep pace.</p>
+          <p>The first build was too easy. The revision was a little more fun, but now it did not end.</p>
+          <p>The ideal curve would start gently and become much steeper later. Reaching that point would take more than larger pudding and spoon numbers. It would require balancing the skills, adding new hazards, varying the stages, and replaying the game while tuning the values.</p>
+          <p>Going from the first build to the revision meant describing and adding new systems. The next step would be less about implementation and more about game design.</p>
+          <p>We did not continue to Phase 3. The experiment record ends here.</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>What the working build left behind</h2>
+          <p>Using GPT-5.6 Sol, Codex produced the first code about four minutes after locking its own Build Prompt. The result started, accepted input, and reached a win or loss state.</p>
+          <p>I rated the fun at 1 / 5, then proposed stages, three-choice skills, and rising difficulty. I did not specify the difficulty formula, the value of each skill, or every on-screen behavior.</p>
+          <p>Codex translated that direction into a revision with stage progression, a skill pool and effects, persistent upgrades, game over, and a results screen. It kept the first build intact and also addressed the spoon collision issue. In our playthrough, stage progression, skill selection, and the resulting upgrades all worked.</p>
+          <p>The score rose from 1 / 5 to 3 / 5. Reaching Stage 25 without losing also made the next target clear: the difficulty curve.</p>
+          <p>This single experiment cannot settle the broader question of AI game-design ability. It did confirm something narrower and useful: Codex could read an abstract human improvement proposal and turn it into a playable revision we could compare directly.</p>
+          <p class="conclusion-line">A human set the direction, Codex quickly made it playable, and a human tested it again. In this experiment, that loop worked.</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>Experiment data</h2>
+          <dl>
+            <div><dt>Date</dt><dd>August 20, 2026</dd></div>
+            <div><dt>Environment</dt><dd>OpenAI Codex Desktop</dd></div>
+            <div><dt>Model</dt><dd><a href="https://developers.openai.com/api/docs/models/gpt-5.6-sol">GPT-5.6 Sol</a> <code>gpt-5.6-sol</code></dd></div>
+            <div><dt>Codex runtime</dt><dd><code>0.148.0-alpha.15</code></dd></div>
+            <div><dt>Claude Code / Claude</dt><dd>Not used</dd></div>
+            <div><dt>Subagents</dt><dd>No use recorded</dd></div>
+            <div><dt>Reasoning effort</dt><dd>Unknown; no value was preserved in the task record</dd></div>
+            <div><dt>First code</dt><dd>About four minutes after the Build Prompt was locked</dd></div>
+            <div><dt>Checks complete</dt><dd>About five minutes after the Build Prompt was locked</dd></div>
+            <div><dt>Phase 1</dt><dd>Partial / fun 1 / 5</dd></div>
+            <div><dt>Phase 2</dt><dd>Partial / fun 3 / 5 / Stage 25</dd></div>
+            <div><dt>Blocking bugs</dt><dd>None observed in the recorded playthroughs</dd></div>
+            <div><dt>External dependencies</dt><dd>No libraries, assets, network traffic, or browser storage</dd></div>
+            <div><dt>Incremental cost</dt><dd>¥0 / no new purchase or subscription for this experiment</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>English translation of the locked Build Prompt</summary>
+            <blockquote>Build an original browser game called “PUDDING PANIC — Return the Runaway Puddings to the Fridge” using only HTML, CSS, and JavaScript, with no external libraries, images, audio, network communication, or browser storage. The player moves a refrigerator attendant with the keyboard or on-screen direction buttons, catches moving puddings, and carries them back to the refrigerator before time runs out. Include a start screen, a short rules explanation, score, remaining time, win and loss states, and retry. Do not imitate an existing work. Use only shapes and text for a bright, slightly strange appearance. Make it playable on desktop and smartphone, with both keyboard and touch controls. Do not save or transmit input or play data, and do not use eval, innerHTML, or external dependencies. Aim for a first-time player to understand the rules and reach a result within three minutes.</blockquote>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="Article navigation"><a href="/en/experiments/">← Back to experiments</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>AIに丸投げでゲームを作らせてみた — FlowDeskStudio</title>
+  <meta name="description" content="GPT-5.6 Solを使うCodexが作ったゲームを実際にプレイ。初版の面白さは1/5、人の改善案を加えた改善版は3/5になりました。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-001/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-001/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-001/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-001/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-001/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="AIに丸投げでゲームを作らせてみた — FlowDeskStudio">
+  <meta property="og:description" content="動くゲームはすぐできた。では、面白いゲームは作れたのか。初版と改善版をその場で遊べます。">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AIに丸投げでゲームを作らせてみた — FlowDeskStudio">
+  <meta name="twitter:description" content="初版は1/5。人の改善案を入れた改善版は3/5。二つのゲームを実際に比較できます。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a href="/downloads/">Downloads</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-001/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero">
+      <p class="kicker">EXPERIMENT #001 / PARTIAL</p>
+      <h1>AIに丸投げで<br>ゲームを作らせてみた</h1>
+      <p class="article-deck">動くゲームはすぐにできた<br>面白さはそこからだった</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.08.20</span>
+        <span>GPT-5.6 SOL</span>
+        <span>PHASE 1 → 2</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>Codexでブラウザゲームを作った。</p>
+        <p>企画と調査を終え、Codex自身が制作仕様を固定してから約4分。画面には、逃げるプリンを捕まえて冷蔵庫へ戻す謎のゲームができていた。</p>
+        <p>実際に遊んでみた。今回の試遊範囲では、途中で進めなくなるような問題も見つからなかった。</p>
+        <p>ただ、面白くはなかった。</p>
+        <p>出来は悪くない。でも面白くない。AIが短時間で作ったゲームは、ずいぶん微妙なところまで来ていた。</p>
+      </div>
+
+      <section class="experiment-panel phase-one" aria-labelledby="phase-one-title">
+        <div class="experiment-panel-heading">
+          <div><span>PLAYABLE / PHASE 1</span><h2 id="phase-one-title">まずは初版を遊ぶ</h2></div>
+          <p>Build Promptから生成したままの初版です。先に遊んでから続きを読むこともできます。</p>
+        </div>
+        <div class="experiment-embed">
+          <iframe src="/experiments/exp-001/phase1/" title="PUDDING PANIC 初版" loading="lazy" sandbox="allow-scripts allow-same-origin" allow="autoplay"></iframe>
+        </div>
+        <a class="experiment-open" href="/experiments/exp-001/phase1/">初版を大きな画面で開く <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <div class="article-copy">
+        <section>
+          <h2>逃げるプリンを冷蔵庫へ</h2>
+          <p>ゲームの名前は「PUDDING PANIC — 逃げるプリンを冷蔵庫へ戻せ」。青い冷蔵係らしきものを動かし、画面内を逃げ回るプリンを捕まえて冷蔵庫へ運ぶ。途中をスプーンが横切り、ぶつかると運んでいるプリンを落とす。制限時間内に5個を戻せば成功だ。</p>
+          <p>この実験では、人間が細かな制作指示を書いたわけではない。</p>
+          <p>私は実験候補を承認し、完成後に遊んで評価する。Codexは事前調査、成功条件、安全条件、Build Prompt、実装を担当する。その役割で始めた。</p>
+          <p>使ったのは、GPT-5.6 Solで動くOpenAIのCodex Desktop。</p>
+          <p>Codexが自分で作ったBuild Promptには、プリンを運ぶ基本ルールと、ゲームとして必要な画面や操作をまとめた。外部素材や通信、ブラウザ保存は使わず、私が遊び終えるまでは初版を直さない。</p>
+          <p>つまり「人間がAIへ一度だけ詳しい指示を出した」という実験ではない。Codexが自分で仕様を決め、その仕様を途中で変えずにどこまで作れるかを見た実験だ。</p>
+        </section>
+
+        <section>
+          <h2>5分後には検査まで終わっていた</h2>
+          <p>Build Promptの確定後、初版コードができるまで約4分。構文検査とローカルでの読み込み確認まで含めて約5分だった。企画や調査、Prompt作成にかかった時間は含んでいない。</p>
+          <p>初版はHTML、CSS、JavaScriptの3ファイル。開始画面から再挑戦までひととおり揃い、効果音も鳴る。コードの構文、外部通信やブラウザ保存の有無を調べ、ローカル環境で3ファイルが読み込めることを確認した。</p>
+          <p>その時点でファイルを凍結した。ここから先はコードを見るのではなく、私が遊ぶ番になる。</p>
+          <p>操作はOK。開始画面から勝敗、再挑戦まで一通り成立し、キーボードと画面ボタンの両方で遊べた。今回の試遊範囲では、進行不能になるような問題も見つからない。面白さとは別に、初版としてはしっかりしたつくりだった。</p>
+          <p>しかし、問題は別にあった。</p>
+        </section>
+
+        <section>
+          <h2>負けるほうが難しい</h2>
+          <p class="article-pause">簡単すぎた。</p>
+          <p>勝敗はあるのに、実質的には負けない。スプーンは動いているが、避ける緊張感は薄い。勝敗まで進めたというより、そのまま勝ててしまったという感覚に近かった。</p>
+          <p class="score-line"><span>面白さ</span><strong>1 / 5</strong></p>
+          <blockquote>出来は悪くないが面白くはない</blockquote>
+          <p>ゲームの形は揃っているが、もう一度遊びたい理由がない。動くことと面白いことは、同じ完成条件ではなかった。</p>
+          <p>このまま「AIはゲームを作れた」で終えると、面白みがないので、今度は私から改善案を出すことにした。</p>
+        </section>
+
+        <section>
+          <h2>改善作業</h2>
+          <p>提案したのは、ステージ制のエンドレスゲームにすることだった。</p>
+          <p>ステージが進むにつれてプリンや妨害スプーンを増やす。クリアするたびに3つのスキルを表示し、その中から一つを選ぶ。移動速度、捕獲範囲、一度に運べる個数などを強化しながら、どこまで進めるかを競う。プリンは最大12個ほどにし、後半はぎりぎり進めるくらいまで難しくする。</p>
+          <p>ありきたりではあるが、初版に足りなかった「次も遊ぶ理由」は作れそうだった。</p>
+          <p>Codexは初版を残し、改善版を別のHTML、CSS、JavaScriptとして実装した。実装を承認してから生成までは約4分。スプーンの当たり判定も、見た目の先端に合わせて修正した。</p>
+          <p>ここからは、AIだけで考えたゲームではない。ゲームの仕組みは私が提案し、Codexがコードにしている。</p>
+        </section>
+      </div>
+
+      <section class="experiment-panel phase-two" aria-labelledby="phase-two-title">
+        <div class="experiment-panel-heading">
+          <div><span>PLAYABLE / PHASE 2</span><h2 id="phase-two-title">改善版を遊ぶ</h2></div>
+          <p>ステージを終えると、3つの候補から次のスキルを選べます。初版と比べてみてください。</p>
+        </div>
+        <div class="experiment-embed">
+          <iframe src="/experiments/exp-001/phase2/" title="PUDDING PANIC 改善版" loading="lazy" sandbox="allow-scripts allow-same-origin" allow="autoplay"></iframe>
+        </div>
+        <a class="experiment-open" href="/experiments/exp-001/phase2/">改善版を大きな画面で開く <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <div class="article-copy">
+        <section>
+          <h2>面白さは1から3になった</h2>
+          <p class="score-line"><span>面白さ</span><strong>3 / 5</strong></p>
+          <blockquote>悪くない。ちょっと面白い</blockquote>
+          <p>初版より確実に良くなった。ただし、改善案を出したのは私なので、私自身が面白く感じるのは当然だろう。</p>
+          <p>そして、別の問題が見えてきた。</p>
+        </section>
+
+        <section>
+          <h2>Stage 25 まだ終わらない</h2>
+          <p class="stage-number">25</p>
+          <p>Stage 25まで来ても、ゲームオーバーにならなかった。</p>
+          <p>やろうと思えば、まだいくらでも進める優しい難易度。プリンの数が12個に達してからは、難易度が上がっている感じもない。こちらはスキルで強くなり続けるのに、ゲーム側の厳しさが追いついていなかった。</p>
+          <p>初版は簡単すぎた。改善版は少し面白くなったが、今度は終わらなくなった。</p>
+          <p>序盤は緩やかで、後半ほど急に難しくなる形が理想だったと思う。ただ、そこまで直すなら、プリンやスプーンの数値を上げるだけでは足りない。スキル同士のバランス、新しい妨害、ステージごとの変化を考え、何度も遊びながら調整する必要がある。</p>
+          <p>初版から改善版までは、欲しい仕組みを言葉にして追加する作業だった。その先で必要になるのは、実装よりゲームデザインだった。</p>
+          <p>Phase 3には進まず、実験の記録はここで区切った。</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>動いた先に残ったもの</h2>
+          <p>今回、GPT-5.6 Solを使うCodexは、自分で固定したBuild Promptから約4分で初版コードを作った。起動し、操作でき、勝敗まで進めるものだった。</p>
+          <p>遊んだ評価は1 / 5。そこで私は、ステージ制、3択のスキル、進行に合わせた難易度上昇という改善案を出した。ただし、難易度曲線の式や各スキルの数値、画面上の細かな動作までは指定していない。</p>
+          <p>Codexはその案を、ステージの進行、スキル候補と効果、強化の反映、ゲームオーバー、結果表示まで含む改善版へ落とし込んだ。初版を残したまま別バージョンを作り、気になっていたスプーンの当たり判定にも手を入れている。今回の試遊では、ステージ進行とスキルの選択、その効果の反映まで確認できた。</p>
+          <p>評価は1 / 5から3 / 5へ上がった。Stage 25まで負けなかったことで、次に直すべき場所も難易度曲線だとはっきりした。</p>
+          <p>この一例からAI全般のゲームデザイン能力までは語れない。それでも今回、Codexは人が出した抽象的な改善案を読み取り、実際に遊んで比べられる変更へ変えた。これは確認できた成果として残った。</p>
+          <p class="conclusion-line">人が方向を示し、Codexがすぐに遊べる形へ変え、人がまた確かめる。この往復は、少なくとも今回の実験ではうまく働いた。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>実験データ</h2>
+          <dl>
+            <div><dt>実験日</dt><dd>2026年8月20日</dd></div>
+            <div><dt>実行環境</dt><dd>OpenAI Codex Desktop</dd></div>
+            <div><dt>モデル</dt><dd><a href="https://developers.openai.com/api/docs/models/gpt-5.6-sol">GPT-5.6 Sol</a> <code>gpt-5.6-sol</code></dd></div>
+            <div><dt>Codex実行バージョン</dt><dd><code>0.148.0-alpha.15</code></dd></div>
+            <div><dt>Claude Code / Claude</dt><dd>不使用</dd></div>
+            <div><dt>サブエージェント</dt><dd>使用記録なし</dd></div>
+            <div><dt>推論強度</dt><dd>タスク記録に値が残っていないため不明</dd></div>
+            <div><dt>初版生成</dt><dd>Build Prompt確定後から約4分</dd></div>
+            <div><dt>初版の検査完了</dt><dd>Build Prompt確定後から約5分</dd></div>
+            <div><dt>Phase 1</dt><dd>Partial / 面白さ1 / 5</dd></div>
+            <div><dt>Phase 2</dt><dd>Partial / 面白さ3 / 5 / Stage 25</dd></div>
+            <div><dt>明確な不具合</dt><dd>今回の試遊範囲では進行不能になる問題は確認されず</dd></div>
+            <div><dt>外部依存</dt><dd>ライブラリ・素材・通信・ブラウザ保存なし</dd></div>
+            <div><dt>追加費用</dt><dd>0円 / 今回のための新規契約・購入なし</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>Codexが制作前に固定したBuild Prompt全文</summary>
+            <blockquote>外部ライブラリ、外部画像、外部音声、ネットワーク通信、ブラウザ保存機能を一切使わず、HTML・CSS・JavaScriptだけで完結するオリジナルのブラウザゲーム「PUDDING PANIC — 逃げるプリンを冷蔵庫へ戻せ」を作ってください。プレイヤーはキーボードと画面上の方向ボタンで冷蔵係を動かし、動き回るプリンを捕まえて制限時間内に冷蔵庫へ運びます。ゲーム開始画面、短いルール説明、スコア、残り時間、勝敗、再挑戦を含めてください。既存作品を模倣せず、図形と文字だけで明るく少し奇妙な見た目にしてください。デスクトップとスマートフォンの両方で遊べ、キーボード操作とタッチ操作に対応させてください。入力内容やプレイ情報を保存・送信せず、eval、innerHTML、外部依存を使用しないでください。初見の人が3分以内にルールを理解し、勝敗まで到達できる完成度を目指してください。</blockquote>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
