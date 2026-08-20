@@ -9,7 +9,13 @@
   --muted: #67685f;
   --line: rgba(18, 19, 15, 0.2);
   --max: 1180px;
+  --font-display: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  --font-body: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
   color-scheme: light;
+}
+
+html[lang="ja"] {
+  --font-body: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
 }
 
 * {
@@ -24,9 +30,20 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-  line-height: 1.7;
+  font-family: var(--font-body);
+  line-height: 1.75;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+html[lang="ja"] body {
+  line-height: 1.85;
+}
+
+html[lang="ja"] p,
+html[lang="ja"] li {
+  letter-spacing: 0.018em;
 }
 
 a {
@@ -71,6 +88,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 11px;
+  font-family: var(--font-display);
   font-size: 1.12rem;
   font-weight: 900;
   letter-spacing: -0.055em;
@@ -102,6 +120,7 @@ a {
   display: flex;
   align-items: center;
   gap: 28px;
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -220,6 +239,12 @@ a {
 
 h1,
 h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+h1,
+h2,
 h3,
 p {
   overflow-wrap: anywhere;
@@ -278,6 +303,7 @@ h1 em::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-display);
   min-height: 50px;
   padding: 13px 20px;
   border: 1px solid var(--ink);
@@ -444,6 +470,7 @@ h1 em::after {
   background: var(--ink);
   color: var(--white);
   font: inherit;
+  font-family: var(--font-display);
   font-size: 0.92rem;
   font-weight: 900;
   cursor: pointer;
@@ -882,11 +909,10 @@ h1 em::after {
 .policy-list { margin: 46px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
 .policy-list li { display: grid; grid-template-columns: 54px 1fr; gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--ink); }
 .policy-list span { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 0.72rem; font-weight: 900; }
-.empty-stage { margin-top: 46px; min-height: 380px; padding: 46px; display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 40px; align-items: center; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
+.empty-stage { margin-top: 46px; min-height: 340px; padding: 46px; display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
 .empty-stage .status-chip { margin-bottom: 24px; color: var(--ink); }
 .empty-stage h2 { margin-bottom: 20px; }
 .empty-stage p { max-width: 670px; color: #b9b8ae; }
-.empty-symbol { width: 150px; height: 150px; display: grid; place-items: center; border-radius: 50%; background: var(--acid); color: var(--ink); font-size: 5rem; font-weight: 300; }
 .route-card { display: flex; min-height: 250px; flex-direction: column; }
 .route-card .card-index { margin-bottom: auto; }
 .route-card a { margin-top: 28px; font-weight: 850; text-underline-offset: 5px; }
@@ -901,8 +927,7 @@ h1 em::after {
 @media (max-width: 680px) {
   .page-hero, .page-section { padding-left: 20px; padding-right: 20px; }
   .manifesto-grid, .role-grid, .route-grid, .status-grid { grid-template-columns: 1fr; }
-  .empty-stage { grid-template-columns: 1fr; padding: 30px 22px; }
-  .empty-symbol { width: 92px; height: 92px; font-size: 3.2rem; }
+  .empty-stage { padding: 30px 22px; }
   .not-found { padding: 52px 20px; }
   .not-found-card { padding: 34px 24px; box-shadow: 7px 7px 0 var(--ink); }
 }

@@ -4,19 +4,19 @@
   const messages = {
     ja: [
       "寄り道からヒントが見つかる日",
-      "最初に浮かんだ案を小さく試す日",
+      "最初の案を小さく試してみる日",
       "いつも選ばない方を選んでみる日",
-      "誰かに話すと面白さが増える日",
-      "身近な違和感をひとつ追いかける日",
-      "後回しにした小さなことを片づける日"
+      "誰かとの会話から視点が増える日",
+      "身近な違和感をひとつ観察する日",
+      "後回しにした小さなことを終える日"
     ],
     en: [
-      "A detour may contain today's best clue",
-      "Try the first idea in the smallest possible way",
-      "Choose the option you usually skip",
-      "Tell someone about an idea and see what changes",
-      "Follow one small thing that feels out of place",
-      "Finish one tiny thing you have been postponing"
+      "A detour may hold today's best clue",
+      "Try the first idea on a small scale",
+      "Choose the option you usually pass over",
+      "A conversation may add a new angle",
+      "Notice one small thing that feels out of place",
+      "Finish one small thing you have postponed"
     ]
   };
 

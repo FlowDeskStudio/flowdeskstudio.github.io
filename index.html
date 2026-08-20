@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>FlowDeskStudio — 面白そう。じゃあ、試してみよう。</title>
-  <meta name="description" content="AI、ソフトウェア、オンライン実験、ちょっと変なアイデアを実際に試し、成功も失敗もそのまま記録する個人実験メディア。">
+  <title>FlowDeskStudio — 好奇心からはじまる実験</title>
+  <meta name="description" content="AI、ソフトウェア、オンラインで見つけた話やアイデアを実際に試し、その過程と結果を記録する個人実験メディア。">
   <link rel="canonical" href="https://flowdeskstudio.net/">
   <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/">
   <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/">
@@ -14,12 +14,12 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://flowdeskstudio.net/">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="FlowDeskStudio — 面白そう。じゃあ、試してみよう。">
-  <meta property="og:description" content="AI、software、online experiments、weird ideas。実際に試して、起きたことを正直に記録します。">
+  <meta property="og:title" content="FlowDeskStudio — 好奇心からはじまる実験">
+  <meta property="og:description" content="AI、ソフトウェア、オンラインで見つけた話やアイデアを実際に試し、その過程と結果を記録します。">
   <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="FlowDeskStudio — 面白そう。じゃあ、試してみよう。">
-  <meta name="twitter:description" content="AI、software、online experiments、weird ideas。実際に試して、起きたことを正直に記録します。">
+  <meta name="twitter:title" content="FlowDeskStudio — 好奇心からはじまる実験">
+  <meta name="twitter:description" content="AI、ソフトウェア、オンラインで見つけた話やアイデアを実際に試し、その過程と結果を記録します。">
   <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
   <link rel="stylesheet" href="/assets/site.css">
   <script src="/assets/lucky.js" defer></script>
@@ -44,9 +44,9 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Independent experiment log</p>
-        <h1 id="hero-title">面白そう<br><em>試してみよう</em></h1>
-        <p class="hero-lede">AI、ソフトウェア、Webサービス、ゲーム開発、自動化、オンラインビジネス。ネットで見かけた話や、ふと思いついた変なアイデアを、実際に試して記録する場所です。</p>
-        <p class="english-line">AI, software, online experiments, and weird ideas.</p>
+        <h1 id="hero-title">好奇心から<br><em>はじまる実験</em></h1>
+        <p class="hero-lede">AI、ソフトウェア、Webサービス、ゲーム開発、自動化、オンラインビジネス。ネットで見つけた話や新しいアイデアを実際に試し、どうなったかを条件や過程とともに記録します。</p>
+        <p class="english-line">Ideas found online, tested in the real world.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#field-notes">実験ログを見る <span aria-hidden="true">↘</span></a>
           <a class="button button-quiet" href="/about.html">この場所について</a>
@@ -60,8 +60,8 @@
         </div>
         <div class="lab-screen">
           <p class="terminal-line"><span>01</span> 最初の実験テーマを準備中</p>
-          <p class="terminal-line muted"><span>02</span> 公開中の検証済み記録：まだなし</p>
-          <p class="terminal-line muted"><span>03</span> 確認できた結果から順に追加</p>
+          <p class="terminal-line muted"><span>02</span> 公開済みの検証記録：0件</p>
+          <p class="terminal-line muted"><span>03</span> 確認できたものから順次公開</p>
         </div>
         <div class="lab-rule">
           <span class="lab-rule-label">ONE RULE</span>
@@ -76,15 +76,15 @@
 
     <section class="lucky-draw" aria-labelledby="lucky-title" data-lucky-draw data-locale="ja">
       <div class="lucky-copy">
-        <p class="kicker">LUCKY DRAW / 今日の運試し</p>
+        <p class="kicker">DAILY DRAW / 今日のラッキーナンバー</p>
         <h2 id="lucky-title">今日のラッキーナンバー</h2>
-        <p>1から99までの数字と、今日を少し面白くするひとことが出ます。占いというより、気分転換の小さなくじです。</p>
-        <button class="draw-button" type="button" data-draw-button>くじを引く</button>
+        <p>1から99までの数字と、今日のテーマをひとつ。気分転換にどうぞ。</p>
+        <button class="draw-button" type="button" data-draw-button>ラッキーナンバーを引く</button>
       </div>
       <div class="lucky-result" aria-live="polite" aria-atomic="true">
         <span>YOUR NUMBER</span>
         <strong data-lucky-number>--</strong>
-        <p data-lucky-message>ボタンを押すまで秘密です</p>
+        <p data-lucky-message>どの数字が出るでしょう</p>
       </div>
     </section>
 
@@ -94,15 +94,15 @@
           <p class="kicker">FIELD NOTES / 実験ログ</p>
           <h2 id="experiments-title">最初の記録を準備中</h2>
         </div>
-        <p>ここでは、実際に試して確認できた結果だけを読めます。最初の記録は、検証が終わりしだい公開します。</p>
+        <p>実際に試し、条件と結果を確かめた記録を掲載します。最初の記録は、確認が終わりしだい公開します。</p>
       </div>
 
       <article class="empty-log">
         <div class="log-index">EXP<br><strong>#001</strong></div>
         <div class="log-content">
           <span class="status-chip status-planned">PLANNED</span>
-          <h3>Experiment #001 は準備中</h3>
-          <p>最初の記録では、結果だけでなく、かかった時間や費用、うまくいかなかった点まで読める形で残します。</p>
+          <h3>Experiment #001 を準備中</h3>
+          <p>結果だけでなく、試した条件、かかった時間や費用、途中で起きた問題まで整理して掲載します。</p>
         </div>
         <div class="log-mark" aria-hidden="true">?</div>
       </article>
@@ -112,25 +112,25 @@
       <div class="section-heading compact">
         <div>
           <p class="kicker">HOW IT WORKS / 実験方法</p>
-          <h2 id="method-title">教える前に試す</h2>
+          <h2 id="method-title">実験の進め方</h2>
         </div>
       </div>
 
       <div class="steps">
         <article class="step-card">
           <span class="step-number">01</span>
-          <h3>気になることを選ぶ</h3>
-          <p>テーマは純粋な好奇心から選びます。危険、高額、規約違反につながるものは扱いません。</p>
+          <h3>テーマ選び</h3>
+          <p>気になるテーマの中から、費用、安全性、規約、確かめ方を考えて取り組むものを選びます。</p>
         </article>
         <article class="step-card accent-blue">
           <span class="step-number">02</span>
-          <h3>実際にやって観察する</h3>
-          <p>AIと人間それぞれの作業、費用、時間、エラー、想定外の出来事を分けて記録します。</p>
+          <h3>実地テスト</h3>
+          <p>AIと人間それぞれの作業、費用、時間、エラー、思いがけない出来事を分けて記録します。</p>
         </article>
         <article class="step-card accent-coral">
           <span class="step-number">03</span>
-          <h3>結果をそのまま残す</h3>
-          <p>成功だけを選びません。失敗、部分成功、途中終了も、確認できた事実として公開候補にします。</p>
+          <h3>結果の整理</h3>
+          <p>成功だけでなく、部分成功、失敗、中止も、実際に確認できたことと一緒に残します。</p>
         </article>
       </div>
     </section>
@@ -139,11 +139,11 @@
       <div class="about-grid">
         <div>
           <p class="kicker">ABOUT THIS LAB</p>
-          <h2 id="about-title">AIで試す<br><span>人が確かめる</span></h2>
+          <h2 id="about-title">AIと人<br><span>それぞれの役割</span></h2>
         </div>
         <div class="about-copy">
-          <p>ここで読めるのは、AIが調査や制作を進め、人間が実際の画面や動作、結果を確かめた記録です。</p>
-          <p>成功例だけを並べず、失敗や途中終了も含めて、同じことを試したい人の判断材料になる形で残します。</p>
+          <p>AIを調査や制作に活用し、人が実際の画面、動作、結果を確かめた記録を掲載します。</p>
+          <p>成功だけを並べず、失敗や中止も含めて、同じことを試したい人の判断材料になる形で残します。</p>
         </div>
       </div>
     </section>
