@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">EXP-002 reconstructed observer view for Simulation Day 64</title>
+  <desc id="desc">A reconstructed diagram of six registers and the answers cycle based on the saved Day 64 post-wake snapshot. This is not a Canonical execution-time screenshot.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9EA6A0"/>
+    </marker>
+    <style>
+      .sans { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      .mono { font-family: "Cascadia Mono", Consolas, monospace; }
+      .label { fill: #A9B0AB; font-size: 18px; letter-spacing: 0.08em; }
+      .value { fill: #F2F0E8; font-size: 30px; font-weight: 700; }
+      .small { fill: #BFC5C0; font-size: 16px; }
+      .node-title { fill: #D7FF3F; font-size: 17px; font-weight: 700; }
+      .node-value { fill: #F2F0E8; font-size: 22px; }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="#10120F"/>
+  <rect x="36" y="30" width="1328" height="54" rx="27" fill="#D7FF3F"/>
+  <text x="700" y="65" text-anchor="middle" class="sans" fill="#10120F" font-size="18" font-weight="800" letter-spacing="0.06em">RECONSTRUCTED OBSERVER VIEW · NOT A CANONICAL SCREENSHOT</text>
+
+  <text x="70" y="145" class="sans" fill="#F2F0E8" font-size="42" font-weight="750">Reciprocal Index · Day 64</text>
+  <text x="70" y="183" class="sans small">First convergence_mark · event-00000001 · classified Major because it was the first occurrence</text>
+
+  <rect x="70" y="220" width="300" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="95" y="257" class="sans label">COHERENCE</text>
+  <text x="95" y="303" class="mono value">7530</text>
+  <rect x="390" y="220" width="300" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="415" y="257" class="sans label">DIVERGENCE</text>
+  <text x="415" y="303" class="mono value">2824</text>
+  <rect x="710" y="220" width="620" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="735" y="257" class="sans label">WHAT THIS MARK MEANS</text>
+  <text x="735" y="291" class="sans small">A scheduled observation at a multiple of 64</text>
+  <text x="735" y="314" class="sans small">It does not mean the values actually converged</text>
+
+  <g fill="none" stroke="#9EA6A0" stroke-width="3" marker-end="url(#arrow)" opacity="0.9">
+    <path d="M762 420 L858 455"/>
+    <path d="M920 550 L920 605"/>
+    <path d="M858 700 L762 740"/>
+    <path d="M638 740 L542 700"/>
+    <path d="M480 605 L480 550"/>
+    <path d="M542 455 L638 420"/>
+  </g>
+  <g class="mono small" fill="#A9B0AB">
+    <text x="810" y="425" text-anchor="middle">+1</text>
+    <text x="940" y="583">−1</text>
+    <text x="810" y="735" text-anchor="middle">+2</text>
+    <text x="590" y="735" text-anchor="middle">−2</text>
+    <text x="500" y="583">+3</text>
+    <text x="590" y="425" text-anchor="middle">−3</text>
+  </g>
+
+  <g class="sans">
+    <g transform="translate(700 395)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 1</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 1189</text>
+      <text y="43" text-anchor="middle" class="mono small">open 54</text>
+    </g>
+    <g transform="translate(920 480)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 2</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 530</text>
+      <text y="43" text-anchor="middle" class="mono small">open 40</text>
+    </g>
+    <g transform="translate(920 675)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 3</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 3178</text>
+      <text y="43" text-anchor="middle" class="mono small">open 60</text>
+    </g>
+    <g transform="translate(700 765)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 4</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 491</text>
+      <text y="43" text-anchor="middle" class="mono small">open 72</text>
+    </g>
+    <g transform="translate(480 675)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 5</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 3180</text>
+      <text y="43" text-anchor="middle" class="mono small">open 47</text>
+    </g>
+    <g transform="translate(480 480)">
+      <circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/>
+      <text y="-24" text-anchor="middle" class="node-title">REGISTER 6</text>
+      <text y="12" text-anchor="middle" class="mono node-value">tone 1896</text>
+      <text y="43" text-anchor="middle" class="mono small">open 90</text>
+    </g>
+  </g>
+
+  <rect x="1080" y="380" width="250" height="360" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="1105" y="420" class="sans label">SOURCE NOTE</text>
+  <text x="1105" y="458" class="sans small">Built locally from the</text>
+  <text x="1105" y="481" class="sans small">saved Day 64 post-wake</text>
+  <text x="1105" y="504" class="sans small">Snapshot and matching</text>
+  <text x="1105" y="527" class="sans small">God View packet.</text>
+  <text x="1105" y="575" class="sans label">RELATIONS</text>
+  <text x="1105" y="610" class="sans small">The ring is observer</text>
+  <text x="1105" y="633" class="sans small">notation, not physical</text>
+  <text x="1105" y="656" class="sans small">space. Current rules do</text>
+  <text x="1105" y="679" class="sans small">not read these arrows</text>
+  <text x="1105" y="702" class="sans small">or their bias values.</text>
+
+  <line x1="70" y1="840" x2="1330" y2="840" stroke="#343A34"/>
+  <text x="70" y="875" class="mono small">source snapshot: 0000000065-day-000064-7146da80f46a4fea.json · renderer: manual-svg-proof-v1</text>
+</svg>

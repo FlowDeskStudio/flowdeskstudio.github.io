@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; media-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'">
+  <meta name="referrer" content="no-referrer">
+  <title>World Observer — EXP-002 — FlowDeskStudio</title>
+  <meta name="description" content="EXP-002でAIが作った抽象世界を観測します。Day 1000以降の状態はAIを呼ばず、固定された世界状態・法則・seedだけから計算します。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-002/observer/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-002/observer/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-002/observer/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-002/observer/">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/experiments/exp-002/observer/observer.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#observer">観測画面へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション"><a href="/experiments/" aria-current="page">Experiments</a><a href="/projects/">Projects</a><a href="/downloads/">Downloads</a><a class="nav-pill" href="/about.html">About</a><span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-002/observer/" lang="en" hreflang="en">EN</a></span></nav>
+  </header>
+  <main id="observer" class="observer-main">
+    <header class="observer-hero">
+      <p class="kicker">EXP-002 / WORLD OBSERVER</p>
+      <h1>神のいない<br>その後を見る</h1>
+      <p>Day 1000でAI Godの確認は終了しました。ここではAIを呼ばず、保存されたDay 1000の状態と世界法則、seedだけから先の状態を計算します。</p>
+    </header>
+
+    <section class="observer-controls" aria-labelledby="observer-control-title">
+      <div><p class="kicker">CHOOSE A DAY</p><h2 id="observer-control-title">観測するDay</h2><p>表示上限はDay 100000です。この上限は世界法則ではなく、ブラウザを重くしないためのObserver側の制限です。</p></div>
+      <div class="observer-input-group"><label for="day-input">Simulation Day</label><div><input id="day-input" type="number" min="1000" max="100000" step="1" value="1000" inputmode="numeric"><button id="observe-button" type="button">観測する</button></div><p id="observer-error" class="observer-error" role="status" aria-live="polite"></p></div>
+      <div class="observer-presets" aria-label="観測日の候補"><button type="button" data-observer-day="1000">Day 1000</button><button type="button" data-observer-day="1001">Day 1001</button><button type="button" data-observer-day="1024">Day 1024</button><button type="button" data-observer-day="1100">Day 1100</button></div>
+    </section>
+
+    <section class="observer-stage" aria-labelledby="world-state-title">
+      <div class="observer-stage-head"><div><p class="kicker">CURRENT WORLD STATE</p><h2 id="world-state-title">Day <span id="observed-day">1000</span></h2></div><p id="mark-status" class="observer-mark-status" data-active="false">次のconvergence_markはDay 1024</p></div>
+      <div class="observer-global"><article><span>COHERENCE</span><strong id="coherence-value">1574</strong><p>変化どうしの一致がどれくらい残ったかを圧縮した内部値</p></article><article><span>DIVERGENCE</span><strong id="divergence-value">7003</strong><p>一致せず残った違いを圧縮した内部値</p></article></div>
+      <div class="observer-register-grid" aria-label="6つのregister">
+        <article><span>REGISTER 1</span><p>tone <strong id="register-1-tone">3876</strong></p><p>openness <strong id="register-1-openness">83</strong></p></article>
+        <article><span>REGISTER 2</span><p>tone <strong id="register-2-tone">3680</strong></p><p>openness <strong id="register-2-openness">91</strong></p></article>
+        <article><span>REGISTER 3</span><p>tone <strong id="register-3-tone">2028</strong></p><p>openness <strong id="register-3-openness">70</strong></p></article>
+        <article><span>REGISTER 4</span><p>tone <strong id="register-4-tone">1721</strong></p><p>openness <strong id="register-4-openness">86</strong></p></article>
+        <article><span>REGISTER 5</span><p>tone <strong id="register-5-tone">2454</strong></p><p>openness <strong id="register-5-openness">34</strong></p></article>
+        <article><span>REGISTER 6</span><p>tone <strong id="register-6-tone">2502</strong></p><p>openness <strong id="register-6-openness">85</strong></p></article>
+      </div>
+      <div class="observer-relation-note"><strong>1 → 2 → 3 → 4 → 5 → 6 → 1</strong><p>これは観測用に表した`answers`の輪です。物理的な空間ではなく、現在のRuleは矢印やbiasを数値計算に使っていません。</p></div>
+    </section>
+
+    <section class="observer-explainer">
+      <div><p class="kicker">PLAIN LANGUAGE</p><h2>数字は動く<br>登場人物は増えない</h2></div>
+      <div><p>この世界には、registerを新しく作ったり消したりする自律Ruleがありません。神ももう起こされません。そのため、これからも6つの記録枠と6本の関係はそのままです。</p><p>変化するのは数字です。64の倍数では`convergence_mark`という定点記録が発生します。名前に反して、何かが収束したという意味ではありません。</p></div>
+    </section>
+
+    <nav class="observer-back" aria-label="記事ナビゲーション"><a href="/experiments/exp-002/">← EXP-002の記事へ戻る</a></nav>
+  </main>
+  <footer class="site-footer"><a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a><p>Curiosity first. Evidence before claims.</p><p class="copyright">© 2026 FlowDeskStudio</p></footer>
+</body>
+</html>
