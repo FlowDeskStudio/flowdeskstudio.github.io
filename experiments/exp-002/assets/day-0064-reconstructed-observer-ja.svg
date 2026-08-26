@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">EXP-002 Simulation Day 64の再構成観測図</title>
+  <desc id="desc">保存されたDay 64の状態から6つのregisterとanswers関係を後日再構成した図。Canonical実行時のスクリーンショットではありません。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="#9EA6A0"/></marker>
+    <style>
+      .sans { font-family: "Yu Gothic", Meiryo, Inter, "Segoe UI", Arial, sans-serif; }
+      .mono { font-family: "Cascadia Mono", Consolas, "Yu Gothic", Meiryo, monospace; }
+      .label { fill: #A9B0AB; font-size: 18px; letter-spacing: 0.04em; }
+      .value { fill: #F2F0E8; font-size: 30px; font-weight: 700; }
+      .small { fill: #BFC5C0; font-size: 16px; }
+      .node-title { fill: #D7FF3F; font-size: 17px; font-weight: 700; }
+      .node-value { fill: #F2F0E8; font-size: 22px; }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="#10120F"/>
+  <rect x="36" y="30" width="1328" height="54" rx="27" fill="#D7FF3F"/>
+  <text x="700" y="65" text-anchor="middle" class="sans" fill="#10120F" font-size="16" font-weight="800">再構成観測図 · CANONICAL実行時のスクリーンショットではありません</text>
+
+  <text x="70" y="145" class="sans" fill="#F2F0E8" font-size="42" font-weight="750">相互参照インデックス · Day 64</text>
+  <text x="70" y="183" class="sans small">最初のconvergence_mark · event-00000001 · 初出のためMajor Eventに分類</text>
+
+  <rect x="70" y="220" width="300" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="95" y="257" class="sans label">整合値 / COHERENCE</text><text x="95" y="303" class="mono value">7530</text>
+  <rect x="390" y="220" width="300" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="415" y="257" class="sans label">分岐値 / DIVERGENCE</text><text x="415" y="303" class="mono value">2824</text>
+  <rect x="710" y="220" width="620" height="105" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="735" y="257" class="sans label">この定点記録の意味</text>
+  <text x="735" y="291" class="sans small">64の倍数で行う予定済みの観測</text>
+  <text x="735" y="314" class="sans small">数値が実際に収束したという意味ではない</text>
+
+  <g fill="none" stroke="#9EA6A0" stroke-width="3" marker-end="url(#arrow)" opacity="0.9">
+    <path d="M762 420 L858 455"/><path d="M920 550 L920 605"/><path d="M858 700 L762 740"/><path d="M638 740 L542 700"/><path d="M480 605 L480 550"/><path d="M542 455 L638 420"/>
+  </g>
+  <g class="mono small" fill="#A9B0AB">
+    <text x="810" y="425" text-anchor="middle">+1</text><text x="940" y="583">−1</text><text x="810" y="735" text-anchor="middle">+2</text><text x="590" y="735" text-anchor="middle">−2</text><text x="500" y="583">+3</text><text x="590" y="425" text-anchor="middle">−3</text>
+  </g>
+
+  <g class="sans">
+    <g transform="translate(700 395)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 1</text><text y="12" text-anchor="middle" class="mono node-value">tone 1189</text><text y="43" text-anchor="middle" class="mono small">openness 54</text></g>
+    <g transform="translate(920 480)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 2</text><text y="12" text-anchor="middle" class="mono node-value">tone 530</text><text y="43" text-anchor="middle" class="mono small">openness 40</text></g>
+    <g transform="translate(920 675)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 3</text><text y="12" text-anchor="middle" class="mono node-value">tone 3178</text><text y="43" text-anchor="middle" class="mono small">openness 60</text></g>
+    <g transform="translate(700 765)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 4</text><text y="12" text-anchor="middle" class="mono node-value">tone 491</text><text y="43" text-anchor="middle" class="mono small">openness 72</text></g>
+    <g transform="translate(480 675)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 5</text><text y="12" text-anchor="middle" class="mono node-value">tone 3180</text><text y="43" text-anchor="middle" class="mono small">openness 47</text></g>
+    <g transform="translate(480 480)"><circle r="68" fill="#181C17" stroke="#D7FF3F" stroke-width="3"/><text y="-24" text-anchor="middle" class="node-title">記録枠 6</text><text y="12" text-anchor="middle" class="mono node-value">tone 1896</text><text y="43" text-anchor="middle" class="mono small">openness 90</text></g>
+  </g>
+
+  <rect x="1080" y="380" width="250" height="360" rx="18" fill="#191D18" stroke="#343A34"/>
+  <text x="1105" y="420" class="sans label">再構成の根拠</text>
+  <text x="1105" y="458" class="sans small">保存されたDay 64の</text><text x="1105" y="481" class="sans small">wake後Snapshotと</text><text x="1105" y="504" class="sans small">対応するGod Viewを</text><text x="1105" y="527" class="sans small">使って後日作成</text>
+  <text x="1105" y="575" class="sans label">関係表示</text>
+  <text x="1105" y="610" class="sans small">円形配置は観測用の表現</text><text x="1105" y="633" class="sans small">物理空間ではない</text><text x="1105" y="656" class="sans small">現在のruleは矢印や</text><text x="1105" y="679" class="sans small">bias値を計算に</text><text x="1105" y="702" class="sans small">使用していない</text>
+
+  <line x1="70" y1="840" x2="1330" y2="840" stroke="#343A34"/>
+  <text x="70" y="875" class="mono small">参照snapshot: 0000000065-day-000064-7146da80f46a4fea.json · 描画: manual-svg-proof-v1</text>
+</svg>

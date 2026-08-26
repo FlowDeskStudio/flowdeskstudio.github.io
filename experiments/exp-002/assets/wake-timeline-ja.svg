@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
+  <title id="title">EXP-002でAI Godが世界を確認した15回</title>
+  <desc id="desc">Day 64からDay 960までの15回を示す再構成タイムライン。判断はすべて何もしないでした。</desc>
+  <defs>
+    <style>
+      .sans{font-family:"Yu Gothic",Meiryo,Inter,"Segoe UI",Arial,sans-serif}.mono{font-family:"Cascadia Mono",Consolas,"Yu Gothic",Meiryo,monospace}
+      .small{font-size:17px;fill:#c8cbc3}.day{font-size:18px;font-weight:800;fill:#f4f1e8}.tag{font-size:12px;font-weight:900;fill:#11130f;letter-spacing:.02em}
+    </style>
+  </defs>
+  <rect width="1400" height="820" fill="#11130f"/>
+  <rect x="40" y="30" width="1320" height="52" rx="26" fill="#c9ff4a"/>
+  <text x="700" y="64" text-anchor="middle" class="sans tag" font-size="14">再構成タイムライン · CANONICAL実行時のスクリーンショットではありません</text>
+  <text x="72" y="152" class="sans" fill="#f4f1e8" font-size="48" font-weight="850">15回確認して 15回とも何もしなかった</text>
+  <text x="72" y="191" class="sans small">神は数値や記録枠、関係、世界法則を変えられた。その力は一度も使われなかった。</text>
+  <line x1="118" y1="390" x2="1282" y2="390" stroke="#7b827b" stroke-width="4"/>
+  <g class="sans">
+    <g transform="translate(118 390)"><circle r="24" fill="#c9ff4a"/><text y="-47" text-anchor="middle" class="day">64</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(201 390)"><circle r="19" fill="#c9ff4a"/><text y="54" text-anchor="middle" class="day">128</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(284 390)"><circle r="19" fill="#c9ff4a"/><text y="-47" text-anchor="middle" class="day">192</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(367 390)"><circle r="19" fill="#c9ff4a"/><text y="54" text-anchor="middle" class="day">256</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(450 390)"><circle r="19" fill="#c9ff4a"/><text y="-47" text-anchor="middle" class="day">320</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(533 390)"><circle r="24" fill="#7180ff"/><text y="54" text-anchor="middle" class="day">384</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(616 390)"><circle r="24" fill="#7180ff"/><text y="-47" text-anchor="middle" class="day">448</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(699 390)"><circle r="19" fill="#c9ff4a"/><text y="54" text-anchor="middle" class="day">512</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(782 390)"><circle r="19" fill="#c9ff4a"/><text y="-47" text-anchor="middle" class="day">576</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(865 390)"><circle r="24" fill="#ff765f"/><text y="54" text-anchor="middle" class="day">640</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(948 390)"><circle r="24" fill="#ff765f"/><text y="-47" text-anchor="middle" class="day">704</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(1031 390)"><circle r="19" fill="#c9ff4a"/><text y="54" text-anchor="middle" class="day">768</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(1114 390)"><circle r="19" fill="#c9ff4a"/><text y="-47" text-anchor="middle" class="day">832</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(1197 390)"><circle r="19" fill="#c9ff4a"/><text y="54" text-anchor="middle" class="day">896</text><text y="4" text-anchor="middle" class="tag">なし</text></g>
+    <g transform="translate(1280 390)"><circle r="24" fill="#f4f1e8"/><text y="-47" text-anchor="middle" class="day">960</text><text y="5" text-anchor="middle" class="tag">なし</text></g>
+  </g>
+  <g class="sans">
+    <rect x="90" y="520" width="280" height="150" rx="18" fill="#1d211c" stroke="#343a34"/><text x="118" y="558" fill="#7180ff" font-size="15" font-weight="900">DAY 384 → 448</text><text x="118" y="594" class="small">一つの値が上限へ到達</text><text x="118" y="621" class="small">世界は介入なしで</text><text x="118" y="648" class="small">その状態を抜けた</text>
+    <rect x="405" y="520" width="280" height="150" rx="18" fill="#1d211c" stroke="#343a34"/><text x="433" y="558" fill="#ff765f" font-size="15" font-weight="900">DAY 640 → 704</text><text x="433" y="594" class="small">別の値が極端な状態へ</text><text x="433" y="621" class="small">変わらない世界法則のまま</text><text x="433" y="648" class="small">再び大きく低下した</text>
+    <rect x="720" y="520" width="280" height="150" rx="18" fill="#1d211c" stroke="#343a34"/><text x="748" y="558" fill="#c9ff4a" font-size="15" font-weight="900">繰り返された理由</text><text x="748" y="594" class="small">違いは残っていた</text><text x="748" y="621" class="small">世界は動いていた</text><text x="748" y="648" class="small">修正する理由はなかった</text>
+    <rect x="1035" y="520" width="275" height="150" rx="18" fill="#1d211c" stroke="#343a34"/><text x="1063" y="558" fill="#f4f1e8" font-size="15" font-weight="900">DAY 1000</text><text x="1063" y="594" class="small">実験装置は神を起こす</text><text x="1063" y="621" class="small">処理を終了　世界法則は</text><text x="1063" y="648" class="small">AIなしでそのまま続いた</text>
+  </g>
+  <text x="72" y="760" class="mono" fill="#aeb3ad" font-size="16">出典: 変更不可のGod response archive 15件 · 判断はすべてno_action</text>
+</svg>

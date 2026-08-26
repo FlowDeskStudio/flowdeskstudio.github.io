@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">EXP-002のGenesisとDay 1000の比較</title>
+  <desc id="desc">同じ6つのregisterとrelationについて、GenesisとDay 1000で変化した数値を示す再構成比較図。</desc>
+  <defs><style>.sans{font-family:"Yu Gothic",Meiryo,Inter,"Segoe UI",Arial,sans-serif}.mono{font-family:"Cascadia Mono",Consolas,"Yu Gothic",Meiryo,monospace}.node{fill:#181c17;stroke:#c9ff4a;stroke-width:2}.title{fill:#f4f1e8;font-size:38px;font-weight:850}.label{fill:#c9ff4a;font-size:15px;font-weight:900}.value{fill:#f4f1e8;font-size:18px}.small{fill:#bfc5c0;font-size:16px}</style></defs>
+  <rect width="1400" height="900" fill="#11130f"/>
+  <rect x="40" y="30" width="1320" height="52" rx="26" fill="#c9ff4a"/><text x="700" y="64" text-anchor="middle" class="sans" fill="#11130f" font-size="14" font-weight="900">再構成比較図 · CANONICAL実行時のスクリーンショットではありません</text>
+  <text x="80" y="150" class="sans title">構造はそのまま 数値だけが変わった</text>
+  <text x="80" y="187" class="sans small">1000日間でregister、relation、ruleの追加や削除はなかった。</text>
+  <rect x="70" y="230" width="600" height="565" rx="24" fill="#181c17" stroke="#343a34"/><rect x="730" y="230" width="600" height="565" rx="24" fill="#181c17" stroke="#343a34"/>
+  <text x="110" y="285" class="sans label">はじまり · DAY 0</text><text x="770" y="285" class="sans label">神を起こす期間の終了 · DAY 1000</text>
+  <text x="110" y="330" class="mono value">整合値 17 · 分岐値 43</text><text x="770" y="330" class="mono value">整合値 1574 · 分岐値 7003</text>
+  <g class="sans">
+    <g transform="translate(215 455)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R1</text><text y="23" text-anchor="middle" class="mono value">2 / 11</text></g>
+    <g transform="translate(370 405)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R2</text><text y="23" text-anchor="middle" class="mono value">3 / 17</text></g>
+    <g transform="translate(525 455)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R3</text><text y="23" text-anchor="middle" class="mono value">5 / 23</text></g>
+    <g transform="translate(525 610)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R4</text><text y="23" text-anchor="middle" class="mono value">7 / 31</text></g>
+    <g transform="translate(370 660)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R5</text><text y="23" text-anchor="middle" class="mono value">11 / 47</text></g>
+    <g transform="translate(215 610)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R6</text><text y="23" text-anchor="middle" class="mono value">13 / 71</text></g>
+    <g transform="translate(875 455)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R1</text><text y="23" text-anchor="middle" class="mono value">3876 / 83</text></g>
+    <g transform="translate(1030 405)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R2</text><text y="23" text-anchor="middle" class="mono value">3680 / 91</text></g>
+    <g transform="translate(1185 455)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R3</text><text y="23" text-anchor="middle" class="mono value">2028 / 70</text></g>
+    <g transform="translate(1185 610)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R4</text><text y="23" text-anchor="middle" class="mono value">1721 / 86</text></g>
+    <g transform="translate(1030 660)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R5</text><text y="23" text-anchor="middle" class="mono value">2454 / 34</text></g>
+    <g transform="translate(875 610)"><circle r="62" class="node"/><text y="-8" text-anchor="middle" class="label">R6</text><text y="23" text-anchor="middle" class="mono value">2502 / 85</text></g>
+  </g>
+  <text x="110" y="755" class="sans small">各組は tone / openness の値</text><text x="770" y="755" class="sans small">数値は固定範囲を循環する状態で、成長点ではない。</text>
+  <text x="80" y="854" class="mono" fill="#aeb3ad" font-size="15">出典: Canonical Genesisと検証済みDay 1000状態 · 円形配置は観測表現で物理空間ではない</text>
+</svg>
