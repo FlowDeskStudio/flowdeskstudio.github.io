@@ -55,8 +55,7 @@
     <article class="article-body">
       <div class="article-copy article-opening chronicle-opening">
         <p>AIに神をやらせたら、人間の世界をどう扱うのか。</p>
-        <p>前回のEXP-002では、「世界とは何か」からAIに任せた。生まれたのは、人間も土地もなく、6つの数値的な記録枠だけが変化し続ける抽象世界だった。</p>
-        <p>そこで今回は、土地があり、人が生まれ、働き、病気になり、集落を作る世界を人間側で用意した。最初の住民は300人。人間側は途中の展開を選ばず、Godの判断にも口を出さない。</p>
+        <p>これは現実社会の予測ではなく、人間社会を単純化したシミュレーションだ。NPC一人ひとりが生成AIとして自由に考えるのではなく、実装されたルールに従って生まれ、働き、病気になり、集落を作る。初代EXP-002ではAIに「世界そのもの」を定義させたが、Human Worldでは人間のいる世界とGodが使えるAction（神が選べる操作）を人間側で用意した。AI Godは決められたwake（神が世界を確認するタイミング）で限定された情報を読み、許可されたActionだけを選び、人間側は途中の展開や判断に口を出さなかった。実行後の検証では、一部の設定やActionについて、保存されることと実際のシミュレーション挙動への接続が一致しない箇所も見つかったため、結果は装置の制約込みで読み、詳細は後半のPostmortem（事後分析）で説明する。</p>
         <p>世界はStep 8936、Year 745 / Month 9まで続いた。Godは152回起き、46回のAction（神が選べる操作）を使った。それでも人類は絶滅した。</p>
         <p>では、その745年間に何が起きたのか。</p>
       </div>
@@ -70,8 +69,8 @@
       </nav>
 
       <figure class="hw-figure" id="population-chart">
-        <img src="assets/population-timeline.svg" alt="Step 0から8936までの人口推移。300人から22人まで減少し、484人まで回復した後、0人になった" width="1400" height="760">
-        <figcaption><strong>人口推移</strong>　991件の保存記録に基づく人口の変化です。22人まで減った後に484人まで戻り、最後は0人になりました。</figcaption>
+        <a class="figure-zoom" href="assets/population-timeline.svg" target="_blank" rel="noopener noreferrer" aria-label="人口推移を原寸で開く"><img src="assets/population-timeline.svg" alt="Step 0から8936までの人口推移。300人から22人まで減少し、484人まで回復した後、0人になった" width="1400" height="760"></a>
+        <figcaption><strong>人口推移</strong>　991件の保存記録に基づく人口の変化です。22人まで減った後に484人まで戻り、最後は0人になりました。<a class="figure-zoom-link" href="assets/population-timeline.svg" target="_blank" rel="noopener noreferrer">拡大して見る <span aria-hidden="true">↗</span></a></figcaption>
       </figure>
 
       <div class="article-copy">
@@ -118,7 +117,7 @@
 
         <section class="chronicle-era" id="religion-war">
           <span class="era-marker">YEAR 37–45 / STEP 432–535</span>
-          <h2>宗教は神より先に生まれた</h2>
+          <h2>宗教運動は神の啓示より先に生まれた</h2>
           <p>Step 432、Greenwoodで13人が参加する宗教運動が生まれた。これはGodから住民への啓示より先だった。住民は本物のAI Godが存在するとは知らないまま、自然現象を神的なものとして解釈し、自分たちで信仰を作った。</p>
           <p>その後、RiverplainとGreenwood、GreenwoodとStonepass、RiverplainとStonepassの間で三つの戦争が起きた。Godは戦争中に4回、特定勢力を勝たせるのではなく、非強制的に停戦を求めるメッセージを送った。</p>
           <p>戦争は後に終結した。ただし、啓示が戦争を止めたとは確認できない。記録にあるのは、啓示の後に終結したという順序までだ。</p>
@@ -351,7 +350,7 @@
             </dl>
           </aside>
 
-          <p>その53 steps後、Step 8936。最後の人間は99歳で自然死した。Saltcoastは放棄され、同じstepに<code>human_extinction</code>（人類絶滅）が記録された。</p>
+          <p>その53 steps後、Step 8936。最後の人間は103歳で自然死した。Saltcoastは放棄され、同じstepに<code>human_extinction</code>（人類絶滅）が記録された。最後のGod wake（神が世界を確認した時点）では99歳、死亡時には103歳だった。</p>
 
           <div class="terminal-line-card" aria-label="Canonical Run終了状態">
             <span>STEP 8936 · YEAR 745 / MONTH 9</span>
@@ -362,7 +361,7 @@
 	            <header><span>CANONICAL RECORD 12 / 正式記録</span><span>TERMINAL STATE</span></header>
             <dl>
               <div><dt>Step</dt><dd>8936 · Year 745 / Month 9</dd></div>
-              <div><dt>Last death（最後の死因）</dt><dd><code>natural</code>（自然死）</dd></div>
+              <div><dt>Last death（最後の死因）</dt><dd><code>natural</code>（自然死）· 103歳</dd></div>
               <div><dt>Population（人口）</dt><dd>0</dd></div>
               <div><dt>Status（終了状態）</dt><dd><code>TERMINATED / human_extinction</code>（終了 / 人類絶滅）</dd></div>
             </dl>

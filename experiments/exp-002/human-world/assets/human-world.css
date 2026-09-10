@@ -261,6 +261,14 @@
   height: auto;
 }
 
+.figure-zoom {
+  display: block;
+}
+
+.figure-zoom:focus-visible {
+  outline-offset: -4px;
+}
+
 .hw-figure figcaption {
   padding: 18px 22px;
   border-top: 1px solid var(--ink);
@@ -270,6 +278,14 @@
 
 .hw-figure figcaption strong {
   color: var(--ink);
+}
+
+.figure-zoom-link {
+  margin-left: 0.65em;
+  color: var(--ink);
+  font-weight: 800;
+  white-space: nowrap;
+  text-underline-offset: 4px;
 }
 
 .chart-pair {

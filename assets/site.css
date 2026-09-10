@@ -180,6 +180,7 @@ a {
 .hero {
   position: relative;
   isolation: isolate;
+  overflow: clip;
   max-width: var(--max);
   min-height: 690px;
   margin: 0 auto;
@@ -592,6 +593,15 @@ h1 em::after {
   margin-top: 8px;
   font-size: 1.5rem;
   letter-spacing: -0.04em;
+}
+
+.log-variant {
+  display: block;
+  margin-top: 18px;
+  font-size: 0.58rem;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
 }
 
 .log-content {
