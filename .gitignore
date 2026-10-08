@@ -1,0 +1,38 @@
+# Defensive ignore list: keeps secrets and internal-layer files out of this public repo.
+# Published deliverables (including .md / .xlsx / .zip) are NOT ignored by extension.
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+credentials.json
+secrets.json
+
+# Raw logs
+*.log
+*.ndjson
+
+# Local AI tooling and settings
+.claude/
+.codex/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+
+# Internal-layer documents and directories
+FDS_HANDOFF.md
+FLOWDESKSTUDIO_HANDOFF.md
+internal/
+private/
+legacy/
+qa_work/
+
+# Dependencies and OS/editor noise
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
