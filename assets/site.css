@@ -953,6 +953,7 @@ h1 em::after {
 .route-card a { margin-top: 28px; font-weight: 850; text-underline-offset: 5px; }
 .privacy-note { margin-top: 48px; padding: 28px; border: 1px solid var(--ink); background: var(--acid); }
 .privacy-note strong { display: block; margin-bottom: 8px; }
+.contact-line { margin-top: 28px; font-size: 0.9rem; }
 .not-found { min-height: calc(100vh - 104px); padding: 80px 28px; display: grid; place-items: center; }
 .not-found-card { width: min(800px, 100%); padding: 54px; border: 1px solid var(--ink); background: var(--white); box-shadow: 12px 12px 0 var(--ink); }
 .error-code { margin: 0 0 28px; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 0.8rem; font-weight: 900; letter-spacing: 0.12em; }
