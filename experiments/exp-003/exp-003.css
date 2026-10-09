@@ -72,20 +72,10 @@
   font-weight: 900;
 }
 
-.build-tag,
-.build-note {
+.build-tag {
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-}
-
-.build-tag {
   min-width: 4.5em;
   color: var(--muted);
-}
-
-.build-note {
-  padding: 2px 8px;
-  border: 1px solid var(--ink);
-  background: var(--acid);
 }
