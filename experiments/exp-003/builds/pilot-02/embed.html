@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5Bl403r9Ci59pk2qzp7rupzI8NlKJKZPqoNGexgntUk='; script-src-attr 'none'; style-src 'sha256-23w2farmz+CUWBjQRe0LhnJ6/z5NPHcGy9FTrfK4BVU='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>もぐらたたき</title>
+<style>
+  :root {
+    --sky1: #8fd3ff;
+    --sky2: #d9f2ff;
+    --grass1: #6cc04a;
+    --grass2: #3f9a2f;
+    --ink: #2b2118;
+    --panel: #fffaf0;
+    --accent: #e8552d;
+    --accent-dark: #b93c1a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(var(--sky1), var(--sky2) 38%, var(--grass1) 38%, var(--grass2));
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    -webkit-user-select: none;
+    user-select: none;
+    overflow-x: hidden;
+  }
+  .app {
+    width: min(100%, 560px);
+    padding: 12px 12px 20px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  h1 {
+    margin: 4px 0 10px;
+    text-align: center;
+    font-size: clamp(24px, 7vw, 36px);
+    letter-spacing: .12em;
+    color: #fff;
+    text-shadow: 0 2px 0 #2d6b8f, 0 4px 8px rgba(0, 0, 0, .25);
+  }
+
+  /* ---------- HUD ---------- */
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    background: var(--panel);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 8px 6px 10px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, .25);
+  }
+  .stat { text-align: center; min-width: 0; }
+  .stat .label { font-size: 11px; font-weight: 700; color: #7a6a58; letter-spacing: .08em; }
+  .stat .value {
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: 800;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .value.bump { animation: bump .18s ease-out; }
+  .stat .value.low { color: #d22; }
+  .stat .sub { font-size: 11px; font-weight: 700; color: var(--accent); min-height: 14px; }
+  .timebar {
+    grid-column: 1 / -1;
+    height: 10px;
+    border-radius: 6px;
+    background: #e5dccb;
+    overflow: hidden;
+    border: 2px solid var(--ink);
+  }
+  .timebar > i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ffb300, #ff7043);
+    transform-origin: left center;
+  }
+  @keyframes bump { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+  /* ---------- Controls ---------- */
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin: 8px 0;
+  }
+  .btn {
+    font: inherit;
+    font-weight: 800;
+    color: var(--ink);
+    background: var(--panel);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+    touch-action: manipulation;
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.primary {
+    background: var(--accent);
+    color: #fff;
+    font-size: 20px;
+    padding: 12px 28px;
+    box-shadow: 0 4px 0 var(--accent-dark);
+  }
+  .btn.primary:active { box-shadow: 0 1px 0 var(--accent-dark); }
+  :focus-visible { outline: 3px solid #1565c0; outline-offset: 2px; }
+
+  /* ---------- Board ---------- */
+  .board {
+    position: relative;
+    background: radial-gradient(ellipse at 50% 30%, #86d35f, #4da636);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    padding: 4% 4% 2%;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+    overflow: hidden;
+  }
+  .board.shake { animation: shake .3s linear; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 2px); }
+    40% { transform: translate(6px, -2px); }
+    60% { transform: translate(-4px, -2px); }
+    80% { transform: translate(4px, 2px); }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2%;
+  }
+  .hole {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 16px;
+  }
+  .pit {
+    position: absolute;
+    left: 8%; right: 8%; bottom: 8%;
+    height: 34%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 35%, #1b120b 55%, #4a301b 100%);
+    box-shadow: 0 0 0 5px #7b5230, 0 5px 0 5px #5d3d22;
+  }
+  .clip {
+    position: absolute;
+    left: 14%; right: 14%; top: 0; bottom: 11%;
+    overflow: hidden;
+    border-radius: 0 0 50% 50% / 0 0 19% 19%;
+    pointer-events: none;
+  }
+  .critter {
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%;
+    height: 96%;
+    transform: translateY(104%);
+    transition: transform .13s ease-in;
+  }
+  .hole.up .critter {
+    transform: translateY(6%);
+    transition: transform .12s cubic-bezier(.2, 1.5, .5, 1);
+  }
+  .hole.hit .critter { transition: transform .22s ease-in; }
+  .critter svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .hole { --fur: #8a5a35; --fur-dark: #6d4425; --belly: #f1d2a9; }
+  .hole.gold { --fur: #f4b400; --fur-dark: #c98d00; --belly: #fff0b8; }
+  .hole.bomb .g-mole, .hole:not(.bomb) .g-bomb { display: none; }
+  .hole:not(.gold) .g-spark { display: none; }
+  .hole.hit .g-eyes, .hole:not(.hit) .g-eyes-x { display: none; }
+  .hole.hit .g-inner { transform: scale(1.08, .86); }
+  .g-inner { transform-origin: 50% 100%; transform-box: fill-box; transition: transform .08s; }
+  .g-fuse-spark { animation: flicker .25s steps(2) infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes flicker { 0% { transform: scale(1); } 100% { transform: scale(1.4) rotate(30deg); } }
+  .keyhint {
+    display: none;
+    position: absolute;
+    right: 6%; bottom: 2%;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, .85);
+    background: rgba(0, 0, 0, .35);
+    border-radius: 6px;
+    padding: 0 6px;
+    line-height: 18px;
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) { .keyhint { display: block; } }
+
+  /* hammer */
+  .hammer {
+    position: absolute;
+    right: 2%; top: 8%;
+    width: 30%; height: 62%;
+    transform-origin: 50% 100%;
+    animation: swing .22s ease-out forwards;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .hammer::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 34%;
+    background: linear-gradient(#ff6b4a, #c9381a);
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+  }
+  .hammer::after {
+    content: "";
+    position: absolute;
+    left: 38%; top: 32%;
+    width: 24%; height: 68%;
+    background: #e2b071;
+    border: 3px solid var(--ink);
+    border-radius: 0 0 6px 6px;
+  }
+  @keyframes swing {
+    0% { transform: rotate(35deg); opacity: 1; }
+    55% { transform: rotate(-58deg); opacity: 1; }
+    100% { transform: rotate(-50deg); opacity: 0; }
+  }
+  /* floating score */
+  .pop {
+    position: absolute;
+    left: 50%; top: 14%;
+    transform: translateX(-50%);
+    font-size: clamp(18px, 6vw, 28px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 0 var(--ink), 2px 0 0 var(--ink), -2px 0 0 var(--ink), 0 -2px 0 var(--ink);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: rise .6s ease-out forwards;
+    z-index: 4;
+  }
+  .pop.minus { color: #ff5a5a; }
+  .pop.bonus { color: #ffe45c; }
+  @keyframes rise {
+    0% { transform: translate(-50%, 10px) scale(.6); opacity: 0; }
+    20% { transform: translate(-50%, 0) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -34px) scale(1); opacity: 0; }
+  }
+
+  /* ---------- Overlay ---------- */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 40, 15, .55);
+    z-index: 10;
+    padding: 12px;
+  }
+  .overlay[hidden] { display: none; }
+  .panel {
+    width: min(100%, 400px);
+    max-height: 100%;
+    overflow: auto;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    border-radius: 18px;
+    padding: 16px 16px 18px;
+    text-align: center;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .35);
+  }
+  .panel[hidden] { display: none; }
+  .panel h2 { margin: 0 0 8px; font-size: 24px; }
+  .panel p { margin: 6px 0; font-size: 14px; line-height: 1.6; }
+  .rules {
+    list-style: none;
+    margin: 8px 0 12px;
+    padding: 0;
+    font-size: 14px;
+    text-align: left;
+    display: inline-block;
+  }
+  .rules li { margin: 4px 0; display: flex; align-items: center; gap: 8px; }
+  .chip {
+    flex: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+  }
+  .chip.c-normal { background: #8a5a35; }
+  .chip.c-gold { background: #f4b400; }
+  .chip.c-bomb { background: #2b2b33; }
+  .seg {
+    display: flex;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 6px 0 14px;
+  }
+  .seg label { flex: 1; position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span {
+    display: block;
+    padding: 10px 4px;
+    font-weight: 800;
+    font-size: 14px;
+    background: #fff;
+    border-left: 3px solid var(--ink);
+  }
+  .seg label:first-child span { border-left: 0; }
+  .seg input:checked + span { background: #ffd54f; }
+  .seg input:focus-visible + span { outline: 3px solid #1565c0; outline-offset: -3px; }
+  .final { font-size: 48px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .newbest { color: var(--accent); font-weight: 900; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin: 10px 0 14px;
+  }
+  .result-grid div { background: #f3ead8; border-radius: 10px; padding: 6px 2px; }
+  .result-grid b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .result-grid small { font-size: 11px; color: #7a6a58; font-weight: 700; }
+  .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .count {
+    font-size: clamp(72px, 30vw, 140px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 5px 0 var(--ink), 0 0 20px rgba(0, 0, 0, .4);
+  }
+  .count[hidden] { display: none; }
+  .note { font-size: 12px; color: #7a6a58; }
+  kbd {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    border: 2px solid var(--ink);
+    border-radius: 5px;
+    padding: 0 5px;
+    background: #fff;
+  }
+  @media (hover: none), (pointer: coarse) { .kbd-help { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .board.shake { animation: none; }
+    .g-fuse-spark { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>もぐらたたき</h1>
+
+  <section class="hud" aria-label="ゲーム状況">
+    <div class="stat"><div class="label">スコア</div><div class="value" id="score">0</div></div>
+    <div class="stat"><div class="label">のこり</div><div class="value" id="time">30</div></div>
+    <div class="stat"><div class="label">コンボ</div><div class="value" id="combo">0</div><div class="sub" id="mult"></div></div>
+    <div class="stat"><div class="label">ベスト</div><div class="value" id="best">0</div></div>
+    <div class="timebar" aria-hidden="true"><i id="bar"></i></div>
+  </section>
+
+  <div class="controls">
+    <button class="btn" id="muteBtn" type="button" aria-pressed="false">音: オン</button>
+    <button class="btn" id="pauseBtn" type="button" disabled>一時停止</button>
+  </div>
+
+  <section class="board" id="board" aria-label="もぐらの穴">
+    <div class="grid" id="grid"></div>
+
+    <div class="overlay" id="overlay">
+      <div class="panel" id="startPanel">
+        <h2>あそびかた</h2>
+        <p>穴から出てくるもぐらを、30秒間でたくさん叩こう!</p>
+        <ul class="rules">
+          <li><i class="chip c-normal"></i>ふつうのもぐら … +10点</li>
+          <li><i class="chip c-gold"></i>金のもぐら(すばやい) … +30点</li>
+          <li><i class="chip c-bomb"></i>ばくだん … −20点、叩いちゃダメ</li>
+          <li>連続で当てるとコンボ! 5回で2倍、10回で3倍</li>
+        </ul>
+        <div class="seg" role="radiogroup" aria-label="むずかしさ">
+          <label><input type="radio" name="diff" value="easy"><span>やさしい</span></label>
+          <label><input type="radio" name="diff" value="normal" checked><span>ふつう</span></label>
+          <label><input type="radio" name="diff" value="hard"><span>むずかしい</span></label>
+        </div>
+        <button class="btn primary" id="startBtn" type="button">スタート</button>
+        <p class="note kbd-help">キーボード: <kbd>1</kbd>〜<kbd>9</kbd> で叩く(テンキーの並び) / <kbd>P</kbd> 一時停止 / <kbd>M</kbd> 音</p>
+      </div>
+
+      <div class="panel" id="pausePanel" hidden>
+        <h2>一時停止中</h2>
+        <div class="row">
+          <button class="btn primary" id="resumeBtn" type="button">つづける</button>
+          <button class="btn" id="quitBtn" type="button">やめる</button>
+        </div>
+      </div>
+
+      <div class="panel" id="overPanel" hidden>
+        <h2 id="rank">おしまい!</h2>
+        <div class="final" id="finalScore">0</div>
+        <p class="newbest" id="newBest" hidden>ベスト更新!</p>
+        <div class="result-grid">
+          <div><b id="rHits">0</b><small>叩いた数</small></div>
+          <div><b id="rAcc">0%</b><small>命中率</small></div>
+          <div><b id="rCombo">0</b><small>最大コンボ</small></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="retryBtn" type="button">もういちど</button>
+          <button class="btn" id="menuBtn" type="button">むずかしさを変える</button>
+        </div>
+        <p class="note">ベストスコアはこのページを開いている間だけ記録されます。</p>
+      </div>
+
+      <div class="count" id="count" hidden aria-live="assertive">3</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var DURATION = 30000;
+  var DIFFS = {
+    easy:   { spawn: [950, 680], show: [1500, 1050], bomb: 0.08, gold: 0.10, maxUp: 2 },
+    normal: { spawn: [760, 430], show: [1150, 720],  bomb: 0.14, gold: 0.10, maxUp: 3 },
+    hard:   { spawn: [560, 300], show: [880, 540],   bomb: 0.20, gold: 0.12, maxUp: 4 }
+  };
+  var KEY_ORDER = ['7', '8', '9', '4', '5', '6', '1', '2', '3'];
+
+  var CRITTER_SVG =
+    '<svg viewBox="0 0 100 120" aria-hidden="true" focusable="false">' +
+      '<g class="g-mole"><g class="g-inner">' +
+        '<path d="M10 122V56a40 46 0 0 1 80 0v66z" fill="var(--fur)" stroke="#2b2118" stroke-width="3"/>' +
+        '<ellipse cx="50" cy="104" rx="25" ry="28" fill="var(--belly)"/>' +
+        '<ellipse cx="14" cy="84" rx="8" ry="6" fill="#f5a9a0" stroke="#2b2118" stroke-width="2.5"/>' +
+        '<ellipse cx="86" cy="84" rx="8" ry="6" fill="#f5a9a0" stroke="#2b2118" stroke-width="2.5"/>' +
+        '<g class="g-eyes">' +
+          '<circle cx="35" cy="46" r="5.5" fill="#1b120b"/><circle cx="65" cy="46" r="5.5" fill="#1b120b"/>' +
+          '<circle cx="36.8" cy="44" r="1.8" fill="#fff"/><circle cx="66.8" cy="44" r="1.8" fill="#fff"/>' +
+        '</g>' +
+        '<g class="g-eyes-x" stroke="#1b120b" stroke-width="3.5" stroke-linecap="round">' +
+          '<path d="M30 41l10 10M40 41l-10 10M60 41l10 10M70 41l-10 10"/>' +
+        '</g>' +
+        '<ellipse cx="50" cy="65" rx="17" ry="12" fill="var(--belly)" stroke="#2b2118" stroke-width="2.5"/>' +
+        '<ellipse cx="50" cy="57" rx="7" ry="5" fill="#ef6f7f" stroke="#2b2118" stroke-width="2.5"/>' +
+        '<rect x="44.5" y="67" width="11" height="8" rx="1.5" fill="#fff" stroke="#2b2118" stroke-width="2"/>' +
+        '<path d="M50 67v8" stroke="#2b2118" stroke-width="1.5"/>' +
+        '<path d="M28 62l-12-3M28 67l-12 2M72 62l12-3M72 67l12 2" stroke="var(--fur-dark)" stroke-width="2" stroke-linecap="round"/>' +
+        '<g class="g-spark" fill="#fff">' +
+          '<path d="M22 22l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z"/>' +
+          '<path d="M80 30l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z"/>' +
+        '</g>' +
+      '</g></g>' +
+      '<g class="g-bomb"><g class="g-inner">' +
+        '<path d="M52 30q4-14 16-12" fill="none" stroke="#8d6e63" stroke-width="4" stroke-linecap="round"/>' +
+        '<path class="g-fuse-spark" d="M68 8l2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5z" fill="#ffb300" stroke="#e65100" stroke-width="1.5"/>' +
+        '<rect x="42" y="28" width="16" height="12" rx="3" fill="#55555f" stroke="#111" stroke-width="3"/>' +
+        '<circle cx="50" cy="78" r="38" fill="#2b2b33" stroke="#111" stroke-width="3"/>' +
+        '<path d="M24 62a30 30 0 0 1 18-16" fill="none" stroke="#6b6b78" stroke-width="5" stroke-linecap="round"/>' +
+        '<g class="g-eyes">' +
+          '<path d="M30 68l14 6v6a7 7 0 0 1-14 0z" fill="#fff"/><path d="M70 68l-14 6v6a7 7 0 0 0 14 0z" fill="#fff"/>' +
+          '<circle cx="38" cy="79" r="3" fill="#111"/><circle cx="62" cy="79" r="3" fill="#111"/>' +
+        '</g>' +
+        '<g class="g-eyes-x" fill="#ffb300" stroke="#e65100" stroke-width="2">' +
+          '<path d="M50 50l7 17 18-5-10 15 14 12-18 1 0 18-11-14-11 14 0-18-18-1 14-12-10-15 18 5z"/>' +
+        '</g>' +
+      '</g></g>' +
+    '</svg>';
+
+  function $(id) { return document.getElementById(id); }
+
+  var gridEl = $('grid'), boardEl = $('board'), overlayEl = $('overlay');
+  var startPanel = $('startPanel'), pausePanel = $('pausePanel'), overPanel = $('overPanel'), countEl = $('count');
+  var scoreEl = $('score'), timeEl = $('time'), comboEl = $('combo'), multEl = $('mult'), bestEl = $('best'), barEl = $('bar');
+  var pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn');
+
+  var holes = [];
+  var state = 'idle';          // idle | countdown | playing | paused | over
+  var diffKey = 'normal';
+  var cfg = DIFFS.normal;
+  var best = { easy: 0, normal: 0, hard: 0 };   // メモリ上のみ(保存しない)
+  var t = 0, nextSpawn = 0, countdown = 0, lastFrame = 0, lastHole = -1;
+  var score = 0, combo = 0, maxCombo = 0, hits = 0, whacks = 0;
+  var shownSec = -1, shownCount = -1;
+
+  /* ---------- 穴の生成 ---------- */
+  for (var i = 0; i < 9; i++) {
+    (function (idx) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'hole';
+      el.setAttribute('aria-label', '穴 ' + KEY_ORDER[idx]);
+      el.innerHTML = '<span class="pit"></span><span class="clip"><span class="critter">' + CRITTER_SVG +
+        '</span></span><span class="keyhint">' + KEY_ORDER[idx] + '</span>';
+      el.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        whack(idx);
+      });
+      // キーボード(Enter/Space)でフォーカス中の穴を叩けるようにする
+      el.addEventListener('click', function (e) { if (e.detail === 0) whack(idx); });
+      el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      gridEl.appendChild(el);
+      holes.push({ el: el, type: null, state: 'down', until: 0, freeAt: 0 });
+    })(i);
+  }
+
+  /* ---------- 効果音 (Web Audio で合成) ---------- */
+  var audio = null, muted = false;
+  function initAudio() {
+    if (audio) { if (audio.state === 'suspended') audio.resume(); return; }
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audio = new AC();
+    } catch (err) { audio = null; }
+  }
+  function tone(freq, dur, type, vol, slideTo, delay) {
+    if (!audio || muted) return;
+    try {
+      var start = audio.currentTime + (delay || 0);
+      var osc = audio.createOscillator(), gain = audio.createGain();
+      osc.type = type || 'square';
+      osc.frequency.setValueAtTime(freq, start);
+      if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + dur);
+      gain.gain.setValueAtTime(vol || 0.1, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      osc.connect(gain); gain.connect(audio.destination);
+      osc.start(start); osc.stop(start + dur + 0.02);
+    } catch (err) { /* 音が出せなくてもゲームは続ける */ }
+  }
+  var sfx = {
+    hit: function (c) { tone(320 + Math.min(c, 12) * 35, 0.1, 'square', 0.09, 160); },
+    gold: function () { tone(880, 0.09, 'triangle', 0.14); tone(1320, 0.16, 'triangle', 0.14, null, 0.08); },
+    bomb: function () { tone(160, 0.4, 'sawtooth', 0.16, 40); },
+    miss: function () { tone(140, 0.07, 'triangle', 0.07, 100); },
+    tick: function () { tone(660, 0.08, 'sine', 0.1); },
+    go: function () { tone(990, 0.25, 'sine', 0.12); },
+    end: function () { tone(660, 0.14, 'triangle', 0.12); tone(520, 0.14, 'triangle', 0.12, null, 0.15); tone(390, 0.3, 'triangle', 0.12, null, 0.3); }
+  };
+
+  /* ---------- 表示 ---------- */
+  function showPanel(panel) {
+    startPanel.hidden = panel !== startPanel;
+    pausePanel.hidden = panel !== pausePanel;
+    overPanel.hidden = panel !== overPanel;
+    countEl.hidden = panel !== countEl;
+    overlayEl.hidden = !panel;
+  }
+  function bump(el) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+  function multiplier() { return combo >= 10 ? 3 : combo >= 5 ? 2 : 1; }
+  function renderScore() {
+    scoreEl.textContent = score;
+    comboEl.textContent = combo;
+    var m = multiplier();
+    multEl.textContent = m > 1 ? '×' + m : '';
+  }
+  function renderTime() {
+    var remain = Math.max(0, DURATION - t);
+    var sec = Math.ceil(remain / 1000);
+    if (sec !== shownSec) {
+      shownSec = sec;
+      timeEl.textContent = sec;
+      timeEl.classList.toggle('low', sec <= 5 && state === 'playing');
+      if (sec <= 5 && sec > 0 && state === 'playing') sfx.tick();
+    }
+    barEl.style.transform = 'scaleX(' + (remain / DURATION) + ')';
+  }
+  function renderBest() { bestEl.textContent = best[diffKey]; }
+  function popText(hole, text, cls) {
+    var p = document.createElement('span');
+    p.className = 'pop' + (cls ? ' ' + cls : '');
+    p.textContent = text;
+    p.addEventListener('animationend', function () { p.remove(); });
+    hole.el.appendChild(p);
+  }
+  function swingHammer(hole) {
+    var old = hole.el.querySelector('.hammer');
+    if (old) old.remove();
+    var h = document.createElement('span');
+    h.className = 'hammer';
+    h.addEventListener('animationend', function () { h.remove(); });
+    hole.el.appendChild(h);
+  }
+
+  /* ---------- ゲーム進行 ---------- */
+  function lerp(pair, p) { return pair[0] + (pair[1] - pair[0]) * p; }
+
+  function lower(hole) {
+    hole.el.classList.remove('up');
+    hole.state = 'down';
+    hole.freeAt = t + 280;
+  }
+  function clearHoles() {
+    for (var i = 0; i < holes.length; i++) {
+      holes[i].el.className = 'hole';
+      holes[i].state = 'down';
+      holes[i].type = null;
+      holes[i].freeAt = 0;
+    }
+  }
+
+  function spawn() {
+    var up = 0, free = [], i;
+    for (i = 0; i < holes.length; i++) {
+      if (holes[i].state !== 'down') up++;
+      else if (t >= holes[i].freeAt && i !== lastHole) free.push(i);
+    }
+    if (up >= cfg.maxUp || !free.length) return;
+    var idx = free[Math.floor(Math.random() * free.length)];
+    var hole = holes[idx];
+    var p = Math.min(1, t / DURATION);
+    var r = Math.random();
+    var type = r < cfg.bomb ? 'bomb' : (r < cfg.bomb + cfg.gold ? 'gold' : 'normal');
+    var show = lerp(cfg.show, p) * (type === 'gold' ? 0.7 : type === 'bomb' ? 1.1 : 1);
+    hole.type = type;
+    hole.state = 'up';
+    hole.until = t + show;
+    hole.el.className = 'hole ' + type + ' up';
+    lastHole = idx;
+  }
+
+  function update() {
+    if (t >= DURATION) { t = DURATION; endGame(); return; }
+    var changed = false;
+    for (var i = 0; i < holes.length; i++) {
+      var h = holes[i];
+      if (h.state === 'up' && t >= h.until) {
+        if (h.type !== 'bomb' && combo > 0) { combo = 0; changed = true; }  // 逃げられるとコンボ終了
+        lower(h);
+      } else if (h.state === 'hit' && t >= h.until) {
+        lower(h);
+      }
+    }
+    if (t >= nextSpawn) {
+      spawn();
+      nextSpawn = t + lerp(cfg.spawn, Math.min(1, t / DURATION)) * (0.7 + Math.random() * 0.6);
+    }
+    if (changed) renderScore();
+    renderTime();
+  }
+
+  function whack(idx) {
+    if (state !== 'playing') return;
+    var hole = holes[idx];
+    if (hole.state === 'hit') return;        // 連打の2発目は数えない
+    whacks++;
+    swingHammer(hole);
+
+    if (hole.state !== 'up') {               // 空振り
+      combo = 0;
+      sfx.miss();
+      renderScore();
+      return;
+    }
+
+    hole.state = 'hit';
+    hole.until = t + 260;
+    hole.el.classList.add('hit');
+
+    if (hole.type === 'bomb') {
+      score = Math.max(0, score - 20);
+      combo = 0;
+      popText(hole, '−20', 'minus');
+      sfx.bomb();
+      boardEl.classList.remove('shake');
+      void boardEl.offsetWidth;
+      boardEl.classList.add('shake');
+    } else {
+      combo++;
+      hits++;
+      if (combo > maxCombo) maxCombo = combo;
+      var m = multiplier();
+      var pts = (hole.type === 'gold' ? 30 : 10) * m;
+      score += pts;
+      popText(hole, '+' + pts, hole.type === 'gold' || m > 1 ? 'bonus' : '');
+      if (hole.type === 'gold') sfx.gold(); else sfx.hit(combo);
+      bump(scoreEl);
+    }
+    renderScore();
+  }
+
+  function startGame() {
+    initAudio();
+    var checked = document.querySelector('input[name="diff"]:checked');
+    diffKey = checked ? checked.value : 'normal';
+    cfg = DIFFS[diffKey];
+    t = 0; nextSpawn = 300; lastHole = -1;
+    score = 0; combo = 0; maxCombo = 0; hits = 0; whacks = 0;
+    shownSec = -1; shownCount = -1;
+    clearHoles();
+    renderScore(); renderTime(); renderBest();
+    timeEl.classList.remove('low');
+    countdown = 2400;
+    state = 'countdown';
+    pauseBtn.disabled = true;
+    showPanel(countEl);
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  }
+
+  function endGame() {
+    state = 'over';
+    pauseBtn.disabled = true;
+    for (var i = 0; i < holes.length; i++) holes[i].el.classList.remove('up');
+    renderTime();
+    timeEl.classList.remove('low');
+    sfx.end();
+
+    var isBest = score > best[diffKey];
+    if (isBest) best[diffKey] = score;
+    renderBest();
+
+    $('finalScore').textContent = score;
+    $('newBest').hidden = !isBest;
+    $('rHits').textContent = hits;
+    $('rAcc').textContent = (whacks ? Math.round(hits / whacks * 100) : 0) + '%';
+    $('rCombo').textContent = maxCombo;
+    $('rank').textContent = score >= 700 ? 'もぐらマスター!' : score >= 450 ? 'すごうで!' : score >= 220 ? 'なかなか!' : 'おしまい!';
+
+    // 連打中に誤って「もういちど」を押さないよう、少しの間ボタンを無効にする
+    var retry = $('retryBtn'), menu = $('menuBtn');
+    retry.disabled = true; menu.disabled = true;
+    showPanel(overPanel);
+    setTimeout(function () {
+      retry.disabled = false; menu.disabled = false;
+      if (state === 'over') retry.focus();
+    }, 800);
+  }
+
+  function pauseGame() {
+    if (state !== 'playing') return;
+    state = 'paused';
+    pauseBtn.disabled = true;
+    showPanel(pausePanel);
+    $('resumeBtn').focus();
+  }
+  function resumeGame() {
+    if (state !== 'paused') return;
+    initAudio();
+    state = 'playing';
+    pauseBtn.disabled = false;
+    showPanel(null);
+    lastFrame = performance.now();
+  }
+  function toMenu() {
+    state = 'idle';
+    pauseBtn.disabled = true;
+    clearHoles();
+    t = 0; score = 0; combo = 0; shownSec = -1;
+    renderScore(); renderTime();
+    timeEl.classList.remove('low');
+    showPanel(startPanel);
+    $('startBtn').focus();
+  }
+  function toggleMute() {
+    muted = !muted;
+    muteBtn.textContent = muted ? '音: オフ' : '音: オン';
+    muteBtn.setAttribute('aria-pressed', String(muted));
+  }
+
+  /* ---------- メインループ ---------- */
+  function frame(now) {
+    var dt = Math.min(now - lastFrame, 100);
+    if (dt < 0) dt = 0;
+    lastFrame = now;
+    if (state === 'countdown') {
+      countdown -= dt;
+      var n = Math.ceil(countdown / 800);
+      if (n !== shownCount && n > 0) {
+        shownCount = n;
+        countEl.textContent = n;
+        sfx.tick();
+      }
+      if (countdown <= 0) {
+        state = 'playing';
+        pauseBtn.disabled = false;
+        showPanel(null);
+        sfx.go();
+      }
+    } else if (state === 'playing') {
+      t += dt;
+      update();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- 入力 ---------- */
+  $('startBtn').addEventListener('click', startGame);
+  $('retryBtn').addEventListener('click', startGame);
+  $('menuBtn').addEventListener('click', toMenu);
+  $('resumeBtn').addEventListener('click', resumeGame);
+  $('quitBtn').addEventListener('click', toMenu);
+  pauseBtn.addEventListener('click', pauseGame);
+  muteBtn.addEventListener('click', toggleMute);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key;
+    var idx = KEY_ORDER.indexOf(k);
+    if (idx !== -1) {
+      if (state === 'playing') {
+        e.preventDefault();
+        if (!e.repeat) whack(idx);
+      }
+      return;
+    }
+    if (k === 'p' || k === 'P' || k === 'Escape') {
+      if (state === 'playing') pauseGame();
+      else if (state === 'paused') resumeGame();
+    } else if (k === 'm' || k === 'M') {
+      toggleMute();
+    }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) pauseGame();
+  });
+  window.addEventListener('blur', pauseGame);
+
+  /* ---------- 初期化 ---------- */
+  renderScore(); renderTime(); renderBest();
+  showPanel(startPanel);
+  lastFrame = performance.now();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

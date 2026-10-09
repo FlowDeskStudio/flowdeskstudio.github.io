@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qjQpGpqM1+gl5ZH/RaNoyum3Z0Cku2KTctOqTT6SJz8='; script-src-attr 'none'; style-src 'sha256-/4S8hRmlOnARmUbl2/xYfLEsLnCiddGidrVUy2HNr2g='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>迷宮探索 - 3D Maze</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #000; overflow: hidden; color: #eee;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none;
+    touch-action: none;
+  }
+  #game { position: fixed; left: 0; top: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+  #hud {
+    position: fixed; left: 12px; top: 10px; pointer-events: none;
+    font-size: 16px; line-height: 1.5; letter-spacing: .04em;
+    text-shadow: 0 1px 3px #000, 0 0 6px #000;
+    display: none;
+  }
+  #hud b { color: #ffd54a; font-weight: 700; }
+  #hud .row { background: rgba(0,0,0,.35); padding: 2px 10px; border-radius: 6px; margin-bottom: 4px; display: inline-block; }
+  #toast {
+    position: fixed; left: 50%; top: 22%; transform: translateX(-50%);
+    padding: 8px 18px; border-radius: 8px; background: rgba(0,0,0,.6);
+    font-size: 18px; text-align: center; pointer-events: none;
+    text-shadow: 0 1px 3px #000; opacity: 0; transition: opacity .3s;
+    max-width: 86vw;
+  }
+  #pauseBtn {
+    position: fixed; left: 50%; top: 8px; transform: translateX(-50%);
+    width: 44px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,.35);
+    background: rgba(0,0,0,.4); color: #fff; font-size: 16px; display: none; cursor: pointer;
+  }
+  .overlay {
+    position: fixed; left: 0; top: 0; width: 100%; height: 100%;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(4,6,12,.72);
+  }
+  .panel {
+    width: min(92vw, 520px); max-height: 92vh; overflow: auto; box-sizing: border-box;
+    padding: 24px 26px; border-radius: 14px;
+    background: rgba(18,20,30,.92); border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); text-align: center;
+  }
+  .panel h1 { margin: 0 0 6px; font-size: 34px; letter-spacing: .12em; color: #ffd54a; text-shadow: 0 0 18px rgba(255,180,60,.45); }
+  .panel h2 { margin: 0 0 10px; font-size: 26px; letter-spacing: .08em; color: #8ff0d0; }
+  .panel p { margin: 8px 0; font-size: 15px; line-height: 1.7; color: #cfd3dc; }
+  .panel table { margin: 12px auto; border-collapse: collapse; font-size: 14px; text-align: left; color: #cfd3dc; }
+  .panel td { padding: 3px 10px; }
+  .panel td:first-child { color: #ffd54a; white-space: nowrap; text-align: right; }
+  .btn {
+    display: inline-block; margin: 12px 6px 0; padding: 11px 26px; font-size: 17px;
+    font-family: inherit; color: #1a1408; background: linear-gradient(#ffe07a, #f0a830);
+    border: none; border-radius: 9px; cursor: pointer; font-weight: 700; letter-spacing: .08em;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.sub { background: #3a3f50; color: #e6e8ee; font-weight: 400; }
+  .big { font-size: 22px !important; color: #fff !important; }
+  label.opt { display: block; margin-top: 12px; font-size: 14px; color: #cfd3dc; }
+  label.opt input { vertical-align: middle; width: 160px; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="row">階層 <b id="hLevel">1</b></div><br>
+  <div class="row">鍵 <b id="hKeys">0/0</b></div><br>
+  <div class="row">時間 <b id="hTime">00:00.0</b></div>
+</div>
+<div id="toast"></div>
+<button id="pauseBtn" aria-label="一時停止">II</button>
+
+<div class="overlay" id="ovTitle">
+  <div class="panel">
+    <h1>迷宮探索</h1>
+    <p>暗い迷宮に散らばった<b style="color:#ffd54a">鍵</b>をすべて集め、<br>光る<b style="color:#8ff0d0">出口の門</b>から脱出しよう。</p>
+    <table>
+      <tr><td>W A S D / 矢印上下</td><td>移動</td></tr>
+      <tr><td>マウス / 矢印左右 / Q E</td><td>視点を回す</td></tr>
+      <tr><td>Shift</td><td>走る</td></tr>
+      <tr><td>M</td><td>地図の表示切替</td></tr>
+      <tr><td>P / Esc</td><td>一時停止</td></tr>
+      <tr><td>N</td><td>音の入/切</td></tr>
+      <tr><td>タッチ操作</td><td>画面左で移動、右で視点</td></tr>
+    </table>
+    <button class="btn" id="btnStart">探索を始める</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovPause">
+  <div class="panel">
+    <h2>一時停止</h2>
+    <p>歩いた場所は右上の地図に記録されます。</p>
+    <label class="opt">視点の感度 <input type="range" id="sens" min="0.3" max="2.5" step="0.1" value="1"></label>
+    <button class="btn" id="btnResume">再開する</button>
+    <button class="btn sub" id="btnRestart">最初からやり直す</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovClear">
+  <div class="panel">
+    <h2 id="cTitle">階層 1 突破!</h2>
+    <p class="big" id="cTime">タイム 00:00.0</p>
+    <p id="cTotal">合計 00:00.0</p>
+    <p id="cNext">次の迷宮はさらに広くなります。</p>
+    <button class="btn" id="btnNext">次の階層へ</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- 基本要素 ----------
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var $ = function (id) { return document.getElementById(id); };
+  var hud = $('hud'), toastEl = $('toast'), pauseBtn = $('pauseBtn');
+  var ovTitle = $('ovTitle'), ovPause = $('ovPause'), ovClear = $('ovClear');
+
+  // ---------- 定数 ----------
+  var TEX = 64, TEXM = 63, SHADES = 32;
+  var PLANE = 0.75;      // 視野の広さ
+  var FOG = 0.24;        // 暗くなる速さ
+  var RADIUS = 0.22;     // プレイヤーの当たり半径
+
+  // ---------- 描画バッファ ----------
+  var W = 480, H = 270, projScale = 320;
+  var view = document.createElement('canvas');
+  var vctx = view.getContext('2d');
+  var img = null, buf = null, zbuf = null;
+  var dpr = 1, vignette = null;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cw = Math.max(1, Math.floor(window.innerWidth * dpr));
+    var ch = Math.max(1, Math.floor(window.innerHeight * dpr));
+    canvas.width = cw; canvas.height = ch;
+    var aspect = cw / ch;
+    if (aspect < 0.4) aspect = 0.4;
+    if (aspect > 3) aspect = 3;
+    H = Math.round(Math.sqrt(130000 / aspect));
+    W = Math.round(H * aspect);
+    if (W < 64) W = 64;
+    if (H < 64) H = 64;
+    view.width = W; view.height = H;
+    img = vctx.createImageData(W, H);
+    buf = new Uint32Array(img.data.buffer);
+    zbuf = new Float32Array(W);
+    projScale = (W / 2) / PLANE;
+    var r = Math.sqrt(cw * cw + ch * ch) / 2;
+    vignette = ctx.createRadialGradient(cw / 2, ch / 2, r * 0.45, cw / 2, ch / 2, r);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
+  }
+
+  // ---------- 乱数・ノイズ ----------
+  function hash(x, y, s) {
+    var n = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 1442695041)) | 0;
+    n = Math.imul(n ^ (n >>> 13), 1274126177);
+    n ^= n >>> 16;
+    return (n >>> 0) / 4294967296;
+  }
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = rnd(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function clamp255(v) { return v < 0 ? 0 : (v > 255 ? 255 : v | 0); }
+
+  // ---------- テクスチャ ----------
+  // fn(x,y) -> [r,g,b]。明るさ段階ごとの配列を事前に作る。
+  function makeTexture(fn) {
+    var base = new Uint8Array(TEX * TEX * 3);
+    var x, y, i = 0, c;
+    for (y = 0; y < TEX; y++) {
+      for (x = 0; x < TEX; x++) {
+        c = fn(x, y);
+        base[i++] = clamp255(c[0]); base[i++] = clamp255(c[1]); base[i++] = clamp255(c[2]);
+      }
+    }
+    var levels = [];
+    for (var l = 0; l < SHADES; l++) {
+      var arr = new Uint32Array(TEX * TEX);
+      var f = l / (SHADES - 1);
+      for (i = 0; i < TEX * TEX; i++) {
+        var r = (base[i * 3] * f) | 0, g = (base[i * 3 + 1] * f) | 0, b = (base[i * 3 + 2] * f) | 0;
+        arr[i] = (0xFF000000 | (b << 16) | (g << 8) | r) >>> 0;
+      }
+      levels.push(arr);
+    }
+    return levels;
+  }
+
+  var PALETTES = [
+    { wall: [156, 80, 58],  mortar: [74, 66, 60],  floor: [96, 90, 84],   ceil: [54, 47, 43], map: '#b5694f' },
+    { wall: [98, 122, 94],  mortar: [48, 58, 48],  floor: [84, 88, 72],   ceil: [40, 49, 43], map: '#7fa27a' },
+    { wall: [86, 114, 158], mortar: [44, 54, 78],  floor: [72, 84, 106],  ceil: [36, 43, 62], map: '#7396cf' },
+    { wall: [182, 150, 98], mortar: [96, 78, 52],  floor: [124, 104, 74], ceil: [72, 58, 41], map: '#cdaa6e' },
+    { wall: [128, 86, 146], mortar: [60, 42, 70],  floor: [82, 72, 96],   ceil: [45, 37, 56], map: '#a877bd' }
+  ];
+  var wallTex = [null, null, null], floorTex = null, ceilTex = null, pal = PALETTES[0];
+
+  function buildTextures(p, seed) {
+    function brick(variant) {
+      return function (x, y) {
+        var row = y >> 4;
+        var off = (row & 1) ? 16 : 0;
+        var xx = (x + off) & TEXM;
+        var bx = xx >> 5, lx = xx & 31, ly = y & 15;
+        var n = 0.9 + 0.2 * hash(x, y, seed + 1);
+        if (lx < 2 || ly < 2) {
+          return [p.mortar[0] * n, p.mortar[1] * n, p.mortar[2] * n];
+        }
+        var s = (0.78 + 0.38 * hash(bx, row, seed + 5)) * n;
+        if (lx === 2 || ly === 2) s *= 1.18;
+        if (lx === 31 || ly === 15) s *= 0.78;
+        var r = p.wall[0] * s, g = p.wall[1] * s, b = p.wall[2] * s;
+        if (variant) {
+          var m = hash(x >> 2, y >> 2, seed + 9) * 0.6 + hash(x >> 3, y >> 3, seed + 11) * 0.4;
+          if (m > 0.55) {
+            var k = Math.min(1, (m - 0.55) * 4);
+            r = r * (1 - k) + (r * 0.45) * k;
+            g = g * (1 - k) + (g * 0.62 + 18) * k;
+            b = b * (1 - k) + (b * 0.45) * k;
+          }
+        }
+        return [r, g, b];
+      };
+    }
+    wallTex[1] = makeTexture(brick(0));
+    wallTex[2] = makeTexture(brick(1));
+    floorTex = makeTexture(function (x, y) {
+      var lx = x & 31, ly = y & 31;
+      var n = 0.86 + 0.28 * hash(x, y, seed + 21);
+      if (lx < 1 || ly < 1) return [p.floor[0] * 0.4 * n, p.floor[1] * 0.4 * n, p.floor[2] * 0.4 * n];
+      var s = (0.8 + 0.3 * hash(x >> 5, y >> 5, seed + 23)) * n;
+      if (hash(x >> 1, y >> 1, seed + 25) > 0.93) s *= 0.75;
+      if (lx === 1 || ly === 1) s *= 1.12;
+      return [p.floor[0] * s, p.floor[1] * s, p.floor[2] * s];
+    });
+    ceilTex = makeTexture(function (x, y) {
+      var n = 0.85 + 0.3 * hash(x, y, seed + 31);
+      var s = n;
+      if ((x & 31) < 3) s *= 0.55;
+      else if ((y & 15) === 0) s *= 0.75;
+      return [p.ceil[0] * s, p.ceil[1] * s, p.ceil[2] * s];
+    });
+  }
+
+  // ---------- スプライト画像(Canvasで手描き) ----------
+  function spriteFromCanvas(draw) {
+    var c = document.createElement('canvas');
+    c.width = TEX; c.height = TEX;
+    var g = c.getContext('2d');
+    draw(g);
+    var d = g.getImageData(0, 0, TEX, TEX);
+    return new Uint32Array(d.data.buffer.slice(0));
+  }
+  var keySprite = null, portalLocked = [], portalOpen = [];
+  var PORTAL_FRAMES = 12;
+
+  function buildSprites() {
+    keySprite = spriteFromCanvas(function (g) {
+      g.shadowColor = 'rgba(255,200,60,0.9)';
+      g.shadowBlur = 7;
+      g.strokeStyle = '#ffd54a'; g.fillStyle = '#ffd54a';
+      g.lineWidth = 6;
+      g.beginPath(); g.arc(19, 32, 10, 0, Math.PI * 2); g.stroke();
+      g.fillRect(28, 29, 29, 6);
+      g.fillRect(44, 34, 5, 9);
+      g.fillRect(52, 34, 5, 12);
+      g.shadowBlur = 0;
+      g.strokeStyle = '#fff3b8'; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(19, 32, 11.5, Math.PI * 1.05, Math.PI * 1.6); g.stroke();
+      g.fillStyle = '#fff3b8'; g.fillRect(30, 29, 25, 1.5);
+    });
+    function portal(rgb, f) {
+      return spriteFromCanvas(function (g) {
+        var ph = f / PORTAL_FRAMES * Math.PI * 2;
+        g.save();
+        g.translate(32, 33);
+        g.scale(0.62, 1);
+        var gr = g.createRadialGradient(0, 0, 2, 0, 0, 29);
+        gr.addColorStop(0, 'rgba(255,255,255,0.95)');
+        gr.addColorStop(0.25, 'rgba(' + rgb + ',0.85)');
+        gr.addColorStop(0.8, 'rgba(' + rgb + ',0.35)');
+        gr.addColorStop(1, 'rgba(' + rgb + ',0)');
+        g.fillStyle = gr;
+        g.beginPath(); g.arc(0, 0, 29, 0, Math.PI * 2); g.fill();
+        g.lineCap = 'round';
+        for (var k = 0; k < 3; k++) {
+          var a0 = ph * ((k & 1) ? -1 : 1) + k * 2.1;
+          g.strokeStyle = 'rgba(255,255,255,' + (0.85 - k * 0.2) + ')';
+          g.lineWidth = 2.5;
+          g.beginPath(); g.arc(0, 0, 9 + k * 6, a0, a0 + 2.3); g.stroke();
+        }
+        g.strokeStyle = 'rgba(' + rgb + ',1)';
+        g.lineWidth = 3;
+        g.beginPath(); g.arc(0, 0, 27, 0, Math.PI * 2); g.stroke();
+        g.restore();
+      });
+    }
+    for (var f = 0; f < PORTAL_FRAMES; f++) {
+      portalLocked.push(portal('255,84,60', f));
+      portalOpen.push(portal('80,255,200', f));
+    }
+  }
+
+  // ---------- 迷路 ----------
+  var MW = 0, MH = 0, map = null, seen = null;
+  var keys = [], exitX = 0, exitY = 0, nKeys = 0, keysGot = 0;
+
+  function genMaze(cw, ch, wantKeys) {
+    MW = cw * 2 + 1; MH = ch * 2 + 1;
+    map = new Uint8Array(MW * MH);
+    seen = new Uint8Array(MW * MH);
+    var i, x, y;
+    for (i = 0; i < map.length; i++) map[i] = 1;
+    var visited = new Uint8Array(cw * ch);
+    var stack = [0];
+    visited[0] = 1; map[1 * MW + 1] = 0;
+    var DX = [1, -1, 0, 0], DY = [0, 0, 1, -1];
+    while (stack.length) {
+      var cur = stack[stack.length - 1];
+      var cx = cur % cw, cy = (cur / cw) | 0;
+      var opts = [];
+      for (i = 0; i < 4; i++) {
+        var nx = cx + DX[i], ny = cy + DY[i];
+        if (nx >= 0 && ny >= 0 && nx < cw && ny < ch && !visited[ny * cw + nx]) opts.push(i);
+      }
+      if (!opts.length) { stack.pop(); continue; }
+      var d = opts[rnd(opts.length)];
+      var tx = cx + DX[d], ty = cy + DY[d];
+      map[(cy * 2 + 1 + DY[d]) * MW + (cx * 2 + 1 + DX[d])] = 0;
+      map[(ty * 2 + 1) * MW + (tx * 2 + 1)] = 0;
+      visited[ty * cw + tx] = 1;
+      stack.push(ty * cw + tx);
+    }
+    // 回り道を少し追加
+    var extra = Math.floor(cw * ch / 10), tries = extra * 20;
+    while (extra > 0 && tries-- > 0) {
+      x = 1 + rnd(MW - 2); y = 1 + rnd(MH - 2);
+      if (((x & 1) ^ (y & 1)) === 1 && map[y * MW + x] === 1) { map[y * MW + x] = 0; extra--; }
+    }
+    // 壁の模様違い
+    for (i = 0; i < map.length; i++) if (map[i] === 1 && Math.random() < 0.2) map[i] = 2;
+
+    // スタートからの距離
+    var dist = new Int32Array(MW * MH);
+    for (i = 0; i < dist.length; i++) dist[i] = -1;
+    var q = [1 * MW + 1], head = 0;
+    dist[q[0]] = 0;
+    while (head < q.length) {
+      var c = q[head++];
+      var nb = [c + 1, c - 1, c + MW, c - MW];
+      for (i = 0; i < 4; i++) {
+        var n = nb[i];
+        if (n >= 0 && n < map.length && map[n] === 0 && dist[n] < 0) { dist[n] = dist[c] + 1; q.push(n); }
+      }
+    }
+    var best = 0, bestI = 1 * MW + 1;
+    for (y = 1; y < MH; y += 2) for (x = 1; x < MW; x += 2) {
+      i = y * MW + x;
+      if (dist[i] > best) { best = dist[i]; bestI = i; }
+    }
+    exitX = (bestI % MW) + 0.5; exitY = ((bestI / MW) | 0) + 0.5;
+
+    // 鍵の配置(行き止まりを優先)
+    var dead = [], other = [];
+    for (y = 1; y < MH; y += 2) for (x = 1; x < MW; x += 2) {
+      i = y * MW + x;
+      if (i === bestI || dist[i] < 5) continue;
+      var open = (map[i + 1] === 0) + (map[i - 1] === 0) + (map[i + MW] === 0) + (map[i - MW] === 0);
+      if (open === 1) dead.push(i); else other.push(i);
+    }
+    shuffle(dead); shuffle(other);
+    var pool = dead.concat(other);
+    keys = [];
+    for (i = 0; i < pool.length && keys.length < wantKeys; i++) {
+      keys.push({ x: (pool[i] % MW) + 0.5, y: ((pool[i] / MW) | 0) + 0.5, alive: true, ph: Math.random() * 6 });
+    }
+    nKeys = keys.length; keysGot = 0;
+  }
+
+  // ---------- 状態 ----------
+  var state = 'title';       // title / play / pause / clear
+  var level = 1, levelTime = 0, totalTime = 0;
+  var px = 1.5, py = 1.5, ang = 0;
+  var bobPhase = 0, bob = 0, lastStep = 0;
+  var gameT = 0, flash = 0, pausedAt = 0;
+  var showMap = true, sens = 1, muted = false;
+  var toastTimer = 0;
+
+  function buildLevel() {
+    pal = PALETTES[(level - 1) % PALETTES.length];
+    buildTextures(pal, level * 97 + rnd(1000));
+    var size = Math.min(5 + level, 14);
+    genMaze(size, size, Math.min(5, 1 + level));
+    px = 1.5; py = 1.5;
+    ang = (map[1 * MW + 2] === 0) ? 0 : Math.PI / 2;
+    levelTime = 0; bobPhase = 0; bob = 0; lastStep = 0; flash = 0;
+    seen[1 * MW + 1] = 1;
+  }
+
+  function setOverlay(which) {
+    ovTitle.style.display = which === 'title' ? 'flex' : 'none';
+    ovPause.style.display = which === 'pause' ? 'flex' : 'none';
+    ovClear.style.display = which === 'clear' ? 'flex' : 'none';
+    hud.style.display = (which === 'title') ? 'none' : 'block';
+    pauseBtn.style.display = (which === null) ? 'block' : 'none';
+  }
+
+  function toast(text, sec) {
+    toastEl.textContent = text;
+    toastEl.style.opacity = '1';
+    toastTimer = sec || 2.5;
+  }
+
+  function fmt(t) {
+    var m = Math.floor(t / 60), s = Math.floor(t % 60), d = Math.floor((t * 10) % 10);
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s + '.' + d;
+  }
+
+  function startLevel() {
+    buildLevel();
+    state = 'play';
+    setOverlay(null);
+    toast('鍵を ' + nKeys + ' 個集めて、出口の門を探そう', 3.5);
+    clearInput();
+    requestLock();
+  }
+  function newGame() { level = 1; totalTime = 0; startLevel(); }
+  function pause() {
+    if (state !== 'play') return;
+    state = 'pause'; pausedAt = performance.now();
+    setOverlay('pause'); clearInput();
+    if (document.pointerLockElement === canvas && document.exitPointerLock) document.exitPointerLock();
+  }
+  function resume() {
+    if (state !== 'pause') return;
+    state = 'play'; setOverlay(null); clearInput(); requestLock();
+  }
+  function levelClear() {
+    state = 'clear';
+    totalTime += levelTime;
+    $('cTitle').textContent = '階層 ' + level + ' 突破!';
+    $('cTime').textContent = 'タイム ' + fmt(levelTime);
+    $('cTotal').textContent = '合計 ' + fmt(totalTime);
+    setOverlay('clear'); clearInput();
+    if (document.pointerLockElement === canvas && document.exitPointerLock) document.exitPointerLock();
+    beep(523, 0.15, 'square', 0.06, 0); beep(659, 0.15, 'square', 0.06, 0.13);
+    beep(784, 0.15, 'square', 0.06, 0.26); beep(1047, 0.4, 'square', 0.06, 0.39);
+  }
+  function nextLevel() { if (state !== 'clear') return; level++; startLevel(); }
+
+  // ---------- 音(合成音のみ) ----------
+  var actx = null;
+  function initAudio() {
+    try {
+      if (!actx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) actx = new AC();
+      }
+      if (actx && actx.state === 'suspended') actx.resume();
+    } catch (e) { actx = null; }
+  }
+  function beep(freq, dur, type, vol, delay) {
+    if (!actx || muted) return;
+    try {
+      var t = actx.currentTime + (delay || 0);
+      var o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* 音が出せなくても続行 */ }
+  }
+
+  // ---------- 入力 ----------
+  var held = {};
+  var locked = false, mouseDown = false;
+  var joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 };
+  var look = { id: null, lx: 0 };
+
+  function clearInput() { held = {}; joy.id = null; look.id = null; mouseDown = false; }
+
+  function requestLock() {
+    try {
+      if (canvas.requestPointerLock) {
+        var p = canvas.requestPointerLock();
+        if (p && typeof p.catch === 'function') p.catch(function () {});
+      }
+    } catch (e) { /* ロックできなくてもキーで操作可能 */ }
+  }
+
+  document.addEventListener('pointerlockchange', function () {
+    locked = (document.pointerLockElement === canvas);
+    if (!locked && state === 'play') pause();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    var c = e.code;
+    if (c === 'ArrowUp' || c === 'ArrowDown' || c === 'ArrowLeft' || c === 'ArrowRight' || c === 'Space') e.preventDefault();
+    if (e.repeat) return;
+    held[c] = true;
+    if (c === 'KeyN') { muted = !muted; if (state === 'play') toast(muted ? '音: 切' : '音: 入', 1.2); }
+    if (state === 'play') {
+      if (c === 'KeyM') showMap = !showMap;
+      else if (c === 'KeyP' || c === 'Escape') pause();
+    } else if (state === 'pause') {
+      if ((c === 'KeyP' || c === 'Enter') && performance.now() - pausedAt > 300) resume();
+    } else if (state === 'title') {
+      if (c === 'Enter' || c === 'Space') { initAudio(); newGame(); }
+    } else if (state === 'clear') {
+      if (c === 'Enter' || c === 'Space') nextLevel();
+    }
+  });
+  document.addEventListener('keyup', function (e) { held[e.code] = false; });
+  window.addEventListener('blur', function () { clearInput(); if (state === 'play') pause(); });
+
+  canvas.addEventListener('mousedown', function () {
+    mouseDown = true;
+    if (state === 'play' && !locked) requestLock();
+  });
+  document.addEventListener('mouseup', function () { mouseDown = false; });
+  document.addEventListener('mousemove', function (e) {
+    if (state !== 'play') return;
+    var mx = e.movementX || 0;
+    if (locked) ang += mx * 0.0024 * sens;
+    else if (mouseDown) ang += mx * 0.005 * sens;
+  });
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    if (state !== 'play') return;
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      if (t.clientX < window.innerWidth / 2 && joy.id === null) {
+        joy.id = t.identifier; joy.ox = joy.x = t.clientX; joy.oy = joy.y = t.clientY;
+      } else if (look.id === null) {
+        look.id = t.identifier; look.lx = t.clientX;
+      }
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      if (t.identifier === joy.id) { joy.x = t.clientX; joy.y = t.clientY; }
+      else if (t.identifier === look.id) {
+        if (state === 'play') ang += (t.clientX - look.lx) * 0.007 * sens;
+        look.lx = t.clientX;
+      }
+    }
+  }, { passive: false });
+  function touchEnd(e) {
+    e.preventDefault();
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      if (t.identifier === joy.id) joy.id = null;
+      if (t.identifier === look.id) look.id = null;
+    }
+  }
+  canvas.addEventListener('touchend', touchEnd, { passive: false });
+  canvas.addEventListener('touchcancel', touchEnd, { passive: false });
+
+  $('btnStart').addEventListener('click', function () { initAudio(); newGame(); });
+  $('btnResume').addEventListener('click', function () { initAudio(); resume(); });
+  $('btnRestart').addEventListener('click', function () { initAudio(); state = 'title'; newGame(); });
+  $('btnNext').addEventListener('click', function () { initAudio(); nextLevel(); });
+  pauseBtn.addEventListener('click', function () { pause(); });
+  $('sens').addEventListener('input', function () { sens = parseFloat(this.value) || 1; });
+
+  // ---------- 更新 ----------
+  function solid(x, y) {
+    var mx = x | 0, my = y | 0;
+    if (mx < 0 || my < 0 || mx >= MW || my >= MH) return true;
+    return map[my * MW + mx] !== 0;
+  }
+  function free(x, y) {
+    return !solid(x - RADIUS, y - RADIUS) && !solid(x + RADIUS, y - RADIUS) &&
+           !solid(x - RADIUS, y + RADIUS) && !solid(x + RADIUS, y + RADIUS);
+  }
+
+  function update(dt) {
+    gameT += dt;
+    levelTime += dt;
+
+    var turn = 0;
+    if (held.ArrowLeft || held.KeyQ) turn -= 1;
+    if (held.ArrowRight || held.KeyE) turn += 1;
+    ang += turn * 2.4 * dt;
+
+    var f = 0, s = 0;
+    if (held.KeyW || held.ArrowUp) f += 1;
+    if (held.KeyS || held.ArrowDown) f -= 1;
+    if (held.KeyD) s += 1;
+    if (held.KeyA) s -= 1;
+    if (joy.id !== null) {
+      var jx = (joy.x - joy.ox) / 55, jy = (joy.y - joy.oy) / 55;
+      var jl = Math.sqrt(jx * jx + jy * jy);
+      if (jl > 1) { jx /= jl; jy /= jl; }
+      if (jl > 0.12) { s += jx; f -= jy; }
+    }
+    var len = Math.sqrt(f * f + s * s);
+    if (len > 1) { f /= len; s /= len; len = 1; }
+    var run = held.ShiftLeft || held.ShiftRight;
+    var speed = run ? 4.0 : 2.6;
+    if (len > 0.01) {
+      var ca = Math.cos(ang), sa = Math.sin(ang);
+      var mvx = (ca * f - sa * s) * speed * dt;
+      var mvy = (sa * f + ca * s) * speed * dt;
+      var ox = px, oy = py;
+      if (free(px + mvx, py)) px += mvx;
+      if (free(px, py + mvy)) py += mvy;
+      var moved = Math.sqrt((px - ox) * (px - ox) + (py - oy) * (py - oy));
+      bobPhase += moved * 3.4;
+      var st = Math.floor(bobPhase / Math.PI);
+      if (st !== lastStep) { lastStep = st; beep(62 + Math.random() * 22, 0.07, 'triangle', 0.07, 0); }
+      bob = Math.sin(bobPhase * 2) * H * 0.012;
+    } else {
+      bob *= Math.max(0, 1 - dt * 10);
+    }
+
+    // 鍵
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (!k.alive) continue;
+      var dx = k.x - px, dy = k.y - py;
+      if (dx * dx + dy * dy < 0.2) {
+        k.alive = false; keysGot++; flash = 0.35;
+        beep(880, 0.12, 'square', 0.06, 0); beep(1320, 0.2, 'square', 0.06, 0.1);
+        if (keysGot >= nKeys) toast('すべての鍵を手に入れた!出口の門が開いた', 3.5);
+        else toast('鍵を手に入れた(残り ' + (nKeys - keysGot) + ' 個)', 2.2);
+      }
+    }
+    // 出口
+    var ex = exitX - px, ey = exitY - py;
+    if (ex * ex + ey * ey < 0.22) {
+      if (keysGot >= nKeys) levelClear();
+      else if (toastTimer < 0.6) toast('門は閉ざされている。鍵があと ' + (nKeys - keysGot) + ' 個必要', 2);
+    }
+    if (flash > 0) flash -= dt;
+  }
+
+  // ---------- 描画 ----------
+  var sprList = [];
+
+  function drawSprite(pix, sx, sy, size, vOff, wFac, hz, dirX, dirY, plX, plY) {
+    var dx = sx - px, dy = sy - py;
+    var det = plX * dirY - dirX * plY;
+    var tx = (dirY * dx - dirX * dy) / det;
+    var ty = (-plY * dx + plX * dy) / det;
+    if (ty < 0.15) return;
+    var scr = (W / 2) * (1 + tx / ty);
+    var h = projScale / ty * size;
+    var flip = wFac < 0;
+    var w = h * Math.max(0.12, Math.abs(wFac));
+    if (w < 1 || h < 1) return;
+    var cy = hz + vOff * projScale / ty;
+    var x0 = scr - w / 2, y0 = cy - h / 2;
+    var xs = Math.max(0, Math.ceil(x0)), xe = Math.min(W - 1, Math.floor(x0 + w));
+    var ys = Math.max(0, Math.ceil(y0)), ye = Math.min(H - 1, Math.floor(y0 + h));
+    for (var x = xs; x <= xe; x++) {
+      if (ty >= zbuf[x]) continue;
+      var u = ((x - x0) / w * TEX) | 0;
+      if (u < 0) u = 0; else if (u > TEXM) u = TEXM;
+      if (flip) u = TEXM - u;
+      for (var y = ys; y <= ye; y++) {
+        var v = ((y - y0) / h * TEX) | 0;
+        if (v < 0) v = 0; else if (v > TEXM) v = TEXM;
+        var c = pix[v * TEX + u];
+        var a = c >>> 24;
+        if (a < 8) continue;
+        var o = y * W + x;
+        if (a > 247) { buf[o] = (c | 0xFF000000) >>> 0; continue; }
+        var d = buf[o], ia = 255 - a;
+        var r = ((c & 255) * a + (d & 255) * ia) >> 8;
+        var g = (((c >> 8) & 255) * a + ((d >> 8) & 255) * ia) >> 8;
+        var b = (((c >> 16) & 255) * a + ((d >> 16) & 255) * ia) >> 8;
+        buf[o] = (0xFF000000 | (b << 16) | (g << 8) | r) >>> 0;
+      }
+    }
+  }
+
+  function render() {
+    var dirX = Math.cos(ang), dirY = Math.sin(ang);
+    var plX = -dirY * PLANE, plY = dirX * PLANE;
+    var hz = ((H / 2) + bob) | 0;
+    var flicker = 0.95 + 0.05 * Math.sin(gameT * 13) * Math.sin(gameT * 7.3);
+    var x, y, level_, t, o;
+    var maxL = SHADES - 1;
+
+    // 床と天井
+    var r0x = dirX - plX, r0y = dirY - plY, r1x = dirX + plX, r1y = dirY + plY;
+    var camH = 0.5 * projScale;
+    for (y = 0; y < H; y++) {
+      var isFloor = y >= hz;
+      var p = isFloor ? (y - hz + 0.5) : (hz - y - 0.5);
+      if (p < 0.5) p = 0.5;
+      var rowDist = camH / p;
+      level_ = (Math.exp(-rowDist * FOG) * flicker * (maxL + 0.99)) | 0;
+      if (level_ > maxL) level_ = maxL;
+      o = y * W;
+      if (level_ <= 0) { buf.fill(0xFF000000, o, o + W); continue; }
+      t = (isFloor ? floorTex : ceilTex)[level_];
+      var fx = (px + rowDist * r0x) * TEX, fy = (py + rowDist * r0y) * TEX;
+      var stx = rowDist * (r1x - r0x) / W * TEX, sty = rowDist * (r1y - r0y) / W * TEX;
+      for (x = 0; x < W; x++) {
+        buf[o + x] = t[((fy & TEXM) << 6) | (fx & TEXM)];
+        fx += stx; fy += sty;
+      }
+    }
+
+    // 壁
+    var pmx = px | 0, pmy = py | 0;
+    if (pmx >= 0 && pmy >= 0 && pmx < MW && pmy < MH) seen[pmy * MW + pmx] = 1;
+    for (x = 0; x < W; x++) {
+      var camX = 2 * x / W - 1;
+      var rdx = dirX + plX * camX, rdy = dirY + plY * camX;
+      var mapX = pmx, mapY = pmy;
+      var ddx = rdx === 0 ? 1e30 : Math.abs(1 / rdx);
+      var ddy = rdy === 0 ? 1e30 : Math.abs(1 / rdy);
+      var stepX, stepY, sdx, sdy;
+      if (rdx < 0) { stepX = -1; sdx = (px - mapX) * ddx; } else { stepX = 1; sdx = (mapX + 1 - px) * ddx; }
+      if (rdy < 0) { stepY = -1; sdy = (py - mapY) * ddy; } else { stepY = 1; sdy = (mapY + 1 - py) * ddy; }
+      var side = 0, cell = 0, steps = 0, hit = false;
+      while (steps < 80) {
+        if (sdx < sdy) { sdx += ddx; mapX += stepX; side = 0; }
+        else { sdy += ddy; mapY += stepY; side = 1; }
+        steps++;
+        if (mapX < 0 || mapY < 0 || mapX >= MW || mapY >= MH) break;
+        var mi = mapY * MW + mapX;
+        cell = map[mi];
+        if (steps < 12) seen[mi] = 1;
+        if (cell > 0) { hit = true; break; }
+      }
+      if (!hit) { zbuf[x] = 1e9; continue; }
+      var perp = side === 0 ? (sdx - ddx) : (sdy - ddy);
+      if (perp < 0.02) perp = 0.02;
+      zbuf[x] = perp;
+      var wallX = side === 0 ? (py + perp * rdy) : (px + perp * rdx);
+      wallX -= Math.floor(wallX);
+      var texX = (wallX * TEX) | 0;
+      if (texX > TEXM) texX = TEXM;
+      var light = Math.exp(-perp * FOG) * flicker;
+      if (side === 1) light *= 0.72;
+      level_ = (light * (maxL + 0.99)) | 0;
+      if (level_ > maxL) level_ = maxL;
+      if (level_ < 0) level_ = 0;
+      t = (wallTex[cell] || wallTex[1])[level_];
+      var lineH = projScale / perp;
+      var ds = hz - lineH / 2, de = hz + lineH / 2;
+      var y0 = Math.ceil(ds); if (y0 < 0) y0 = 0;
+      var y1 = Math.ceil(de); if (y1 > H) y1 = H;
+      var tstep = TEX / lineH;
+      var tpos = (y0 - ds) * tstep;
+      for (y = y0; y < y1; y++) {
+        var tyy = tpos | 0;
+        if (tyy > TEXM) tyy = TEXM;
+        buf[y * W + x] = t[(tyy << 6) | texX];
+        tpos += tstep;
+      }
+    }
+
+    // スプライト(遠い順)
+    sprList.length = 0;
+    var i, k;
+    for (i = 0; i < keys.length; i++) {
+      k = keys[i];
+      if (!k.alive) continue;
+      sprList.push({ d: (k.x - px) * (k.x - px) + (k.y - py) * (k.y - py), kind: 0, k: k });
+    }
+    sprList.push({ d: (exitX - px) * (exitX - px) + (exitY - py) * (exitY - py), kind: 1, k: null });
+    sprList.sort(function (a, b) { return b.d - a.d; });
+    for (i = 0; i < sprList.length; i++) {
+      var sp = sprList[i];
+      if (sp.kind === 0) {
+        k = sp.k;
+        drawSprite(keySprite, k.x, k.y, 0.5, 0.1 + Math.sin(gameT * 3 + k.ph) * 0.05,
+          Math.cos(gameT * 2.2 + k.ph), hz, dirX, dirY, plX, plY);
+      } else {
+        var fr = Math.floor(gameT * 10) % PORTAL_FRAMES;
+        var set = (keysGot >= nKeys) ? portalOpen : portalLocked;
+        drawSprite(set[fr], exitX, exitY, 0.95, 0.02, 1, hz, dirX, dirY, plX, plY);
+      }
+    }
+
+    // 画面へ転送
+    vctx.putImageData(img, 0, 0);
+    var cw = canvas.width, ch = canvas.height;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(view, 0, 0, cw, ch);
+    if (vignette) { ctx.fillStyle = vignette; ctx.fillRect(0, 0, cw, ch); }
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,220,100,' + Math.min(0.35, flash).toFixed(3) + ')';
+      ctx.fillRect(0, 0, cw, ch);
+    }
+    if (state !== 'title') {
+      if (showMap) drawMap(cw, ch);
+      drawTouch();
+    }
+  }
+
+  function drawMap(cw, ch) {
+    var size = Math.floor(Math.min(220 * dpr, Math.min(cw, ch) * 0.34));
+    var cs = size / Math.max(MW, MH);
+    var ox = cw - size - 10 * dpr, oy = 10 * dpr;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(ox - 3, oy - 3, cs * MW + 6, cs * MH + 6);
+    var x, y, i;
+    for (y = 0; y < MH; y++) {
+      for (x = 0; x < MW; x++) {
+        i = y * MW + x;
+        if (!seen[i]) continue;
+        ctx.fillStyle = map[i] ? pal.map : 'rgba(230,230,240,0.16)';
+        ctx.fillRect(ox + x * cs, oy + y * cs, cs + 0.6, cs + 0.6);
+      }
+    }
+    var ei = (exitY | 0) * MW + (exitX | 0);
+    if (seen[ei]) {
+      ctx.fillStyle = (keysGot >= nKeys) ? '#50ffc8' : '#ff5a40';
+      ctx.fillRect(ox + (exitX - 0.4) * cs, oy + (exitY - 0.4) * cs, cs * 0.8, cs * 0.8);
+    }
+    ctx.fillStyle = '#ffd54a';
+    for (i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (!k.alive || !seen[(k.y | 0) * MW + (k.x | 0)]) continue;
+      ctx.beginPath();
+      ctx.arc(ox + k.x * cs, oy + k.y * cs, Math.max(2, cs * 0.32), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    var r = Math.max(4 * dpr, cs * 0.6);
+    ctx.save();
+    ctx.translate(ox + px * cs, oy + py * cs);
+    ctx.rotate(ang);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(r, 0); ctx.lineTo(-r * 0.7, r * 0.65); ctx.lineTo(-r * 0.35, 0); ctx.lineTo(-r * 0.7, -r * 0.65);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawTouch() {
+    if (joy.id === null) return;
+    var ox = joy.ox * dpr, oy = joy.oy * dpr;
+    var dx = (joy.x - joy.ox), dy = (joy.y - joy.oy);
+    var l = Math.sqrt(dx * dx + dy * dy);
+    if (l > 55) { dx = dx / l * 55; dy = dy / l * 55; }
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 2 * dpr;
+    ctx.beginPath(); ctx.arc(ox, oy, 55 * dpr, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.arc(ox + dx * dpr, oy + dy * dpr, 24 * dpr, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ---------- HUD ----------
+  var hudCache = { l: '', k: '', t: '' };
+  function updateHud() {
+    var l = String(level), k = keysGot + '/' + nKeys, t = fmt(levelTime);
+    if (l !== hudCache.l) { hudCache.l = l; $('hLevel').textContent = l; }
+    if (k !== hudCache.k) { hudCache.k = k; $('hKeys').textContent = k; }
+    if (t !== hudCache.t) { hudCache.t = t; $('hTime').textContent = t; }
+  }
+
+  // ---------- メインループ ----------
+  var lastTs = 0;
+  function frame(ts) {
+    var dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    if (!(dt > 0)) dt = 0;
+    if (dt > 0.05) dt = 0.05;
+    if (state === 'play') {
+      update(dt);
+      updateHud();
+    } else if (state === 'title') {
+      gameT += dt;
+      ang += dt * 0.22;
+    } else if (state === 'clear') {
+      gameT += dt;
+    }
+    if (toastTimer > 0) {
+      toastTimer -= dt;
+      if (toastTimer <= 0 || state === 'title') toastEl.style.opacity = '0';
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- 起動 ----------
+  window.addEventListener('resize', resize);
+  resize();
+  buildSprites();
+  buildLevel();          // タイトル背景用の迷路
+  setOverlay('title');
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

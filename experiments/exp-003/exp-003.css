@@ -1,0 +1,81 @@
+.article-hero.exp-003::after {
+  content: "03";
+  color: var(--blue);
+}
+
+.result-table-wrap {
+  margin: 34px 0 42px;
+  overflow-x: auto;
+  border: 1px solid var(--ink);
+  background: var(--white);
+}
+
+.result-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.result-table th,
+.result-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.result-table thead th {
+  border-bottom: 1px solid var(--ink);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.result-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.result-table .stage-row td {
+  background: var(--paper);
+  font-weight: 900;
+}
+
+.result-table .verdict {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.result-table .held {
+  color: var(--muted);
+}
+
+.build-list {
+  margin: 34px 0 42px;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+
+.build-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.build-list a {
+  font-weight: 900;
+}
+
+.build-tag {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  min-width: 4.5em;
+  color: var(--muted);
+}

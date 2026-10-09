@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DWWI0k8hb1a0k0Jg7V+eWjMQZdJ4gBFf9dGzhDE6aKA='; script-src-attr 'unsafe-hashes' 'sha256-GZIcz60Uwd6wT3vaYke/atSr53TehbYAPepOa3d03Vw='; style-src 'sha256-ZmnbKmab/Eod/KU7ylue9DfbfWOG0Xy2gV/tBdF1ZuE='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>誕生日カードメーカー</title>
+<style>
+  :root {
+    color-scheme: light;
+    --desk: #ece3d4;
+    --paper: #f8f3ea;
+    --panel: #fffdf9;
+    --ink: #2a2420;
+    --sub: #665b53;
+    --line: #dfd4c5;
+    --accent: #bf4028;
+    --accent-dark: #9c3220;
+    --ui: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--ui);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .vh {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  header { padding: 20px 16px 4px; max-width: 1180px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 1.5rem; letter-spacing: .04em; line-height: 1.3; }
+  header p { margin: 4px 0 0; color: var(--sub); font-size: .9rem; }
+
+  .workspace {
+    max-width: 1180px; margin: 0 auto; padding: 16px;
+    display: grid; gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stage {
+    background: var(--desk);
+    border-radius: 16px;
+    padding: 20px 16px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 62vh;
+    width: auto; height: auto;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(60, 40, 20, .18), 0 14px 30px -12px rgba(60, 40, 20, .45);
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+  button {
+    font: inherit; color: inherit; cursor: pointer;
+    min-height: 44px; padding: 8px 18px;
+    border-radius: 999px; border: 1.5px solid var(--ink);
+    background: var(--panel);
+    transition: background-color .15s, transform .1s;
+  }
+  button:hover { background: #f1e8da; }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  button.small { min-height: 36px; padding: 4px 14px; font-size: .85rem; border-width: 1px; border-color: #a8998a; }
+  :focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+  .status { min-height: 1.5em; margin: 0; font-size: .85rem; color: var(--sub); text-align: center; }
+
+  .controls { display: grid; gap: 16px; align-content: start; }
+  fieldset {
+    margin: 0; padding: 16px; min-width: 0;
+    border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
+  }
+  legend { padding: 0 8px; font-weight: 700; letter-spacing: .06em; }
+  .field + .field { margin-top: 14px; }
+  .field > label, .field > .label {
+    display: block; font-size: .85rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%; font: inherit; color: inherit;
+    padding: 9px 12px; min-height: 44px;
+    border: 1.5px solid #a8998a; border-radius: 10px; background: #fff;
+  }
+  textarea { resize: vertical; min-height: 108px; line-height: 1.6; display: block; }
+  .under { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  .under .count { margin-left: auto; font-size: .8rem; color: var(--sub); font-variant-numeric: tabular-nums; }
+  .note { margin: 6px 0 0; font-size: .8rem; color: var(--accent-dark); }
+  .note:empty { display: none; }
+
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { position: relative; display: inline-flex; }
+  .opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .opt span {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 40px; padding: 6px 14px;
+    border: 1.5px solid #a8998a; border-radius: 999px; background: #fff;
+    font-size: .9rem; white-space: nowrap;
+  }
+  .opt input:hover + span { background: #f6eee2; }
+  .opt input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .opt input:focus-visible + span { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+  .opt i {
+    width: 18px; height: 18px; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, var(--s1) 50%, var(--s2) 50%);
+    box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px rgba(0, 0, 0, .25);
+  }
+  footer { max-width: 1180px; margin: 0 auto; padding: 0 16px 28px; color: var(--sub); font-size: .8rem; }
+
+  @media (min-width: 900px) {
+    header { padding-top: 28px; }
+    h1 { font-size: 1.75rem; }
+    .workspace { grid-template-columns: 420px minmax(0, 1fr); gap: 28px; align-items: start; }
+    .stage { order: 2; position: sticky; top: 16px; padding: 32px 24px 20px; }
+    canvas { max-height: calc(100vh - 210px); }
+  }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  @media print {
+    @page { margin: 12mm; }
+    header, footer, .controls, .actions, .status { display: none !important; }
+    body, .stage { background: #fff; }
+    .workspace { display: block; padding: 0; }
+    .stage { position: static; padding: 0; border-radius: 0; }
+    canvas { box-shadow: none; border-radius: 0; max-width: 100%; max-height: 260mm; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>誕生日カードメーカー</h1>
+  <p>ことばとデザインを選ぶと、その場でカードができあがります。画像で保存、または印刷してどうぞ。</p>
+</header>
+
+<main class="workspace">
+  <section class="stage" aria-label="プレビュー">
+    <canvas id="card" width="1000" height="1480" role="img" aria-label="誕生日カードのプレビュー"></canvas>
+    <div class="actions">
+      <button type="button" class="primary" id="save">画像で保存(PNG)</button>
+      <button type="button" id="print">印刷する</button>
+      <button type="button" id="lucky">デザインをおまかせ</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <form class="controls" id="form" autocomplete="off" onsubmit="return false">
+    <fieldset>
+      <legend>ことば</legend>
+      <div class="field">
+        <label for="headline">見出し</label>
+        <input type="text" id="headline" name="headline" maxlength="30" value="Happy Birthday">
+        <div class="under" aria-label="見出しの候補">
+          <button type="button" class="small" data-head="Happy Birthday">Happy Birthday</button>
+          <button type="button" class="small" data-head="おたんじょうび おめでとう">おたんじょうび おめでとう</button>
+          <button type="button" class="small" data-head="お誕生日おめでとうございます">お誕生日おめでとうございます</button>
+        </div>
+      </div>
+      <div class="field row">
+        <div>
+          <label for="to">贈る相手(「へ」が付きます)</label>
+          <input type="text" id="to" name="to" maxlength="20" value="さくらちゃん" placeholder="例:さくらちゃん">
+        </div>
+        <div>
+          <label for="age">年齢(任意)</label>
+          <input type="number" id="age" name="age" min="0" max="120" step="1" inputmode="numeric" placeholder="なし">
+        </div>
+      </div>
+      <div class="field">
+        <label for="message">メッセージ</label>
+        <textarea id="message" name="message" maxlength="200" aria-describedby="clipnote">すてきな一年になりますように。
+いつもありがとう!</textarea>
+        <div class="under">
+          <button type="button" class="small" id="sample">文例を入れる</button>
+          <span class="count" id="count" aria-hidden="true">0 / 200</span>
+        </div>
+        <p class="note" id="clipnote" role="status"></p>
+      </div>
+      <div class="field">
+        <label for="from">差出人(「より」が付きます)</label>
+        <input type="text" id="from" name="from" maxlength="20" value="たろう" placeholder="例:たろう">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>デザイン</legend>
+      <div class="field" role="radiogroup" aria-labelledby="l-motif">
+        <span class="label" id="l-motif">イラスト</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="motif" value="cake" checked><span>ケーキ</span></label>
+          <label class="opt"><input type="radio" name="motif" value="balloon"><span>風船</span></label>
+          <label class="opt"><input type="radio" name="motif" value="bouquet"><span>花束</span></label>
+          <label class="opt"><input type="radio" name="motif" value="gift"><span>プレゼント</span></label>
+        </div>
+      </div>
+      <div class="field" role="radiogroup" aria-labelledby="l-theme">
+        <span class="label" id="l-theme">色</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="theme" value="ichigo" checked><span><i style="--s1:#fde8e4;--s2:#e8526a"></i>いちごミルク</span></label>
+          <label class="opt"><input type="radio" name="theme" value="lemon"><span><i style="--s1:#fff4c2;--s2:#1f9d8b"></i>レモンソーダ</span></label>
+          <label class="opt"><input type="radio" name="theme" value="ramune"><span><i style="--s1:#dff1f7;--s2:#2f7fc1"></i>ラムネ</span></label>
+          <label class="opt"><input type="radio" name="theme" value="matcha"><span><i style="--s1:#e9efd9;--s2:#6b8f3a"></i>抹茶</span></label>
+          <label class="opt"><input type="radio" name="theme" value="yozora"><span><i style="--s1:#1c2447;--s2:#f2c14e"></i>夜空</span></label>
+        </div>
+      </div>
+      <div class="field" role="radiogroup" aria-labelledby="l-font">
+        <span class="label" id="l-font">書体</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="font" value="gothic" checked><span>ゴシック</span></label>
+          <label class="opt"><input type="radio" name="font" value="mincho"><span>明朝</span></label>
+          <label class="opt"><input type="radio" name="font" value="soft"><span>やわらか</span></label>
+        </div>
+      </div>
+      <div class="field" role="radiogroup" aria-labelledby="l-shape">
+        <span class="label" id="l-shape">かたち</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="shape" value="portrait" checked><span>はがき たて</span></label>
+          <label class="opt"><input type="radio" name="shape" value="landscape"><span>はがき よこ</span></label>
+          <label class="opt"><input type="radio" name="shape" value="square"><span>正方形</span></label>
+        </div>
+      </div>
+      <div class="field" role="radiogroup" aria-labelledby="l-deco">
+        <span class="label" id="l-deco">かざり</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="deco" value="confetti" checked><span>紙ふぶき</span></label>
+          <label class="opt"><input type="radio" name="deco" value="stars"><span>星</span></label>
+          <label class="opt"><input type="radio" name="deco" value="none"><span>なし</span></label>
+        </div>
+        <div class="under">
+          <button type="button" class="small" id="reshuffle">かざりを散らし直す</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</main>
+
+<footer>
+  <p>入力した内容はこのページの中だけで扱われ、どこにも送信・保存されません。ページを閉じると消えます。</p>
+  <noscript>このページを使うには JavaScript を有効にしてください。</noscript>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var THEMES = {
+    ichigo: { bg: '#fde8e4', tint: '#fbd0cc', ink: '#5a2a33', head: '#d43a57', a1: '#e8526a', a2: '#f6a23a', a3: '#6fb7a8', cream: '#fff8ee' },
+    lemon:  { bg: '#fff4c2', tint: '#ffe58a', ink: '#2f4a45', head: '#12806f', a1: '#1f9d8b', a2: '#f2784b', a3: '#f5c518', cream: '#fffdf2' },
+    ramune: { bg: '#dff1f7', tint: '#c2e3ef', ink: '#1f3b57', head: '#2168a8', a1: '#2f7fc1', a2: '#f26d85', a3: '#f7c948', cream: '#ffffff' },
+    matcha: { bg: '#e9efd9', tint: '#d6e2b8', ink: '#2f3d24', head: '#557a26', a1: '#6b8f3a', a2: '#d9603b', a3: '#e3b23c', cream: '#fffaf0' },
+    yozora: { bg: '#1c2447', tint: '#2a3566', ink: '#f6ecd0', head: '#f2c14e', a1: '#f2c14e', a2: '#ef7b7b', a3: '#7fc8d6', cream: '#fff6e0' }
+  };
+  var FONTS = {
+    gothic: '"Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif',
+    mincho: '"Hiragino Mincho ProN","Yu Mincho","BIZ UDPMincho","Noto Serif JP",serif',
+    soft:   '"Hiragino Maru Gothic ProN","UD Digi Kyokasho NK-R","Klee","BIZ UDPGothic","Yu Gothic UI",sans-serif'
+  };
+  var SHAPES = { portrait: [1000, 1480], landscape: [1480, 1000], square: [1200, 1200] };
+  var SAMPLES = [
+    'すてきな一年になりますように。\nいつもありがとう!',
+    'お誕生日おめでとう。\n笑顔いっぱいの毎日になりますように。',
+    'また一緒においしいものを食べに行こうね。\nこれからもよろしく!',
+    '健康で実り多い一年になりますよう、\n心よりお祈りしています。',
+    'うまれてきてくれて、ありがとう。\nだいすきだよ。'
+  ];
+  var NO_START = '、。，．,.!?！？）)」』】〕〉》ー～…・っゃゅょぁぃぅぇぉッャュョァィゥェォ々';
+
+  var form = document.getElementById('form');
+  var canvas = document.getElementById('card');
+  var statusEl = document.getElementById('status');
+  var clipNote = document.getElementById('clipnote');
+  var countEl = document.getElementById('count');
+  var seed = 20261008;
+  var sampleIndex = 0;
+
+  /* ---------- 小さな道具 ---------- */
+  function rng(s) {
+    return function () {
+      s |= 0; s = s + 0x6D2B79F5 | 0;
+      var t = Math.imul(s ^ s >>> 15, 1 | s);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function rrect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath(); c.fill();
+  }
+  function ell(c, x, y, rx, ry, rot) {
+    c.beginPath(); c.ellipse(x, y, rx, ry, rot || 0, 0, Math.PI * 2); c.fill();
+  }
+  function star(c, x, y, R, n, ratio, rot) {
+    c.beginPath();
+    for (var i = 0; i < n * 2; i++) {
+      var r = i % 2 ? R * ratio : R;
+      var a = (rot || 0) - Math.PI / 2 + i * Math.PI / n;
+      c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+    }
+    c.closePath(); c.fill();
+  }
+  function band(c, x, y, w, h, n) {
+    rrect(c, x, y, w, h, 3);
+    var r = w / n / 2;
+    c.beginPath(); c.moveTo(x, y + h - 1);
+    for (var i = 0; i < n; i++) c.arc(x + r + 2 * r * i, y + h - 1, r, Math.PI, 0, true);
+    c.closePath(); c.fill();
+  }
+
+  /* ---------- イラスト(-50〜50 の箱に描く) ---------- */
+  var ART = {
+    cake: function (c, T) {
+      c.fillStyle = T.a3; ell(c, 0, 40, 42, 5);
+      c.fillStyle = T.cream; rrect(c, -30, 10, 60, 30, 4); rrect(c, -20, -14, 40, 26, 4);
+      c.fillStyle = T.a1; band(c, -30, 10, 60, 5, 6);
+      c.fillStyle = T.a2; band(c, -20, -14, 40, 5, 4);
+      for (var i = -2; i <= 2; i++) ell(c, i * 10, 31, 2, 2);
+      [-10, 0, 10].forEach(function (x, k) {
+        c.fillStyle = k === 1 ? T.a1 : T.a3; rrect(c, x - 1.6, -30, 3.2, 16, 1.2);
+        flame(c, x, -35);
+      });
+    },
+    balloon: function (c, T) {
+      var b = [[-20, -10, T.a1], [19, -14, T.a2], [0, -24, T.a3]];
+      c.strokeStyle = T.ink; c.lineWidth = 0.7; c.lineCap = 'round';
+      b.forEach(function (p) {
+        c.beginPath(); c.moveTo(p[0], p[1] + 20);
+        c.quadraticCurveTo(p[0] * 0.2, 20, 0, 46); c.stroke();
+      });
+      b.forEach(function (p) {
+        c.fillStyle = p[2];
+        c.beginPath(); c.moveTo(p[0], p[1] + 17); c.lineTo(p[0] - 2.5, p[1] + 21.5); c.lineTo(p[0] + 2.5, p[1] + 21.5); c.closePath(); c.fill();
+        ell(c, p[0], p[1], 15, 18);
+        c.fillStyle = 'rgba(255,255,255,.45)'; ell(c, p[0] - 6, p[1] - 8, 2.6, 5, 0.5);
+      });
+    },
+    bouquet: function (c, T) {
+      var f = [[-19, -8, T.a1], [0, -22, T.a2], [19, -8, T.a3], [-8, 0, T.a3], [10, -3, T.a1], [-10, -18, T.cream], [11, -19, T.cream]];
+      c.fillStyle = '#5d9a6a'; ell(c, -25, 0, 9, 4, -0.7); ell(c, 25, 0, 9, 4, 0.7); ell(c, 0, -34, 4, 8);
+      f.forEach(function (p) {
+        c.fillStyle = p[2];
+        for (var i = 0; i < 6; i++) ell(c, p[0] + Math.cos(i * Math.PI / 3) * 5.4, p[1] + Math.sin(i * Math.PI / 3) * 5.4, 4.6, 4.6);
+        c.fillStyle = '#ffd75e'; ell(c, p[0], p[1], 3, 3);
+      });
+      c.fillStyle = T.cream;
+      c.beginPath(); c.moveTo(-25, -2); c.lineTo(0, 10); c.lineTo(25, -2); c.lineTo(6, 46); c.lineTo(-6, 46); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(0,0,0,.07)';
+      c.beginPath(); c.moveTo(0, 10); c.lineTo(25, -2); c.lineTo(6, 46); c.lineTo(0, 46); c.closePath(); c.fill();
+      c.fillStyle = T.a2; ell(c, -8, 30, 8, 4.5, 0.4); ell(c, 8, 30, 8, 4.5, -0.4);
+      c.fillStyle = T.a1; ell(c, 0, 31, 3.4, 3.4);
+    },
+    gift: function (c, T) {
+      c.fillStyle = T.a1; rrect(c, -28, -4, 56, 46, 3); rrect(c, -32, -14, 64, 13, 3);
+      c.fillStyle = 'rgba(0,0,0,.14)'; c.fillRect(-28, -1, 56, 3);
+      c.fillStyle = T.a3; c.fillRect(-5, -14, 10, 56);
+      ell(c, -11, -22, 11, 6.5, 0.45); ell(c, 11, -22, 11, 6.5, -0.45);
+      c.fillStyle = 'rgba(0,0,0,.14)'; ell(c, -11, -22, 5.5, 2.8, 0.45); ell(c, 11, -22, 5.5, 2.8, -0.45);
+      c.fillStyle = T.a3; ell(c, 0, -17, 4.8, 4.8);
+      c.fillStyle = T.a2; star(c, -40, -26, 6, 4, 0.3); star(c, 39, -34, 4.5, 4, 0.3); star(c, 42, 8, 3.5, 4, 0.3);
+    }
+  };
+  function flame(c, x, y) {
+    c.fillStyle = '#ff9d2e';
+    c.beginPath(); c.moveTo(x, y - 5.5);
+    c.bezierCurveTo(x + 4.5, y - 1, x + 3.2, y + 3.2, x, y + 3.2);
+    c.bezierCurveTo(x - 3.2, y + 3.2, x - 4.5, y - 1, x, y - 5.5); c.fill();
+    c.fillStyle = '#fff1a8'; ell(c, x, y + 0.8, 1.3, 1.9);
+  }
+
+  /* ---------- 文字組み ---------- */
+  function wrap(c, text, maxW) {
+    var out = [];
+    String(text).split('\n').forEach(function (para) {
+      var toks = para.match(/[A-Za-z0-9'’\-]+|\s|[^]/gu) || [];
+      var flat = [];
+      toks.forEach(function (t) {
+        if (c.measureText(t).width > maxW) Array.from(t).forEach(function (ch) { flat.push(ch); });
+        else flat.push(t);
+      });
+      var line = '';
+      flat.forEach(function (t) {
+        var space = /^\s$/.test(t);
+        if (space && line === '') return;
+        if (line === '' || c.measureText(line + t).width <= maxW || NO_START.indexOf(t) >= 0) { line += t; return; }
+        out.push(line.replace(/\s+$/, ''));
+        line = space ? '' : t;
+      });
+      out.push(line.replace(/\s+$/, ''));
+    });
+    return out;
+  }
+  function fitLine(c, s, maxW) {
+    if (c.measureText(s).width <= maxW) return s;
+    var chars = Array.from(s);
+    while (chars.length > 1 && c.measureText(chars.join('') + '…').width > maxW) chars.pop();
+    return chars.join('') + '…';
+  }
+
+  /* ---------- カード全体 ---------- */
+  function layout(W, H) {
+    var m = Math.min(W, H) * 0.07;
+    if (W > H) return {
+      art: { x: m, y: m, w: W * 0.40 - m, h: H - 2 * m },
+      text: { x: W * 0.43, y: m * 1.3, w: W * 0.57 - m * 1.5, h: H - m * 2.6 }
+    };
+    var f = W === H ? 0.42 : 0.40;
+    return {
+      art: { x: m, y: m, w: W - 2 * m, h: H * f - m },
+      text: { x: m * 1.5, y: H * (f + 0.01), w: W - 3 * m, h: H * (1 - f - 0.01) - m * 1.6 }
+    };
+  }
+
+  function render(c, W, H, st) {
+    var T = THEMES[st.theme] || THEMES.ichigo;
+    var font = FONTS[st.font] || FONTS.gothic;
+    var L = layout(W, H);
+    var u = Math.min(W, H) / 1000;
+    var s = Math.min(L.art.w, L.art.h);
+    var cx = L.art.x + L.art.w / 2, cy = L.art.y + L.art.h / 2;
+    var hasAge = st.age !== null;
+    var bx = cx + s * 0.40, by = cy - s * 0.34, br = s * 0.13;
+    var clipped = false;
+
+    c.fillStyle = T.bg; c.fillRect(0, 0, W, H);
+
+    /* かざり */
+    if (st.deco !== 'none') {
+      var r = rng(st.seed);
+      var cols = [T.a1, T.a2, T.a3];
+      var want = Math.round(64 * W * H / 1480000), made = 0, tries = 0, pad = 14 * u;
+      while (made < want && tries++ < 900) {
+        var x = r() * W, y = r() * H, kind = r(), rot = r() * Math.PI * 2, size = 0.7 + r() * 0.8, col = cols[Math.floor(r() * 3)];
+        if (x > L.text.x - pad && x < L.text.x + L.text.w + pad && y > L.text.y - pad && y < L.text.y + L.text.h + pad) continue;
+        if (Math.hypot(x - cx, y - cy) < s * 0.5 + pad) continue;
+        if (hasAge && Math.hypot(x - bx, y - by) < br * 1.2 + pad) continue;
+        made++;
+        c.save(); c.translate(x, y); c.rotate(rot); c.fillStyle = col; c.strokeStyle = col;
+        if (st.deco === 'stars') {
+          if (kind < 0.6) star(c, 0, 0, 13 * u * size, 5, 0.45);
+          else if (kind < 0.8) star(c, 0, 0, 10 * u * size, 4, 0.3);
+          else ell(c, 0, 0, 3.5 * u * size, 3.5 * u * size);
+        } else if (kind < 0.4) {
+          c.fillRect(-9 * u * size, -3.5 * u * size, 18 * u * size, 7 * u * size);
+        } else if (kind < 0.65) {
+          ell(c, 0, 0, 5.5 * u * size, 5.5 * u * size);
+        } else if (kind < 0.85) {
+          c.beginPath(); c.moveTo(0, -8 * u * size); c.lineTo(7 * u * size, 5 * u * size); c.lineTo(-7 * u * size, 5 * u * size); c.closePath(); c.fill();
+        } else {
+          c.lineWidth = 3.5 * u; c.lineCap = 'round';
+          c.beginPath(); c.arc(0, 0, 10 * u * size, 0, Math.PI * 0.9); c.stroke();
+        }
+        c.restore();
+      }
+    }
+
+    /* イラスト */
+    c.fillStyle = T.tint; ell(c, cx, cy, s * 0.5, s * 0.5);
+    c.save(); c.translate(cx, cy); c.scale(s / 112, s / 112);
+    (ART[st.motif] || ART.cake)(c, T);
+    c.restore();
+
+    /* 年齢バッジ */
+    if (hasAge) {
+      c.fillStyle = T.head;
+      ell(c, bx, by, br * 0.9, br * 0.9);
+      for (var i = 0; i < 12; i++) ell(c, bx + Math.cos(i * Math.PI / 6) * br * 0.86, by + Math.sin(i * Math.PI / 6) * br * 0.86, br * 0.24, br * 0.24);
+      var num = String(st.age);
+      c.fillStyle = T.bg; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = 'bold ' + (br * (num.length > 2 ? 0.72 : 0.95)) + 'px ' + font;
+      c.fillText(num, bx, by - br * 0.14);
+      c.font = 'bold ' + (br * 0.34) + 'px ' + font;
+      c.fillText('歳', bx, by + br * 0.56);
+    }
+
+    /* 文字 */
+    var tx = L.text.x + L.text.w / 2, y0 = L.text.y, bottom = L.text.y + L.text.h, maxW = L.text.w;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+
+    if (st.headline) {
+      var hs = 104 * u, hmin = 58 * u;
+      c.font = 'bold ' + hs + 'px ' + font;
+      while (hs > hmin && c.measureText(st.headline).width > maxW) { hs -= 2 * u; c.font = 'bold ' + hs + 'px ' + font; }
+      var hl = wrap(c, st.headline, maxW).slice(0, 3);
+      c.fillStyle = T.head;
+      hl.forEach(function (ln) { c.fillText(ln, tx, y0 + hs * 0.6); y0 += hs * 1.2; });
+      y0 += 22 * u;
+      [T.a1, T.a2, T.a3].forEach(function (col, k) { c.fillStyle = col; ell(c, tx + (k - 1) * 26 * u, y0, 5.5 * u, 5.5 * u); });
+      y0 += 30 * u;
+    }
+    if (st.to) {
+      var ns = 46 * u;
+      c.font = 'bold ' + ns + 'px ' + font;
+      var nm = st.to + ' へ';
+      while (ns > 30 * u && c.measureText(nm).width > maxW) { ns -= 2 * u; c.font = 'bold ' + ns + 'px ' + font; }
+      c.fillStyle = T.ink;
+      c.fillText(fitLine(c, nm, maxW), tx, y0 + 30 * u);
+      y0 += 66 * u;
+    }
+    if (st.from) {
+      c.font = '34px ' + font; c.font = (34 * u) + 'px ' + font;
+      c.fillStyle = T.ink;
+      c.fillText(fitLine(c, st.from + ' より', maxW), tx, bottom - 22 * u);
+      bottom -= 62 * u;
+    }
+    if (st.message) {
+      var top = y0 + 8 * u, areaH = Math.max(0, bottom - 8 * u - top);
+      var ms = 40 * u, lines;
+      for (;;) {
+        c.font = ms + 'px ' + font;
+        lines = wrap(c, st.message, maxW);
+        if (lines.length * ms * 1.7 <= areaH || ms <= 22 * u) break;
+        ms -= 2 * u;
+      }
+      var lh = ms * 1.7, fitN = Math.max(1, Math.floor(areaH / lh));
+      if (lines.length > fitN) {
+        clipped = true;
+        lines = lines.slice(0, fitN);
+        lines[fitN - 1] = fitLine(c, lines[fitN - 1] + '…………', maxW - ms).replace(/…+$/, '…');
+      }
+      var my = top + (areaH - lines.length * lh) / 2;
+      c.fillStyle = T.ink;
+      lines.forEach(function (ln, k) { c.fillText(ln, tx, my + lh * (k + 0.5)); });
+    }
+    return { clipped: clipped };
+  }
+
+  /* ---------- 画面とのつなぎ ---------- */
+  function readState() {
+    var e = form.elements;
+    var ageRaw = e.age.value.trim(), age = null;
+    if (ageRaw !== '' && isFinite(Number(ageRaw))) age = Math.min(120, Math.max(0, Math.floor(Number(ageRaw))));
+    return {
+      headline: e.headline.value.trim(),
+      to: e.to.value.trim(),
+      from: e.from.value.trim(),
+      message: e.message.value.replace(/\s+$/, ''),
+      age: age,
+      motif: e.motif.value, theme: e.theme.value, font: e.font.value,
+      shape: e.shape.value, deco: e.deco.value, seed: seed
+    };
+  }
+  function update() {
+    var st = readState();
+    var size = SHAPES[st.shape] || SHAPES.portrait;
+    if (canvas.width !== size[0] || canvas.height !== size[1]) { canvas.width = size[0]; canvas.height = size[1]; }
+    var res = render(canvas.getContext('2d'), size[0], size[1], st);
+    clipNote.textContent = res.clipped ? 'メッセージが長いため、一部がカードに入りきっていません。' : '';
+    countEl.textContent = Array.from(form.elements.message.value).length + ' / 200';
+    var parts = ['誕生日カードのプレビュー'];
+    if (st.headline) parts.push('見出し「' + st.headline + '」');
+    if (st.to) parts.push(st.to + ' へ');
+    if (st.age !== null) parts.push(st.age + '歳');
+    if (st.message) parts.push('メッセージ「' + st.message.replace(/\n/g, ' ') + '」');
+    if (st.from) parts.push(st.from + ' より');
+    canvas.setAttribute('aria-label', parts.join('、'));
+  }
+  function say(msg) { statusEl.textContent = msg; }
+  function pick(name, r) {
+    var list = form.querySelectorAll('input[name="' + name + '"]');
+    list[Math.floor(r() * list.length)].checked = true;
+  }
+
+  form.addEventListener('input', update);
+  form.addEventListener('change', update);
+
+  form.querySelectorAll('[data-head]').forEach(function (b) {
+    b.addEventListener('click', function () { form.elements.headline.value = b.getAttribute('data-head'); update(); });
+  });
+  document.getElementById('sample').addEventListener('click', function () {
+    sampleIndex = (sampleIndex + 1) % SAMPLES.length;
+    form.elements.message.value = SAMPLES[sampleIndex];
+    update();
+  });
+  document.getElementById('reshuffle').addEventListener('click', function () {
+    seed = (seed * 1664525 + 1013904223) | 0;
+    if (form.elements.deco.value === 'none') form.querySelector('input[name="deco"][value="confetti"]').checked = true;
+    update();
+  });
+  document.getElementById('lucky').addEventListener('click', function () {
+    seed = (Math.random() * 0x7fffffff) | 0;
+    var r = Math.random;
+    pick('motif', r); pick('theme', r); pick('font', r);
+    form.querySelector('input[name="deco"][value="' + (r() < 0.5 ? 'confetti' : 'stars') + '"]').checked = true;
+    update();
+    say('デザインを入れ替えました。ことばはそのままです。');
+  });
+  document.getElementById('print').addEventListener('click', function () { window.print(); });
+  document.getElementById('save').addEventListener('click', function () {
+    var st = readState();
+    var size = SHAPES[st.shape] || SHAPES.portrait;
+    var off = document.createElement('canvas');
+    off.width = size[0] * 2; off.height = size[1] * 2;
+    var c = off.getContext('2d');
+    c.scale(2, 2);
+    render(c, size[0], size[1], st);
+    off.toBlob(function (blob) {
+      if (!blob) { say('画像を作れませんでした。印刷をお試しください。'); return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'birthday-card.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      say('birthday-card.png(' + off.width + '×' + off.height + 'px)を保存しました。');
+    }, 'image/png');
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

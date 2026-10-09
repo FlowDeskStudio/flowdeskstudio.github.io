@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vtrQjst+cbeixUQQ25YlwrjGDOg6O1LEbDlzKVqMIl4='; script-src-attr 'none'; style-src 'sha256-HAgzdWyXP5221F/UNm9U+06rGwlbvZaoXk1PWMdi/tU='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>表計算</title>
+<style>
+:root{
+  --ac:#0f766e; --ac-soft:rgba(15,118,110,.10); --line:#e1e4e8; --head:#f1f3f5; --head-hl:#d5ebe8;
+  --ink:#1f2933; --sub:#667085; --panel:#ffffff; --edge:#d3d8de;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;overflow:hidden;color:var(--ink);background:#eef0f3;
+  font:13px/1.4 "Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif}
+#toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;padding:6px 8px;background:var(--panel);border-bottom:1px solid var(--edge)}
+.g{display:flex;align-items:center;gap:2px;padding:0 7px;border-right:1px solid #e6e9ed}
+.g:first-child{padding-left:0}
+.g.last{border-right:0}
+.tb{height:28px;min-width:28px;padding:0 7px;border:1px solid transparent;border-radius:5px;background:transparent;
+  color:var(--ink);font:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.tb:hover{background:#eef1f4;border-color:#dfe3e8}
+.tb:active{background:#e1e6ea}
+.tb.on{background:var(--head-hl);border-color:#a9d3cd;color:#0b524c}
+.tb svg{width:16px;height:16px;display:block}
+.clr{position:relative;height:28px;min-width:30px;padding:0 6px;border:1px solid transparent;border-radius:5px;cursor:pointer;
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.clr:hover{background:#eef1f4;border-color:#dfe3e8}
+.clr span{font-weight:700;font-size:13px}
+.clr i{display:block;width:16px;height:4px;margin-top:2px;border:1px solid rgba(0,0,0,.25);border-radius:1px}
+.clr input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:0}
+select#fmt{height:28px;border:1px solid #cfd5db;border-radius:5px;background:#fff;font:inherit;color:var(--ink);padding:0 4px}
+#fbar{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--panel);border-bottom:1px solid var(--edge)}
+#nameBox{width:92px;height:26px;border:1px solid #cfd5db;border-radius:4px;padding:0 6px;font:inherit;text-align:center}
+.fx{color:var(--sub);font-style:italic;font-family:Georgia,"Times New Roman",serif;font-size:14px;padding:0 2px}
+#bar{flex:1;min-width:0;height:26px;border:1px solid #cfd5db;border-radius:4px;padding:0 8px;
+  font:13px Consolas,"Cascadia Mono","Yu Gothic UI","Meiryo",monospace}
+#nameBox:focus,#bar:focus,select#fmt:focus{outline:2px solid var(--ac);outline-offset:-1px}
+#gridc{flex:1;min-height:0;overflow:auto;background:#fff;position:relative}
+#wrap{position:relative;display:inline-block;vertical-align:top}
+#tbl{border-collapse:separate;border-spacing:0;table-layout:fixed;user-select:none;-webkit-user-select:none}
+#tbl th,#tbl td{height:24px;line-height:22px;padding:0 4px;overflow:hidden;white-space:nowrap;
+  border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+#tbl td{background:#fff;cursor:cell}
+#tbl th{background:var(--head);color:#55606e;font-weight:500;font-size:12px;text-align:center;position:sticky;z-index:3;
+  border-color:#d3d8de;cursor:default}
+#tbl thead th{top:0}
+#tbl tbody th{left:0}
+#tbl thead th.corner{left:0;z-index:4}
+#tbl th.hl{background:var(--head-hl);color:#0b524c;font-weight:700}
+.rz{position:absolute;top:0;right:-1px;width:7px;height:100%;cursor:col-resize}
+.rz:hover{background:rgba(15,118,110,.35)}
+#selbox,#actbox,#copybox,#fillbox{position:absolute;pointer-events:none;z-index:2;display:none}
+#selbox{border:2px solid var(--ac)}
+#selbox.multi{background:var(--ac-soft)}
+#actbox{border:1px solid var(--ac)}
+#copybox{border:2px dashed #2563eb}
+#fillbox{border:2px dashed #6b7280}
+#fillh{position:absolute;z-index:2;width:8px;height:8px;background:var(--ac);border:1px solid #fff;cursor:crosshair}
+body.dragging #fillh{pointer-events:none}
+body.colresize,body.colresize *{cursor:col-resize !important}
+#ed{position:absolute;z-index:2;margin:0;padding:0 3px;border:2px solid var(--ac);outline:none;background:#fff;color:var(--ink);
+  font:inherit;opacity:0;pointer-events:none;min-width:20px}
+#ed.on{opacity:1;pointer-events:auto;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+#status{display:flex;justify-content:space-between;gap:16px;padding:4px 10px;background:var(--panel);border-top:1px solid var(--edge);
+  color:var(--sub);font-size:12px;min-height:25px;white-space:nowrap;overflow:hidden}
+#stats{font-variant-numeric:tabular-nums;color:var(--ink)}
+#menu{position:fixed;z-index:50;display:none;min-width:190px;padding:4px;background:#fff;border:1px solid #cfd5db;border-radius:7px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18)}
+#menu div.mi{padding:5px 12px;border-radius:4px;cursor:pointer}
+#menu div.mi:hover{background:var(--head-hl)}
+#menu hr{border:0;border-top:1px solid #e6e9ed;margin:4px 0}
+#dlg{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(20,28,38,.45);padding:16px}
+#dlg.open{display:flex}
+.panel{display:none;flex-direction:column;width:min(760px,100%);max-height:100%;background:#fff;border-radius:10px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+.panel.open{display:flex}
+.panel h2{margin:0;padding:12px 16px;font-size:15px;border-bottom:1px solid #e6e9ed}
+.panel .body{padding:12px 16px;overflow:auto}
+.panel .foot{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-top:1px solid #e6e9ed;background:#f7f8fa}
+.panel .foot .sp{flex:1}
+.btn{height:30px;padding:0 12px;border:1px solid #cfd5db;border-radius:6px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+.btn:hover{background:#f0f3f5}
+.btn.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+.btn.pri:hover{background:#0c5f58}
+#csvText{width:100%;height:300px;resize:vertical;border:1px solid #cfd5db;border-radius:6px;padding:8px;
+  font:12px Consolas,"Cascadia Mono","Meiryo",monospace;white-space:pre;overflow:auto}
+.help h3{margin:14px 0 6px;font-size:13px;color:#0b524c}
+.help h3:first-child{margin-top:0}
+.help p{margin:4px 0}
+.help table{border-collapse:collapse;width:100%}
+.help td{border:1px solid #e6e9ed;padding:4px 8px;vertical-align:top}
+.help td:first-child{white-space:nowrap;background:#f7f8fa;width:1%}
+.help code{font-family:Consolas,"Cascadia Mono",monospace;background:#f1f3f5;padding:0 4px;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div class="g">
+    <button class="tb" data-act="undo" title="元に戻す (Ctrl+Z)">↶</button>
+    <button class="tb" data-act="redo" title="やり直し (Ctrl+Y)">↷</button>
+  </div>
+  <div class="g">
+    <button class="tb" id="btnB" data-act="bold" title="太字 (Ctrl+B)"><b>B</b></button>
+    <button class="tb" id="btnI" data-act="italic" title="斜体 (Ctrl+I)"><i style="font-family:Georgia,serif">I</i></button>
+    <button class="tb" id="btnU" data-act="underline" title="下線 (Ctrl+U)"><u>U</u></button>
+  </div>
+  <div class="g">
+    <button class="tb" id="btnL" data-act="left" title="左揃え"><svg viewBox="0 0 16 16"><path d="M2 3h12M2 6.5h8M2 10h12M2 13.5h8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+    <button class="tb" id="btnC" data-act="center" title="中央揃え"><svg viewBox="0 0 16 16"><path d="M2 3h12M4 6.5h8M2 10h12M4 13.5h8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+    <button class="tb" id="btnR" data-act="right" title="右揃え"><svg viewBox="0 0 16 16"><path d="M2 3h12M6 6.5h8M2 10h12M6 13.5h8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+  </div>
+  <div class="g">
+    <label class="clr" title="文字色"><span>A</span><i id="fgSw" style="background:#000000"></i><input type="color" id="fg" value="#000000"></label>
+    <label class="clr" title="背景色"><span>▨</span><i id="bgSw" style="background:#ffffff"></i><input type="color" id="bg" value="#ffffff"></label>
+    <button class="tb" data-act="clearfmt" title="選択範囲の書式をすべて解除">書式クリア</button>
+  </div>
+  <div class="g">
+    <select id="fmt" title="表示形式">
+      <option value="">標準</option>
+      <option value="fix">小数固定</option>
+      <option value="num">桁区切り</option>
+      <option value="cur">通貨 (¥)</option>
+      <option value="pct">パーセント</option>
+      <option value="date">日付</option>
+    </select>
+    <button class="tb" data-act="decUp" title="小数点以下の桁数を増やす">.0←</button>
+    <button class="tb" data-act="decDown" title="小数点以下の桁数を減らす">→.0</button>
+  </div>
+  <div class="g">
+    <button class="tb" data-act="insRow" title="選択行の上に行を挿入">行挿入</button>
+    <button class="tb" data-act="delRow" title="選択行を削除">行削除</button>
+    <button class="tb" data-act="insCol" title="選択列の左に列を挿入">列挿入</button>
+    <button class="tb" data-act="delCol" title="選択列を削除">列削除</button>
+  </div>
+  <div class="g last">
+    <button class="tb" data-act="csv" title="CSV の書き出し・読み込み">CSV</button>
+    <button class="tb" data-act="new" title="すべてのセルを消去">全消去</button>
+    <button class="tb" data-act="help" title="使い方と関数一覧">ヘルプ</button>
+  </div>
+</div>
+
+<div id="fbar">
+  <input id="nameBox" autocomplete="off" spellcheck="false" title="セル番地(入力して Enter で移動)">
+  <span class="fx">fx</span>
+  <input id="bar" autocomplete="off" spellcheck="false" placeholder="値または =数式 を入力">
+</div>
+
+<div id="gridc">
+  <div id="wrap">
+    <table id="tbl"></table>
+    <div id="selbox"></div><div id="actbox"></div><div id="copybox"></div><div id="fillbox"></div>
+    <div id="fillh" title="ドラッグでオートフィル"></div>
+    <input id="ed" autocomplete="off" spellcheck="false" aria-label="セル編集">
+  </div>
+</div>
+
+<div id="status"><span id="msg">準備完了</span><span id="stats"></span></div>
+
+<div id="menu"></div>
+
+<div id="dlg">
+  <div class="panel" id="pCsv">
+    <h2>CSV の書き出し・読み込み</h2>
+    <div class="body">
+      <p style="margin:0 0 8px;color:#667085">書き出しボタンで下の欄に CSV を表示します。欄に CSV(またはタブ区切り)を貼り付けて「読み込む」と、シート全体を置き換えます。</p>
+      <textarea id="csvText" spellcheck="false"></textarea>
+      <input type="file" id="csvFile" accept=".csv,.tsv,.txt,text/csv,text/plain" style="display:none">
+    </div>
+    <div class="foot">
+      <button class="btn" data-d="expVal">値を書き出し</button>
+      <button class="btn" data-d="expRaw">数式のまま書き出し</button>
+      <button class="btn" data-d="save">ファイルに保存</button>
+      <button class="btn" data-d="open">ファイルを開く</button>
+      <span class="sp"></span>
+      <button class="btn pri" data-d="imp">読み込む</button>
+      <button class="btn" data-d="close">閉じる</button>
+    </div>
+  </div>
+  <div class="panel" id="pHelp">
+    <h2>使い方と関数一覧</h2>
+    <div class="body help">
+      <h3>基本操作</h3>
+      <table>
+        <tr><td>入力</td><td>セルを選んでそのまま入力。<code>=</code> で始めると数式になります(例 <code>=SUM(A1:A5)*1.1</code>)。ダブルクリックまたは F2 で編集。</td></tr>
+        <tr><td>確定 / 取消</td><td>Enter(下へ)、Tab(右へ)、Esc(取消)</td></tr>
+        <tr><td>参照の挿入</td><td>数式の入力中にセルをクリック/ドラッグすると、そのセル番地や範囲が挿入されます。</td></tr>
+        <tr><td>範囲選択</td><td>ドラッグ、Shift+矢印、Shift+クリック。行番号・列見出しのクリックで行/列全体、左上隅で全選択(Ctrl+A)。</td></tr>
+        <tr><td>移動</td><td>矢印、Tab、Enter、Home、PageUp/PageDown、Ctrl+矢印(データの端へ)、Ctrl+Home</td></tr>
+        <tr><td>コピー等</td><td>Ctrl+C / Ctrl+X / Ctrl+V。数式の相対参照は貼り付け先に合わせてずれます。<code>$A$1</code> のように <code>$</code> を付けると固定されます。</td></tr>
+        <tr><td>オートフィル</td><td>選択範囲右下の小さな四角をドラッグ。数値が 2 つ以上並んでいれば連続データになります。</td></tr>
+        <tr><td>元に戻す</td><td>Ctrl+Z / Ctrl+Y(または Ctrl+Shift+Z)</td></tr>
+        <tr><td>削除</td><td>Delete / Backspace で選択範囲の内容を消去</td></tr>
+        <tr><td>列幅</td><td>列見出しの境界をドラッグ。ダブルクリックで自動調整。</td></tr>
+        <tr><td>行・列</td><td>ツールバーまたは右クリックメニューから挿入/削除。数式の参照は自動で調整されます。</td></tr>
+      </table>
+      <h3>演算子</h3>
+      <p><code>+ - * / ^</code>(算術)、<code>&amp;</code>(文字列連結)、<code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>(比較)、<code>%</code>(パーセント)</p>
+      <h3>関数</h3>
+      <table>
+        <tr><td>集計</td><td>SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTBLANK, PRODUCT, MEDIAN, STDEV, STDEVP, VAR, VARP, LARGE, SMALL, RANK, SUMPRODUCT</td></tr>
+        <tr><td>条件付き集計</td><td>SUMIF, SUMIFS, COUNTIF, COUNTIFS, AVERAGEIF(条件は <code>"&gt;=10"</code> や <code>"り*"</code> の形式)</td></tr>
+        <tr><td>数学</td><td>ABS, ROUND, ROUNDUP, ROUNDDOWN, INT, TRUNC, MOD, POWER, SQRT, EXP, LN, LOG, LOG10, PI, SIGN, CEILING, FLOOR, SIN, COS, TAN, RAND, RANDBETWEEN</td></tr>
+        <tr><td>論理</td><td>IF, IFS, AND, OR, NOT, XOR, IFERROR, ISBLANK, ISNUMBER, ISTEXT, ISERROR, TRUE, FALSE</td></tr>
+        <tr><td>文字列</td><td>CONCAT, CONCATENATE, TEXTJOIN, LEN, LEFT, RIGHT, MID, UPPER, LOWER, TRIM, REPT, FIND, SEARCH, SUBSTITUTE, EXACT, VALUE, TEXT</td></tr>
+        <tr><td>検索</td><td>VLOOKUP, HLOOKUP, INDEX, MATCH, CHOOSE, ROW, COLUMN, ROWS, COLUMNS</td></tr>
+        <tr><td>日付</td><td>TODAY, NOW, DATE, YEAR, MONTH, DAY, WEEKDAY, DAYS, EDATE(<code>2026/10/9</code> の形式で入力すると日付になります)</td></tr>
+      </table>
+      <h3>エラー表示</h3>
+      <p><code>#DIV/0!</code> 0 での除算 / <code>#VALUE!</code> 型の不一致 / <code>#REF!</code> 無効な参照 / <code>#NAME?</code> 不明な名前 / <code>#N/A</code> 該当なし / <code>#NUM!</code> 数値が不正 / <code>#CIRC!</code> 循環参照 / <code>#ERROR!</code> 数式の書き方の誤り</p>
+      <p style="color:#667085">このアプリはデータを保存しません。ページを閉じると内容は失われます。残したい場合は CSV として書き出してください。</p>
+    </div>
+    <div class="foot"><span class="sp"></span><button class="btn pri" data-d="close">閉じる</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= 基本設定 ================= */
+var COLS = 26, ROWS = 100, DEFW = 96, HEADW = 46;
+var cells = {};          // key -> {v: 入力文字列, s: 書式}
+var vals = {};           // key -> 計算結果
+var autoFmt = {};        // key -> 自動判定された表示形式
+var colW = [];
+for (var i0 = 0; i0 < COLS; i0++) colW.push(DEFW);
+var EMPTY = {};
+var EPOCH = Date.UTC(1899, 11, 30);
+var NUMRE = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+
+function K(c, r){ return r * COLS + c; }
+function colName(c){ var s = ''; c++; while (c > 0){ var m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = (c - m - 1) / 26; } return s; }
+function colIdx(s){ var n = 0; s = s.toUpperCase(); for (var i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64); return n - 1; }
+function refText(c, r, ca, ra){ return (ca ? '$' : '') + colName(c) + (ra ? '$' : '') + (r + 1); }
+function clamp(v, lo, hi){ return v < lo ? lo : v > hi ? hi : v; }
+function clone(o){ var n = {}; for (var k in o) n[k] = o[k]; return n; }
+
+/* ================= エラー値 ================= */
+function FErr(code){ this.code = code; }
+function E(code){ return new FErr(code); }
+
+/* ================= 字句解析 ================= */
+var REFRE = /^(\$?)([A-Za-z]{1,2})(\$?)(\d{1,5})(?![A-Za-z0-9_(])/;
+var NUMTOK = /^(\d+\.?\d*([eE][+-]?\d+)?|\.\d+([eE][+-]?\d+)?)/;
+var IDRE = /^[A-Za-z_][A-Za-z0-9_.]*/;
+var ERRRE = /^#(REF!|DIV\/0!|VALUE!|NAME\?|N\/A|NUM!|CIRC!|ERROR!)/;
+
+function tokenize(src){
+  var toks = [], i = 0, n = src.length, m;
+  while (i < n){
+    var ch = src[i];
+    if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === '　'){ i++; continue; }
+    if (ch === '"'){
+      var j = i + 1, s = '';
+      for (;;){
+        if (j >= n) throw E('#ERROR!');
+        if (src[j] === '"'){ if (src[j + 1] === '"'){ s += '"'; j += 2; continue; } j++; break; }
+        s += src[j++];
+      }
+      toks.push({t: 'str', v: s, s: i, e: j}); i = j; continue;
+    }
+    var rest = src.slice(i);
+    if ((m = REFRE.exec(rest))){
+      toks.push({t: 'ref', c: colIdx(m[2]), r: parseInt(m[4], 10) - 1, ca: m[1] === '$', ra: m[3] === '$', s: i, e: i + m[0].length});
+      i += m[0].length; continue;
+    }
+    if ((m = NUMTOK.exec(rest))){
+      toks.push({t: 'num', v: Number(m[0]), s: i, e: i + m[0].length}); i += m[0].length; continue;
+    }
+    if ((m = IDRE.exec(rest))){
+      toks.push({t: 'id', v: m[0].toUpperCase(), s: i, e: i + m[0].length}); i += m[0].length; continue;
+    }
+    if ((m = ERRRE.exec(rest))){
+      toks.push({t: 'err', v: m[0], s: i, e: i + m[0].length}); i += m[0].length; continue;
+    }
+    var two = src.substr(i, 2);
+    if (two === '<=' || two === '>=' || two === '<>'){ toks.push({t: 'op', v: two, s: i, e: i + 2}); i += 2; continue; }
+    if ('+-*/^&=<>(),:%'.indexOf(ch) >= 0){ toks.push({t: 'op', v: ch, s: i, e: i + 1}); i++; continue; }
+    throw E('#ERROR!');
+  }
+  return toks;
+}
+
+/* ================= 構文解析 ================= */
+var CMPOPS = {'=': 1, '<>': 1, '<': 1, '>': 1, '<=': 1, '>=': 1};
+
+function parseFormula(src){
+  var toks = tokenize(src), p = 0;
+  function isOp(v){ return p < toks.length && toks[p].t === 'op' && toks[p].v === v; }
+  function expr(){
+    var l = cat();
+    while (p < toks.length && toks[p].t === 'op' && CMPOPS[toks[p].v]){ var op = toks[p++].v; l = {t: 'bin', op: op, l: l, r: cat()}; }
+    return l;
+  }
+  function cat(){
+    var l = add();
+    while (isOp('&')){ p++; l = {t: 'bin', op: '&', l: l, r: add()}; }
+    return l;
+  }
+  function add(){
+    var l = mul();
+    while (isOp('+') || isOp('-')){ var op = toks[p++].v; l = {t: 'bin', op: op, l: l, r: mul()}; }
+    return l;
+  }
+  function mul(){
+    var l = pow();
+    while (isOp('*') || isOp('/')){ var op = toks[p++].v; l = {t: 'bin', op: op, l: l, r: pow()}; }
+    return l;
+  }
+  function pow(){
+    var l = unary();
+    while (isOp('^')){ p++; l = {t: 'bin', op: '^', l: l, r: unary()}; }
+    return l;
+  }
+  function unary(){
+    if (isOp('-')){ p++; return {t: 'neg', x: unary()}; }
+    if (isOp('+')){ p++; return unary(); }
+    return postfix();
+  }
+  function postfix(){
+    var x = primary();
+    while (isOp('%')){ p++; x = {t: 'pct', x: x}; }
+    return x;
+  }
+  function primary(){
+    var tk = toks[p];
+    if (!tk) throw E('#ERROR!');
+    p++;
+    switch (tk.t){
+      case 'num': return {t: 'num', v: tk.v};
+      case 'str': return {t: 'str', v: tk.v};
+      case 'err': return {t: 'err', v: tk.v};
+      case 'ref':
+        if (isOp(':') && toks[p + 1] && toks[p + 1].t === 'ref'){ p++; var b = toks[p++]; return {t: 'range', a: tk, b: b}; }
+        return {t: 'ref', c: tk.c, r: tk.r};
+      case 'id':
+        if (isOp('(')){
+          p++;
+          var args = [];
+          if (isOp(')')){ p++; }
+          else {
+            for (;;){
+              args.push(expr());
+              if (isOp(',')){ p++; continue; }
+              if (isOp(')')){ p++; break; }
+              throw E('#ERROR!');
+            }
+          }
+          return {t: 'fn', name: tk.v, args: args};
+        }
+        if (tk.v === 'TRUE') return {t: 'bool', v: true};
+        if (tk.v === 'FALSE') return {t: 'bool', v: false};
+        return {t: 'name', v: tk.v};
+      case 'op':
+        if (tk.v === '('){ var e = expr(); if (!isOp(')')) throw E('#ERROR!'); p++; return e; }
+        throw E('#ERROR!');
+    }
+    throw E('#ERROR!');
+  }
+  var ast = expr();
+  if (p < toks.length) throw E('#ERROR!');
+  return ast;
+}
+
+var astCache = {};
+var astCount = 0;
+function getAst(src){
+  var a = astCache[src];
+  if (a === undefined){
+    try { a = parseFormula(src); } catch (e){ a = (e instanceof FErr) ? e : E('#ERROR!'); }
+    if (astCount > 5000){ astCache = {}; astCount = 0; }
+    astCache[src] = a; astCount++;
+  }
+  return a;
+}
+
+/* ================= 値の変換 ================= */
+function cleanNum(x){ return isFinite(x) ? parseFloat(x.toPrecision(12)) : x; }
+function general(v){
+  if (!isFinite(v)) return String(v);
+  if (Number.isInteger(v) && Math.abs(v) < 1e15) return String(v);
+  return String(parseFloat(v.toPrecision(12)));
+}
+function toNum(v){
+  if (v === null || v === undefined) return 0;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'boolean') return v ? 1 : 0;
+  var t = String(v).trim();
+  if (NUMRE.test(t)) return Number(t);
+  throw E('#VALUE!');
+}
+function toStr(v){
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  return general(v);
+}
+function truthy(v){
+  if (typeof v === 'boolean') return v;
+  if (v === null || v === undefined) return false;
+  if (typeof v === 'number') return v !== 0;
+  var u = String(v).trim().toUpperCase();
+  if (u === 'TRUE') return true;
+  if (u === 'FALSE') return false;
+  throw E('#VALUE!');
+}
+function rank(v){ return typeof v === 'number' ? 0 : typeof v === 'string' ? 1 : 2; }
+function compare(a, b){
+  if (a === null || a === undefined) a = typeof b === 'string' ? '' : typeof b === 'boolean' ? false : 0;
+  if (b === null || b === undefined) b = typeof a === 'string' ? '' : typeof a === 'boolean' ? false : 0;
+  var ra = rank(a), rb = rank(b);
+  if (ra !== rb) return ra - rb;
+  if (ra === 1){ var x = a.toLowerCase(), y = b.toLowerCase(); return x < y ? -1 : x > y ? 1 : 0; }
+  a = +a; b = +b;
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+function serialOf(y, m, d){ return Math.round((Date.UTC(y, m - 1, d) - EPOCH) / 864e5); }
+function dateOf(serial){ return new Date(EPOCH + Math.floor(serial) * 864e5); }
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function fmtDate(v){
+  if (!isFinite(v) || Math.abs(v) > 3e6) return general(v);
+  var d = dateOf(v), s = d.getUTCFullYear() + '/' + pad2(d.getUTCMonth() + 1) + '/' + pad2(d.getUTCDate());
+  var frac = v - Math.floor(v);
+  if (frac > 1e-9){ var mins = Math.min(1439, Math.round(frac * 1440)); s += ' ' + pad2(Math.floor(mins / 60)) + ':' + pad2(mins % 60); }
+  return s;
+}
+function commas(s){ var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); return p.join('.'); }
+function fmtNum(v, fmt, dec){
+  if (!isFinite(v)) return String(v);
+  switch (fmt){
+    case 'fix': return v.toFixed(dec == null ? 2 : dec);
+    case 'num': return commas(v.toFixed(dec || 0));
+    case 'cur': return (v < 0 ? '-' : '') + '¥' + commas(Math.abs(v).toFixed(dec || 0));
+    case 'pct': return (dec == null ? general(cleanNum(v * 100)) : (v * 100).toFixed(dec)) + '%';
+    case 'date': return fmtDate(v);
+  }
+  if (dec != null) return v.toFixed(dec);
+  return general(v);
+}
+function roundTo(x, d, mode){
+  var f = Math.pow(10, d), a = parseFloat((Math.abs(x) * f).toPrecision(14)), r;
+  if (mode === 0) r = Math.round(a); else if (mode > 0) r = Math.ceil(a); else r = Math.floor(a);
+  return (x < 0 ? -1 : 1) * r / f;
+}
+
+/* ================= 評価 ================= */
+var computing = {};
+var curK = 0;
+
+function cellVal(c, r){
+  if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return null;
+  var k = K(c, r);
+  if (!(k in cells)) return null;
+  return getVal(k);
+}
+function getVal(k){
+  if (k in vals) return vals[k];
+  var cell = cells[k];
+  if (!cell || cell.v === '') return null;
+  if (computing[k]) return E('#CIRC!');
+  computing[k] = true;
+  var prev = curK, v;
+  curK = k;
+  try {
+    v = computeRaw(cell.v, k);
+    if (typeof v === 'number' && !isFinite(v)) v = E('#NUM!');
+  } catch (e){
+    v = (e instanceof FErr) ? e : E('#ERROR!');
+  }
+  curK = prev;
+  delete computing[k];
+  vals[k] = v;
+  return v;
+}
+var DATEFN = {TODAY: 1, NOW: 1, DATE: 1, EDATE: 1};
+function computeRaw(raw, k){
+  if (raw[0] === '=' && raw.length > 1){
+    var ast = getAst(raw.slice(1));
+    if (ast instanceof FErr) throw ast;
+    if (ast.t === 'fn' && DATEFN[ast.name]) autoFmt[k] = 'date';
+    var v = scalar(ev(ast));
+    return (v === null || v === undefined) ? 0 : v;
+  }
+  if (raw[0] === "'") return raw.slice(1);
+  var t = raw.trim();
+  if (t === '') return raw;
+  if (NUMRE.test(t)) return Number(t);
+  if (t[t.length - 1] === '%' && NUMRE.test(t.slice(0, -1))){ autoFmt[k] = 'pct'; return Number(t.slice(0, -1)) / 100; }
+  if (/^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) return Number(t.replace(/,/g, ''));
+  var m = /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/.exec(t);
+  if (m){
+    var mo = +m[2], d = +m[3];
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31){ autoFmt[k] = 'date'; return serialOf(+m[1], mo, d); }
+  }
+  var u = t.toUpperCase();
+  if (u === 'TRUE') return true;
+  if (u === 'FALSE') return false;
+  return raw;
+}
+function chk(c, r){ if (c < 0 || r < 0 || c >= COLS || r >= ROWS) throw E('#REF!'); }
+function ev(n){
+  switch (n.t){
+    case 'num': case 'str': case 'bool': return n.v;
+    case 'err': throw E(n.v);
+    case 'name': throw E('#NAME?');
+    case 'ref': chk(n.c, n.r); return {rng: 1, c1: n.c, r1: n.r, c2: n.c, r2: n.r};
+    case 'range':
+      chk(n.a.c, n.a.r); chk(n.b.c, n.b.r);
+      return {rng: 1, c1: Math.min(n.a.c, n.b.c), r1: Math.min(n.a.r, n.b.r), c2: Math.max(n.a.c, n.b.c), r2: Math.max(n.a.r, n.b.r)};
+    case 'neg': return -num(n.x);
+    case 'pct': return num(n.x) / 100;
+    case 'bin': return binop(n.op, sv(n.l), sv(n.r));
+    case 'fn':
+      var f = FN.hasOwnProperty(n.name) ? FN[n.name] : null;
+      if (!f) throw E('#NAME?');
+      return f(n.args);
+  }
+  throw E('#ERROR!');
+}
+function scalar(v){
+  if (v && v.rng){
+    if (v.c1 === v.c2 && v.r1 === v.r2){
+      var x = cellVal(v.c1, v.r1);
+      if (x instanceof FErr) throw x;
+      return x;
+    }
+    throw E('#VALUE!');
+  }
+  return v;
+}
+function sv(n){ return scalar(ev(n)); }
+function num(n){ return toNum(sv(n)); }
+function str(n){ return toStr(sv(n)); }
+function fin(x){ if (typeof x !== 'number' || isNaN(x) || !isFinite(x)) throw E('#NUM!'); return x; }
+function binop(op, a, b){
+  switch (op){
+    case '+': return fin(toNum(a) + toNum(b));
+    case '-': return fin(toNum(a) - toNum(b));
+    case '*': return fin(toNum(a) * toNum(b));
+    case '/': var d = toNum(b), x = toNum(a); if (d === 0) throw E('#DIV/0!'); return fin(x / d);
+    case '^': return fin(Math.pow(toNum(a), toNum(b)));
+    case '&': return toStr(a) + toStr(b);
+    case '=': return compare(a, b) === 0;
+    case '<>': return compare(a, b) !== 0;
+    case '<': return compare(a, b) < 0;
+    case '>': return compare(a, b) > 0;
+    case '<=': return compare(a, b) <= 0;
+    case '>=': return compare(a, b) >= 0;
+  }
+  throw E('#ERROR!');
+}
+function forRange(rg, fn){
+  for (var r = rg.r1; r <= rg.r2; r++) for (var c = rg.c1; c <= rg.c2; c++) fn(cellVal(c, r), c, r);
+}
+function rngArg(n){ var v = ev(n); if (!v || !v.rng) throw E('#VALUE!'); return v; }
+function nums(args){
+  var out = [];
+  for (var i = 0; i < args.length; i++){
+    var v = ev(args[i]);
+    if (v && v.rng){
+      forRange(v, function(x){ if (x instanceof FErr) throw x; if (typeof x === 'number') out.push(x); });
+    } else if (v !== null && v !== undefined){
+      out.push(toNum(v));
+    }
+  }
+  return out;
+}
+function allVals(args){
+  var out = [];
+  for (var i = 0; i < args.length; i++){
+    var v = ev(args[i]);
+    if (v && v.rng) forRange(v, function(x){ if (x instanceof FErr) throw x; out.push(x); });
+    else out.push(v);
+  }
+  return out;
+}
+function sumOf(a){ var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s; }
+function variance(a, sample){
+  var n = a.length;
+  if (n < (sample ? 2 : 1)) throw E('#DIV/0!');
+  var m = sumOf(a) / n, s = 0;
+  for (var i = 0; i < n; i++) s += (a[i] - m) * (a[i] - m);
+  return s / (sample ? n - 1 : n);
+}
+function opTest(op, d){
+  switch (op){
+    case '=': return d === 0; case '<>': return d !== 0; case '<': return d < 0;
+    case '>': return d > 0; case '<=': return d <= 0; case '>=': return d >= 0;
+  }
+  return false;
+}
+function critOf(cv){
+  var f;
+  if (typeof cv === 'string'){
+    var m = /^(<=|>=|<>|<|>|=)([\s\S]*)$/.exec(cv), op = '=', rhs = cv;
+    if (m){ op = m[1]; rhs = m[2]; }
+    var t = rhs.trim();
+    if (NUMRE.test(t)){
+      var nv = Number(t);
+      f = function(x){
+        var isn = typeof x === 'number';
+        if (op === '<>') return !isn || x !== nv;
+        if (!isn) return false;
+        return opTest(op, x < nv ? -1 : x > nv ? 1 : 0);
+      };
+    } else if (op === '=' || op === '<>'){
+      var pat = rhs.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[\\s\\S]*').replace(/\?/g, '[\\s\\S]');
+      var re = new RegExp('^' + pat + '$', 'i');
+      f = function(x){ var hit = re.test(toStr(x)); return op === '=' ? hit : !hit; };
+    } else {
+      var low = rhs.toLowerCase();
+      f = function(x){
+        if (typeof x !== 'string') return false;
+        var y = x.toLowerCase();
+        return opTest(op, y < low ? -1 : y > low ? 1 : 0);
+      };
+    }
+  } else if (cv === null || cv === undefined){
+    f = function(x){ return x === null || x === ''; };
+  } else {
+    f = function(x){ return x === cv; };
+  }
+  return function(x){ if (x instanceof FErr) return false; return f(x); };
+}
+function ifsPairs(args, start){
+  var ps = [];
+  for (var i = start; i + 1 < args.length; i += 2) ps.push({rg: rngArg(args[i]), cr: critOf(sv(args[i + 1]))});
+  if (!ps.length) throw E('#VALUE!');
+  return ps;
+}
+function ifsEach(ps, fn){
+  var b = ps[0].rg, h = b.r2 - b.r1 + 1, w = b.c2 - b.c1 + 1;
+  for (var j = 0; j < h; j++) for (var i = 0; i < w; i++){
+    var ok = true;
+    for (var q = 0; q < ps.length; q++){
+      if (!ps[q].cr(cellVal(ps[q].rg.c1 + i, ps[q].rg.r1 + j))){ ok = false; break; }
+    }
+    if (ok) fn(i, j);
+  }
+}
+function accAt(rg, i, j, acc){
+  var y = cellVal(rg.c1 + i, rg.r1 + j);
+  if (y instanceof FErr) throw y;
+  if (typeof y === 'number'){ acc.s += y; acc.n++; }
+}
+function one(c, r){ return {rng: 1, c1: c, r1: r, c2: c, r2: r}; }
+function lookupLine(rg){
+  var list = [];
+  if (rg.c1 === rg.c2){ for (var r = rg.r1; r <= rg.r2; r++) list.push(cellVal(rg.c1, r)); }
+  else if (rg.r1 === rg.r2){ for (var c = rg.c1; c <= rg.c2; c++) list.push(cellVal(c, rg.r1)); }
+  else throw E('#N/A');
+  return list;
+}
+function findIn(list, key, mode){   // mode 0: 完全一致, 1: 以下で最大, -1: 以上で最小
+  var hit = -1;
+  for (var i = 0; i < list.length; i++){
+    var x = list[i];
+    if (x === null || x instanceof FErr || typeof x !== typeof key) continue;
+    var d = compare(x, key);
+    if (mode === 0){ if (d === 0) return i; }
+    else if (mode > 0){ if (d <= 0) hit = i; else break; }
+    else { if (d >= 0) hit = i; else break; }
+  }
+  return hit;
+}
+function textFmt(v, f){
+  if (typeof v !== 'number') return toStr(v);
+  if (/[ymd]/i.test(f) && !/[0#]/.test(f)){
+    var d = dateOf(v);
+    return f.replace(/yyyy/gi, d.getUTCFullYear()).replace(/yy/gi, pad2(d.getUTCFullYear() % 100))
+            .replace(/mm/gi, pad2(d.getUTCMonth() + 1)).replace(/dd/gi, pad2(d.getUTCDate()))
+            .replace(/m/gi, d.getUTCMonth() + 1).replace(/d/gi, d.getUTCDate());
+  }
+  var pct = f.indexOf('%') >= 0, dec = ((f.split('.')[1]) || '').replace(/[^0#]/g, '').length;
+  var s = (pct ? v * 100 : v).toFixed(dec);
+  if (f.indexOf(',') >= 0) s = commas(s);
+  var pre = /^[^0#.,%]*/.exec(f)[0];
+  return pre + s + (pct ? '%' : '');
+}
+
+var FN = {
+  SUM: function(a){ return sumOf(nums(a)); },
+  AVERAGE: function(a){ var n = nums(a); if (!n.length) throw E('#DIV/0!'); return sumOf(n) / n.length; },
+  MIN: function(a){ var n = nums(a); return n.length ? Math.min.apply(null, n) : 0; },
+  MAX: function(a){ var n = nums(a); return n.length ? Math.max.apply(null, n) : 0; },
+  COUNT: function(a){
+    var k = 0;
+    for (var i = 0; i < a.length; i++){
+      var v = ev(a[i]);
+      if (v && v.rng) forRange(v, function(y){ if (typeof y === 'number') k++; });
+      else if (typeof v === 'number' || (typeof v === 'string' && NUMRE.test(v.trim()))) k++;
+    }
+    return k;
+  },
+  COUNTA: function(a){
+    var k = 0;
+    for (var i = 0; i < a.length; i++){
+      var v = ev(a[i]);
+      if (v && v.rng) forRange(v, function(y){ if (y !== null && y !== '') k++; });
+      else if (v !== null && v !== '') k++;
+    }
+    return k;
+  },
+  COUNTBLANK: function(a){ var k = 0; forRange(rngArg(a[0]), function(y){ if (y === null || y === '') k++; }); return k; },
+  PRODUCT: function(a){ var n = nums(a), p = 1; for (var i = 0; i < n.length; i++) p *= n[i]; return n.length ? p : 0; },
+  MEDIAN: function(a){
+    var n = nums(a).sort(function(x, y){ return x - y; });
+    if (!n.length) throw E('#NUM!');
+    var m = n.length >> 1;
+    return n.length % 2 ? n[m] : (n[m - 1] + n[m]) / 2;
+  },
+  VAR: function(a){ return variance(nums(a), true); },
+  VARP: function(a){ return variance(nums(a), false); },
+  STDEV: function(a){ return Math.sqrt(variance(nums(a), true)); },
+  STDEVP: function(a){ return Math.sqrt(variance(nums(a), false)); },
+  LARGE: function(a){
+    var n = nums([a[0]]).sort(function(x, y){ return y - x; }), k = Math.floor(num(a[1]));
+    if (k < 1 || k > n.length) throw E('#NUM!');
+    return n[k - 1];
+  },
+  SMALL: function(a){
+    var n = nums([a[0]]).sort(function(x, y){ return x - y; }), k = Math.floor(num(a[1]));
+    if (k < 1 || k > n.length) throw E('#NUM!');
+    return n[k - 1];
+  },
+  RANK: function(a){
+    var x = num(a[0]), n = nums([a[1]]), asc = a.length > 2 ? num(a[2]) !== 0 : false, k = 1, found = false;
+    for (var i = 0; i < n.length; i++){
+      if (n[i] === x) found = true;
+      if (asc ? n[i] < x : n[i] > x) k++;
+    }
+    if (!found) throw E('#N/A');
+    return k;
+  },
+  SUMPRODUCT: function(a){
+    var rs = [], i;
+    for (i = 0; i < a.length; i++) rs.push(rngArg(a[i]));
+    var h = rs[0].r2 - rs[0].r1, w = rs[0].c2 - rs[0].c1;
+    for (i = 1; i < rs.length; i++) if (rs[i].r2 - rs[i].r1 !== h || rs[i].c2 - rs[i].c1 !== w) throw E('#VALUE!');
+    var s = 0;
+    for (var j = 0; j <= h; j++) for (var q = 0; q <= w; q++){
+      var p = 1;
+      for (i = 0; i < rs.length; i++){
+        var y = cellVal(rs[i].c1 + q, rs[i].r1 + j);
+        if (y instanceof FErr) throw y;
+        p *= (typeof y === 'number') ? y : 0;
+      }
+      s += p;
+    }
+    return s;
+  },
+  SUMIF: function(a){
+    var ps = ifsPairs(a, 0), sr = a.length > 2 ? rngArg(a[2]) : ps[0].rg, acc = {s: 0, n: 0};
+    ifsEach(ps, function(i, j){ accAt(sr, i, j, acc); });
+    return acc.s;
+  },
+  AVERAGEIF: function(a){
+    var ps = ifsPairs(a, 0), sr = a.length > 2 ? rngArg(a[2]) : ps[0].rg, acc = {s: 0, n: 0};
+    ifsEach(ps, function(i, j){ accAt(sr, i, j, acc); });
+    if (!acc.n) throw E('#DIV/0!');
+    return acc.s / acc.n;
+  },
+  COUNTIF: function(a){ var k = 0; ifsEach(ifsPairs(a, 0), function(){ k++; }); return k; },
+  COUNTIFS: function(a){ var k = 0; ifsEach(ifsPairs(a, 0), function(){ k++; }); return k; },
+  SUMIFS: function(a){
+    var sr = rngArg(a[0]), acc = {s: 0, n: 0};
+    ifsEach(ifsPairs(a, 1), function(i, j){ accAt(sr, i, j, acc); });
+    return acc.s;
+  },
+
+  ABS: function(a){ return Math.abs(num(a[0])); },
+  SQRT: function(a){ var x = num(a[0]); if (x < 0) throw E('#NUM!'); return Math.sqrt(x); },
+  POWER: function(a){ return fin(Math.pow(num(a[0]), num(a[1]))); },
+  MOD: function(a){ var x = num(a[0]), d = num(a[1]); if (d === 0) throw E('#DIV/0!'); return cleanNum(x - d * Math.floor(x / d)); },
+  INT: function(a){ return Math.floor(num(a[0])); },
+  TRUNC: function(a){ return roundTo(num(a[0]), a.length > 1 ? Math.floor(num(a[1])) : 0, -1); },
+  ROUND: function(a){ return roundTo(num(a[0]), a.length > 1 ? Math.floor(num(a[1])) : 0, 0); },
+  ROUNDUP: function(a){ return roundTo(num(a[0]), a.length > 1 ? Math.floor(num(a[1])) : 0, 1); },
+  ROUNDDOWN: function(a){ return roundTo(num(a[0]), a.length > 1 ? Math.floor(num(a[1])) : 0, -1); },
+  CEILING: function(a){ var x = num(a[0]), s = a.length > 1 ? num(a[1]) : 1; if (s === 0) return 0; return cleanNum(Math.ceil(cleanNum(x / s)) * s); },
+  FLOOR: function(a){ var x = num(a[0]), s = a.length > 1 ? num(a[1]) : 1; if (s === 0) throw E('#DIV/0!'); return cleanNum(Math.floor(cleanNum(x / s)) * s); },
+  SIGN: function(a){ var x = num(a[0]); return x > 0 ? 1 : x < 0 ? -1 : 0; },
+  EXP: function(a){ return fin(Math.exp(num(a[0]))); },
+  LN: function(a){ var x = num(a[0]); if (x <= 0) throw E('#NUM!'); return Math.log(x); },
+  LOG: function(a){
+    var x = num(a[0]), b = a.length > 1 ? num(a[1]) : 10;
+    if (x <= 0 || b <= 0 || b === 1) throw E('#NUM!');
+    return cleanNum(Math.log(x) / Math.log(b));
+  },
+  LOG10: function(a){ var x = num(a[0]); if (x <= 0) throw E('#NUM!'); return cleanNum(Math.log(x) / Math.LN10); },
+  PI: function(){ return Math.PI; },
+  SIN: function(a){ return Math.sin(num(a[0])); },
+  COS: function(a){ return Math.cos(num(a[0])); },
+  TAN: function(a){ return Math.tan(num(a[0])); },
+  RAND: function(){ return Math.random(); },
+  RANDBETWEEN: function(a){
+    var lo = Math.ceil(num(a[0])), hi = Math.floor(num(a[1]));
+    if (hi < lo) throw E('#NUM!');
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+  },
+
+  IF: function(a){
+    if (a.length < 2) throw E('#VALUE!');
+    if (truthy(sv(a[0]))) return ev(a[1]);
+    return a.length > 2 ? ev(a[2]) : false;
+  },
+  IFS: function(a){
+    for (var i = 0; i + 1 < a.length; i += 2) if (truthy(sv(a[i]))) return ev(a[i + 1]);
+    throw E('#N/A');
+  },
+  AND: function(a){
+    var vs = logicVals(a);
+    for (var i = 0; i < vs.length; i++) if (!vs[i]) return false;
+    return true;
+  },
+  OR: function(a){
+    var vs = logicVals(a);
+    for (var i = 0; i < vs.length; i++) if (vs[i]) return true;
+    return false;
+  },
+  XOR: function(a){ var vs = logicVals(a), k = 0; for (var i = 0; i < vs.length; i++) if (vs[i]) k++; return k % 2 === 1; },
+  NOT: function(a){ return !truthy(sv(a[0])); },
+  TRUE: function(){ return true; },
+  FALSE: function(){ return false; },
+  IFERROR: function(a){
+    try { var v = sv(a[0]); return v === null ? 0 : v; }
+    catch (e){ if (e instanceof FErr) return a.length > 1 ? ev(a[1]) : ''; throw e; }
+  },
+  ISERROR: function(a){
+    try { sv(a[0]); return false; }
+    catch (e){ if (e instanceof FErr) return true; throw e; }
+  },
+  ISBLANK: function(a){ var v = sv(a[0]); return v === null; },
+  ISNUMBER: function(a){ return typeof sv(a[0]) === 'number'; },
+  ISTEXT: function(a){ return typeof sv(a[0]) === 'string'; },
+
+  CONCAT: function(a){ var v = allVals(a), s = ''; for (var i = 0; i < v.length; i++) s += toStr(v[i]); return s; },
+  CONCATENATE: function(a){ return FN.CONCAT(a); },
+  TEXTJOIN: function(a){
+    var d = str(a[0]), skip = truthy(sv(a[1])), v = allVals(a.slice(2)), out = [];
+    for (var i = 0; i < v.length; i++){ var s = toStr(v[i]); if (skip && s === '') continue; out.push(s); }
+    return out.join(d);
+  },
+  LEN: function(a){ return str(a[0]).length; },
+  LEFT: function(a){ var n = a.length > 1 ? Math.floor(num(a[1])) : 1; if (n < 0) throw E('#VALUE!'); return str(a[0]).slice(0, n); },
+  RIGHT: function(a){
+    var n = a.length > 1 ? Math.floor(num(a[1])) : 1, s = str(a[0]);
+    if (n < 0) throw E('#VALUE!');
+    return n === 0 ? '' : s.slice(-n);
+  },
+  MID: function(a){
+    var s = str(a[0]), st = Math.floor(num(a[1])), n = Math.floor(num(a[2]));
+    if (st < 1 || n < 0) throw E('#VALUE!');
+    return s.slice(st - 1, st - 1 + n);
+  },
+  UPPER: function(a){ return str(a[0]).toUpperCase(); },
+  LOWER: function(a){ return str(a[0]).toLowerCase(); },
+  TRIM: function(a){ return str(a[0]).replace(/ +/g, ' ').replace(/^ | $/g, ''); },
+  REPT: function(a){ var n = Math.floor(num(a[1])); if (n < 0 || n > 10000) throw E('#VALUE!'); return new Array(n + 1).join(str(a[0])); },
+  FIND: function(a){
+    var st = a.length > 2 ? Math.floor(num(a[2])) : 1, i = str(a[1]).indexOf(str(a[0]), st - 1);
+    if (st < 1 || i < 0) throw E('#VALUE!');
+    return i + 1;
+  },
+  SEARCH: function(a){
+    var st = a.length > 2 ? Math.floor(num(a[2])) : 1, i = str(a[1]).toLowerCase().indexOf(str(a[0]).toLowerCase(), st - 1);
+    if (st < 1 || i < 0) throw E('#VALUE!');
+    return i + 1;
+  },
+  SUBSTITUTE: function(a){ var s = str(a[0]), o = str(a[1]), n = str(a[2]); return o === '' ? s : s.split(o).join(n); },
+  EXACT: function(a){ return str(a[0]) === str(a[1]); },
+  VALUE: function(a){ var v = sv(a[0]); if (typeof v === 'string') v = v.replace(/,/g, ''); return toNum(v); },
+  TEXT: function(a){ return textFmt(sv(a[0]), str(a[1])); },
+
+  VLOOKUP: function(a){
+    var key = sv(a[0]), rg = rngArg(a[1]), idx = Math.floor(num(a[2])), approx = a.length > 3 ? truthy(sv(a[3])) : true;
+    if (idx < 1) throw E('#VALUE!');
+    if (idx > rg.c2 - rg.c1 + 1) throw E('#REF!');
+    var list = [];
+    for (var r = rg.r1; r <= rg.r2; r++) list.push(cellVal(rg.c1, r));
+    var i = findIn(list, key, approx ? 1 : 0);
+    if (i < 0) throw E('#N/A');
+    return one(rg.c1 + idx - 1, rg.r1 + i);
+  },
+  HLOOKUP: function(a){
+    var key = sv(a[0]), rg = rngArg(a[1]), idx = Math.floor(num(a[2])), approx = a.length > 3 ? truthy(sv(a[3])) : true;
+    if (idx < 1) throw E('#VALUE!');
+    if (idx > rg.r2 - rg.r1 + 1) throw E('#REF!');
+    var list = [];
+    for (var c = rg.c1; c <= rg.c2; c++) list.push(cellVal(c, rg.r1));
+    var i = findIn(list, key, approx ? 1 : 0);
+    if (i < 0) throw E('#N/A');
+    return one(rg.c1 + i, rg.r1 + idx - 1);
+  },
+  MATCH: function(a){
+    var key = sv(a[0]), list = lookupLine(rngArg(a[1])), type = a.length > 2 ? num(a[2]) : 1;
+    var i = findIn(list, key, type === 0 ? 0 : type > 0 ? 1 : -1);
+    if (i < 0) throw E('#N/A');
+    return i + 1;
+  },
+  INDEX: function(a){
+    var rg = rngArg(a[0]), h = rg.r2 - rg.r1 + 1, w = rg.c2 - rg.c1 + 1;
+    var r = Math.floor(num(a[1])), c;
+    if (a.length > 2) c = Math.floor(num(a[2]));
+    else if (h === 1){ c = r; r = 1; }
+    else c = 1;
+    if (r === 0 && h === 1) r = 1;
+    if (c === 0 && w === 1) c = 1;
+    if (r < 1 || c < 1 || r > h || c > w) throw E('#REF!');
+    return one(rg.c1 + c - 1, rg.r1 + r - 1);
+  },
+  CHOOSE: function(a){
+    var i = Math.floor(num(a[0]));
+    if (i < 1 || i >= a.length) throw E('#VALUE!');
+    return ev(a[i]);
+  },
+  ROW: function(a){ if (a.length) return rngArg(a[0]).r1 + 1; return Math.floor(curK / COLS) + 1; },
+  COLUMN: function(a){ if (a.length) return rngArg(a[0]).c1 + 1; return (curK % COLS) + 1; },
+  ROWS: function(a){ var g = rngArg(a[0]); return g.r2 - g.r1 + 1; },
+  COLUMNS: function(a){ var g = rngArg(a[0]); return g.c2 - g.c1 + 1; },
+
+  TODAY: function(){ var d = new Date(); return serialOf(d.getFullYear(), d.getMonth() + 1, d.getDate()); },
+  NOW: function(){
+    var d = new Date();
+    return serialOf(d.getFullYear(), d.getMonth() + 1, d.getDate()) + (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) / 86400;
+  },
+  DATE: function(a){ return serialOf(Math.floor(num(a[0])), Math.floor(num(a[1])), Math.floor(num(a[2]))); },
+  YEAR: function(a){ return dateOf(num(a[0])).getUTCFullYear(); },
+  MONTH: function(a){ return dateOf(num(a[0])).getUTCMonth() + 1; },
+  DAY: function(a){ return dateOf(num(a[0])).getUTCDate(); },
+  WEEKDAY: function(a){
+    var w = dateOf(num(a[0])).getUTCDay(), t = a.length > 1 ? num(a[1]) : 1;
+    if (t === 2) return w === 0 ? 7 : w;
+    if (t === 3) return w === 0 ? 6 : w - 1;
+    return w + 1;
+  },
+  DAYS: function(a){ return Math.floor(num(a[0])) - Math.floor(num(a[1])); },
+  EDATE: function(a){
+    var d = dateOf(num(a[0])), m = Math.floor(num(a[1]));
+    var y = d.getUTCFullYear(), mo = d.getUTCMonth() + m, day = d.getUTCDate();
+    var last = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+    return Math.round((Date.UTC(y, mo, Math.min(day, last)) - EPOCH) / 864e5);
+  }
+};
+function logicVals(args){
+  var out = [];
+  for (var i = 0; i < args.length; i++){
+    var v = ev(args[i]);
+    if (v && v.rng){
+      forRange(v, function(x){
+        if (x instanceof FErr) throw x;
+        if (typeof x === 'boolean') out.push(x); else if (typeof x === 'number') out.push(x !== 0);
+      });
+    } else out.push(truthy(v));
+  }
+  if (!out.length) throw E('#VALUE!');
+  return out;
+}
+
+function recalc(){
+  vals = {}; autoFmt = {}; computing = {};
+  for (var ks in cells) getVal(+ks);
+}
+
+/* ================= 参照の書き換え ================= */
+function mapOne(t, op, role){
+  var c = t.c, r = t.r;
+  if (op.type === 'shift'){
+    if (!t.ca) c += op.dc;
+    if (!t.ra) r += op.dr;
+  } else {
+    var v = op.axis === 'r' ? r : c;
+    if (op.type === 'ins'){ if (v >= op.at) v++; }
+    else {
+      if (v > op.at) v--;
+      else if (v === op.at){
+        if (role === 'hi') v--;
+        else if (role !== 'lo') return null;
+      }
+    }
+    if (op.axis === 'r') r = v; else c = v;
+  }
+  if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return null;
+  return {c: c, r: r};
+}
+function mapRange(a, b, op){
+  var ra = 'single', rb = 'single';
+  if (op.type === 'del'){
+    var va = op.axis === 'r' ? a.r : a.c, vb = op.axis === 'r' ? b.r : b.c;
+    if (va <= vb){ ra = 'lo'; rb = 'hi'; } else { ra = 'hi'; rb = 'lo'; }
+  }
+  var na = mapOne(a, op, ra), nb = mapOne(b, op, rb);
+  if (!na || !nb) return '#REF!';
+  if (op.type === 'del'){
+    var xa = op.axis === 'r' ? na.r : na.c, xb = op.axis === 'r' ? nb.r : nb.c;
+    var lo = ra === 'lo' ? xa : xb, hi = ra === 'lo' ? xb : xa;
+    if (hi < lo) return '#REF!';
+  }
+  return refText(na.c, na.r, a.ca, a.ra) + ':' + refText(nb.c, nb.r, b.ca, b.ra);
+}
+function rewrite(raw, op){
+  if (typeof raw !== 'string' || raw[0] !== '=' || raw.length < 2) return raw;
+  var src = raw.slice(1), toks;
+  try { toks = tokenize(src); } catch (e){ return raw; }
+  var out = '', pos = 0;
+  for (var i = 0; i < toks.length; i++){
+    var t = toks[i];
+    if (t.t !== 'ref') continue;
+    var n1 = toks[i + 1], n2 = toks[i + 2], txt, end;
+    if (n1 && n1.t === 'op' && n1.v === ':' && n2 && n2.t === 'ref'){
+      txt = mapRange(t, n2, op); end = n2.e; i += 2;
+    } else {
+      var m = mapOne(t, op, 'single');
+      txt = m ? refText(m.c, m.r, t.ca, t.ra) : '#REF!';
+      end = t.e;
+    }
+    out += src.slice(pos, t.s) + txt;
+    pos = end;
+  }
+  return '=' + out + src.slice(pos);
+}
+
+/* ================= データ操作 ================= */
+function rawOf(c, r){ var x = cells[K(c, r)]; return x ? x.v : ''; }
+function styleOf(c, r){ var x = cells[K(c, r)]; return (x && x.s) || EMPTY; }
+function putCell(c, r, raw, style){
+  var k = K(c, r);
+  if (raw === '' && !style) delete cells[k];
+  else cells[k] = style ? {v: raw, s: style} : {v: raw};
+}
+function setRaw(c, r, raw){
+  var k = K(c, r), x = cells[k];
+  if (x){ x.v = raw; if (raw === '' && !x.s) delete cells[k]; }
+  else if (raw !== '') cells[k] = {v: raw};
+}
+
+var undoStack = [], redoStack = [];
+function snap(){ return JSON.stringify({cells: cells, colW: colW}); }
+function pushUndo(s){
+  undoStack.push(s || snap());
+  if (undoStack.length > 200) undoStack.shift();
+  redoStack.length = 0;
+  hideCopyBox();
+}
+function restore(s){
+  var o = JSON.parse(s);
+  cells = o.cells; colW = o.colW;
+  hideCopyBox();
+  applyColW();
+  render();
+  updateSel(false);
+}
+function undo(){
+  if (!undoStack.length){ flash('これ以上戻せません'); return; }
+  redoStack.push(snap());
+  restore(undoStack.pop());
+}
+function redo(){
+  if (!redoStack.length){ flash('やり直す操作がありません'); return; }
+  undoStack.push(snap());
+  restore(redoStack.pop());
+}
+
+/* ================= 画面構築 ================= */
+function $(id){ return document.getElementById(id); }
+var tbl = $('tbl'), wrap = $('wrap'), gridc = $('gridc'), ed = $('ed'), bar = $('bar'), nameBox = $('nameBox');
+var selbox = $('selbox'), actbox = $('actbox'), copybox = $('copybox'), fillbox = $('fillbox'), fillh = $('fillh');
+var msgEl = $('msg'), statsEl = $('stats'), menu = $('menu'), dlg = $('dlg'), fmtSel = $('fmt');
+var tds = [], colTh = [], rowTh = [], colEls = [], cornerTh = null;
+
+function build(){
+  var cg = document.createElement('colgroup'), c0 = document.createElement('col');
+  c0.style.width = HEADW + 'px'; cg.appendChild(c0);
+  var c, r;
+  for (c = 0; c < COLS; c++){ var ce = document.createElement('col'); cg.appendChild(ce); colEls.push(ce); }
+  tbl.appendChild(cg);
+  var thead = document.createElement('thead'), hr = document.createElement('tr');
+  cornerTh = document.createElement('th'); cornerTh.className = 'corner'; cornerTh._kind = 'corner'; cornerTh._c = -1; cornerTh._r = -1;
+  cornerTh.title = 'すべて選択';
+  hr.appendChild(cornerTh);
+  for (c = 0; c < COLS; c++){
+    var th = document.createElement('th');
+    th.textContent = colName(c); th._kind = 'colh'; th._c = c; th._r = -1;
+    var rz = document.createElement('div'); rz.className = 'rz'; rz._kind = 'rz'; rz._c = c; rz._r = -1;
+    th.appendChild(rz);
+    hr.appendChild(th); colTh.push(th);
+  }
+  thead.appendChild(hr); tbl.appendChild(thead);
+  var tb = document.createElement('tbody');
+  for (r = 0; r < ROWS; r++){
+    var tr = document.createElement('tr'), rh = document.createElement('th');
+    rh.textContent = r + 1; rh._kind = 'rowh'; rh._c = -1; rh._r = r;
+    tr.appendChild(rh); rowTh.push(rh);
+    var row = [];
+    for (c = 0; c < COLS; c++){
+      var td = document.createElement('td');
+      td._kind = 'cell'; td._c = c; td._r = r; td._t = ''; td._s = '';
+      tr.appendChild(td); row.push(td);
+    }
+    tds.push(row); tb.appendChild(tr);
+  }
+  tbl.appendChild(tb);
+}
+function applyColW(){
+  var sum = HEADW;
+  for (var c = 0; c < COLS; c++){
+    if (!(colW[c] > 0)) colW[c] = DEFW;
+    colEls[c].style.width = colW[c] + 'px'; sum += colW[c];
+  }
+  tbl.style.width = sum + 'px';
+}
+
+function dispText(k, cell, v){
+  if (v === null || v === undefined) return '';
+  if (v instanceof FErr) return v.code;
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  if (typeof v === 'number'){
+    var s = cell.s || EMPTY;
+    return fmtNum(v, s.fmt || autoFmt[k] || '', s.dec);
+  }
+  return String(v);
+}
+function cssOf(s, v){
+  var a = s.al;
+  if (!a) a = typeof v === 'number' ? 'right' : (typeof v === 'boolean' || v instanceof FErr) ? 'center' : 'left';
+  var t = 'text-align:' + a + ';';
+  if (s.b) t += 'font-weight:700;';
+  if (s.i) t += 'font-style:italic;';
+  if (s.u) t += 'text-decoration:underline;';
+  if (s.fg) t += 'color:' + s.fg + ';';
+  else if (v instanceof FErr) t += 'color:#c0392b;';
+  if (s.bg) t += 'background:' + s.bg + ';';
+  return t;
+}
+function render(){
+  recalc();
+  for (var r = 0; r < ROWS; r++){
+    var row = tds[r];
+    for (var c = 0; c < COLS; c++){
+      var k = r * COLS + c, cell = cells[k], td = row[c], text = '', css = '';
+      if (cell){
+        var v = vals[k];
+        if (v === undefined) v = null;
+        text = dispText(k, cell, v);
+        css = cssOf(cell.s || EMPTY, v);
+      }
+      if (td._t !== text){ td.textContent = text; td._t = text; }
+      if (td._s !== css){ td.style.cssText = css; td._s = css; }
+    }
+  }
+  if (!edit) bar.value = rawOf(sel.ac, sel.ar);
+  updateStatus();
+}
+
+/* ================= 選択 ================= */
+var sel = {ac: 0, ar: 0, fc: 0, fr: 0};
+var edit = null;         // {c, r, quick}
+var pointing = null;     // 数式入力中のクリック参照
+var drag = null;
+var clip = null;
+var dialogOpen = false;
+
+function selRange(){
+  return {c1: Math.min(sel.ac, sel.fc), r1: Math.min(sel.ar, sel.fr), c2: Math.max(sel.ac, sel.fc), r2: Math.max(sel.ar, sel.fr)};
+}
+function rectOf(c1, r1, c2, r2){
+  var a = tds[r1][c1].getBoundingClientRect(), b = tds[r2][c2].getBoundingClientRect(), w = wrap.getBoundingClientRect();
+  return {x: a.left - w.left, y: a.top - w.top, w: b.right - a.left, h: b.bottom - a.top};
+}
+function place(el, b){
+  el.style.left = (b.x - 1) + 'px'; el.style.top = (b.y - 1) + 'px';
+  el.style.width = (b.w + 1) + 'px'; el.style.height = (b.h + 1) + 'px';
+  el.style.display = 'block';
+}
+function placeEd(){
+  var c = edit ? edit.c : sel.ac, r = edit ? edit.r : sel.ar, b = rectOf(c, r, c, r);
+  ed.style.left = (b.x - 1) + 'px'; ed.style.top = (b.y - 1) + 'px';
+  ed.style.height = (b.h + 1) + 'px'; ed.style.width = (b.w + 1) + 'px';
+  if (edit) growEd();
+}
+function growEd(){
+  if (!edit) return;
+  var base = tds[edit.r][edit.c].offsetWidth + 1;
+  ed.style.width = base + 'px';
+  if (ed.scrollWidth > ed.clientWidth) ed.style.width = (ed.scrollWidth + 14) + 'px';
+}
+function revealCell(c, r){
+  var t = tds[r][c].getBoundingClientRect(), g = gridc.getBoundingClientRect();
+  var hw = cornerTh.offsetWidth, hh = cornerTh.offsetHeight;
+  var right = g.left + gridc.clientWidth, bottom = g.top + gridc.clientHeight;
+  if (t.left < g.left + hw) gridc.scrollLeft -= (g.left + hw - t.left);
+  else if (t.right > right) gridc.scrollLeft += (t.right - right);
+  if (t.top < g.top + hh) gridc.scrollTop -= (g.top + hh - t.top);
+  else if (t.bottom > bottom) gridc.scrollTop += (t.bottom - bottom);
+}
+function updateSel(reveal){
+  var R = selRange(), multi = R.c1 !== R.c2 || R.r1 !== R.r2, c, r;
+  var b = rectOf(R.c1, R.r1, R.c2, R.r2);
+  place(selbox, b);
+  selbox.classList.toggle('multi', multi);
+  if (multi) place(actbox, rectOf(sel.ac, sel.ar, sel.ac, sel.ar)); else actbox.style.display = 'none';
+  fillh.style.left = (b.x + b.w - 5) + 'px'; fillh.style.top = (b.y + b.h - 5) + 'px';
+  for (c = 0; c < COLS; c++) colTh[c].classList.toggle('hl', c >= R.c1 && c <= R.c2);
+  for (r = 0; r < ROWS; r++) rowTh[r].classList.toggle('hl', r >= R.r1 && r <= R.r2);
+  if (document.activeElement !== nameBox)
+    nameBox.value = multi ? refText(R.c1, R.r1) + ':' + refText(R.c2, R.r2) : refText(sel.ac, sel.ar);
+  if (!edit){ bar.value = rawOf(sel.ac, sel.ar); placeEd(); }
+  var st = styleOf(sel.ac, sel.ar);
+  $('btnB').classList.toggle('on', !!st.b);
+  $('btnI').classList.toggle('on', !!st.i);
+  $('btnU').classList.toggle('on', !!st.u);
+  $('btnL').classList.toggle('on', st.al === 'left');
+  $('btnC').classList.toggle('on', st.al === 'center');
+  $('btnR').classList.toggle('on', st.al === 'right');
+  fmtSel.value = st.fmt || '';
+  updateStatus();
+  if (reveal !== false) revealCell(sel.fc, sel.fr);
+}
+function updateStatus(){
+  var R = selRange();
+  if (R.c1 === R.c2 && R.r1 === R.r2){ statsEl.textContent = ''; return; }
+  var n = 0, cnt = 0, s = 0, mn = Infinity, mx = -Infinity;
+  for (var ks in vals){
+    var k = +ks, c = k % COLS, r = (k - c) / COLS;
+    if (c < R.c1 || c > R.c2 || r < R.r1 || r > R.r2) continue;
+    var v = vals[ks];
+    if (v === null || v === '') continue;
+    cnt++;
+    if (typeof v === 'number'){ n++; s += v; if (v < mn) mn = v; if (v > mx) mx = v; }
+  }
+  if (n) statsEl.textContent = '合計: ' + general(cleanNum(s)) + ' 平均: ' + general(cleanNum(s / n)) +
+    ' 最小: ' + general(mn) + ' 最大: ' + general(mx) + ' 数値の個数: ' + n + ' データの個数: ' + cnt;
+  else statsEl.textContent = cnt ? 'データの個数: ' + cnt : '';
+}
+var flashTimer = 0;
+function flash(m){
+  msgEl.textContent = m;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(function(){ msgEl.textContent = '準備完了'; }, 4000);
+}
+function focusEd(){ try { ed.focus({preventScroll: true}); } catch (e){ ed.focus(); } }
+function hideCopyBox(){ copybox.style.display = 'none'; }
+
+/* ================= 編集 ================= */
+function beginEdit(o){
+  if (edit) return;
+  o = o || {};
+  edit = {c: sel.ac, r: sel.ar, quick: !!o.quick};
+  pointing = null;
+  if (!o.typed) ed.value = rawOf(sel.ac, sel.ar);
+  bar.value = ed.value;
+  ed.classList.add('on');
+  placeEd();
+  revealCell(edit.c, edit.r);
+  if (!o.fromBar){
+    focusEd();
+    if (!o.typed){ var n = ed.value.length; ed.setSelectionRange(n, n); }
+  }
+}
+function normInput(v){
+  if (v[0] === '＝') v = '=' + v.slice(1);
+  if (v[0] === '=' && v.length > 1){
+    var d = 0, q = false;
+    for (var i = 0; i < v.length; i++){
+      var ch = v[i];
+      if (ch === '"') q = !q;
+      else if (!q){ if (ch === '(') d++; else if (ch === ')') d--; }
+    }
+    if (!q && d > 0) v += new Array(d + 1).join(')');
+  }
+  return v;
+}
+function commitEdit(dx, dy, noFocus){
+  if (!edit) return;
+  var v = normInput(ed.value), c = edit.c, r = edit.r;
+  edit = null; pointing = null;
+  ed.classList.remove('on'); ed.value = '';
+  if (v !== rawOf(c, r)){ pushUndo(); setRaw(c, r, v); }
+  sel.ac = sel.fc = clamp(c + (dx || 0), 0, COLS - 1);
+  sel.ar = sel.fr = clamp(r + (dy || 0), 0, ROWS - 1);
+  render();
+  updateSel();
+  if (!noFocus) focusEd();
+}
+function cancelEdit(){
+  if (!edit) return;
+  edit = null; pointing = null;
+  ed.classList.remove('on'); ed.value = '';
+  updateSel();
+  focusEd();
+}
+function syncFrom(inp){
+  if (inp === ed) bar.value = ed.value; else ed.value = bar.value;
+  growEd();
+}
+function insertPoint(inp, s, e2, text){
+  var v = inp.value;
+  inp.value = v.slice(0, s) + text + v.slice(e2);
+  var ne = s + text.length;
+  try { inp.setSelectionRange(ne, ne); } catch (e){}
+  pointing = {inp: inp, start: s, end: ne, text: text};
+  syncFrom(inp);
+}
+function tryPoint(c, r){
+  var inp = document.activeElement === bar ? bar : ed, v = inp.value;
+  if (v[0] !== '=' && v[0] !== '＝') return false;
+  var s = inp.selectionStart, e2 = inp.selectionEnd;
+  if (s == null){ s = e2 = v.length; }
+  if (pointing && pointing.inp === inp && e2 === pointing.end && v.slice(pointing.start, pointing.end) === pointing.text){
+    s = pointing.start;
+  } else {
+    var i = s - 1;
+    while (i >= 0 && v[i] === ' ') i--;
+    if (i < 0 || '=＝+-*/^&(,:<>'.indexOf(v[i]) < 0) return false;
+  }
+  insertPoint(inp, s, e2, refText(c, r));
+  return true;
+}
+
+function moveSel(dx, dy, ext){
+  if (ext){
+    sel.fc = clamp(sel.fc + dx, 0, COLS - 1); sel.fr = clamp(sel.fr + dy, 0, ROWS - 1);
+  } else {
+    sel.ac = sel.fc = clamp(sel.ac + dx, 0, COLS - 1); sel.ar = sel.fr = clamp(sel.ar + dy, 0, ROWS - 1);
+  }
+  updateSel();
+}
+function hasData(c, r){ var x = cells[K(c, r)]; return !!(x && x.v !== ''); }
+function inb(c, r){ return c >= 0 && r >= 0 && c < COLS && r < ROWS; }
+function jump(c, r, dx, dy){
+  var nc = c + dx, nr = r + dy;
+  if (!inb(nc, nr)) return [c, r];
+  if (hasData(c, r) && hasData(nc, nr)){
+    while (inb(nc + dx, nr + dy) && hasData(nc + dx, nr + dy)){ nc += dx; nr += dy; }
+    return [nc, nr];
+  }
+  while (inb(nc, nr) && !hasData(nc, nr)){ nc += dx; nr += dy; }
+  if (!inb(nc, nr)){ nc -= dx; nr -= dy; }
+  return [nc, nr];
+}
+function clearSelection(){
+  var R = selRange(), any = false, ks, k, c, r;
+  for (ks in cells){
+    k = +ks; c = k % COLS; r = (k - c) / COLS;
+    if (c >= R.c1 && c <= R.c2 && r >= R.r1 && r <= R.r2 && cells[ks].v !== ''){ any = true; break; }
+  }
+  if (!any) return;
+  pushUndo();
+  for (ks in cells){
+    k = +ks; c = k % COLS; r = (k - c) / COLS;
+    if (c >= R.c1 && c <= R.c2 && r >= R.r1 && r <= R.r2){
+      if (cells[ks].s) cells[ks].v = ''; else delete cells[ks];
+    }
+  }
+  render(); updateSel(false);
+}
+function applyStyle(fn){
+  var R = selRange();
+  pushUndo();
+  for (var r = R.r1; r <= R.r2; r++) for (var c = R.c1; c <= R.c2; c++){
+    var k = K(c, r), cell = cells[k], made = false;
+    if (!cell){ cell = {v: ''}; made = true; }
+    var s = cell.s || {};
+    fn(s);
+    var has = false;
+    for (var p in s){ has = true; break; }
+    if (has) cell.s = s; else delete cell.s;
+    if (cell.v === '' && !cell.s){ if (!made) delete cells[k]; }
+    else if (made) cells[k] = cell;
+  }
+  render(); updateSel(false);
+}
+function setProp(prop, val){
+  applyStyle(function(s){ if (val === null || val === undefined || val === false) delete s[prop]; else s[prop] = val; });
+}
+function natDec(v){
+  var s = String(cleanNum(v));
+  if (s.indexOf('e') >= 0) return 0;
+  var i = s.indexOf('.');
+  return i < 0 ? 0 : s.length - i - 1;
+}
+function changeDec(d){
+  var k = K(sel.ac, sel.ar), st = styleOf(sel.ac, sel.ar), v = vals[k], f = st.fmt || autoFmt[k] || '';
+  var cur = st.dec != null ? st.dec : f === 'fix' ? 2 : f === '' ? (typeof v === 'number' ? Math.min(10, natDec(v)) : 0) : 0;
+  var nd = clamp(cur + d, 0, 10);
+  applyStyle(function(s){ s.dec = nd; if (!s.fmt) s.fmt = 'fix'; });
+}
+
+/* ================= 行・列の挿入/削除 ================= */
+function structOp(type, axis, at){
+  var nc = {}, op = {type: type, axis: axis, at: at};
+  for (var ks in cells){
+    var k = +ks, c = k % COLS, r = (k - c) / COLS, cell = cells[ks];
+    var v = axis === 'r' ? r : c;
+    if (type === 'ins'){ if (v >= at) v++; }
+    else { if (v === at) continue; if (v > at) v--; }
+    if (axis === 'r') r = v; else c = v;
+    if (c >= COLS || r >= ROWS) continue;
+    var raw = rewrite(cell.v, op);
+    nc[K(c, r)] = cell.s ? {v: raw, s: cell.s} : {v: raw};
+  }
+  cells = nc;
+  if (axis === 'c'){
+    if (type === 'ins'){ colW.splice(at, 0, DEFW); colW.length = COLS; }
+    else { colW.splice(at, 1); colW.push(DEFW); }
+  }
+}
+function edgeHasData(axis, n){
+  for (var ks in cells){
+    if (cells[ks].v === '') continue;
+    var k = +ks, c = k % COLS, r = (k - c) / COLS;
+    if (axis === 'r' ? r >= ROWS - n : c >= COLS - n) return true;
+  }
+  return false;
+}
+function insertLines(axis, at, n){
+  var lim = axis === 'r' ? ROWS : COLS;
+  if (at >= lim){ flash('これより外側には挿入できません'); return; }
+  n = Math.min(n, lim - at);
+  if (edgeHasData(axis, n)){ flash(axis === 'r' ? '最終行付近にデータがあるため挿入できません' : '最終列付近にデータがあるため挿入できません'); return; }
+  pushUndo();
+  for (var i = 0; i < n; i++) structOp('ins', axis, at);
+  applyColW(); render(); updateSel(false);
+  flash((axis === 'r' ? '行' : '列') + 'を ' + n + ' 挿入しました');
+}
+function deleteLines(axis, from, to){
+  pushUndo();
+  for (var i = to; i >= from; i--) structOp('del', axis, i);
+  if (axis === 'r'){ sel.ar = sel.fr = Math.min(from, ROWS - 1); }
+  else { sel.ac = sel.fc = Math.min(from, COLS - 1); }
+  applyColW(); render(); updateSel(false);
+  flash((axis === 'r' ? '行' : '列') + 'を ' + (to - from + 1) + ' 削除しました');
+}
+
+/* ================= クリップボード ================= */
+function tsvEsc(s){ return /[\t\n\r"]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function makeClip(cut){
+  var R = selRange(), data = [], lines = [];
+  for (var r = R.r1; r <= R.r2; r++){
+    var row = [], texts = [];
+    for (var c = R.c1; c <= R.c2; c++){
+      var cell = cells[K(c, r)];
+      row.push(cell ? {v: cell.v, s: cell.s ? clone(cell.s) : undefined} : null);
+      texts.push(tsvEsc(tds[r][c]._t));
+    }
+    data.push(row); lines.push(texts.join('\t'));
+  }
+  clip = {text: lines.join('\n'), w: R.c2 - R.c1 + 1, h: R.r2 - R.r1 + 1, data: data, c1: R.c1, r1: R.r1, cut: !!cut};
+  place(copybox, rectOf(R.c1, R.r1, R.c2, R.r2));
+  flash(cut ? '切り取りました。貼り付け先を選んで Ctrl+V' : 'コピーしました');
+}
+function normText(t){ return String(t).replace(/\r\n?/g, '\n').replace(/\n+$/, ''); }
+function parseDelim(text, d){
+  var rows = [], row = [], f = '', i = 0, q = false, n = text.length, quoted = false;
+  while (i < n){
+    var ch = text[i];
+    if (q){
+      if (ch === '"'){ if (text[i + 1] === '"'){ f += '"'; i += 2; continue; } q = false; i++; continue; }
+      f += ch; i++; continue;
+    }
+    if (ch === '"' && f === '' && !quoted){ q = true; quoted = true; i++; continue; }
+    if (ch === d){ row.push(f); f = ''; quoted = false; i++; continue; }
+    if (ch === '\r'){ i++; continue; }
+    if (ch === '\n'){ row.push(f); rows.push(row); row = []; f = ''; quoted = false; i++; continue; }
+    f += ch; i++;
+  }
+  if (f !== '' || row.length || quoted){ row.push(f); rows.push(row); }
+  return rows;
+}
+function doPaste(text){
+  var R = selRange(), selW = R.c2 - R.c1 + 1, selH = R.r2 - R.r1 + 1, i, j, tw, th;
+  if (clip && (text == null || text === '' || normText(text) === normText(clip.text))){
+    pushUndo();
+    tw = clip.w; th = clip.h;
+    if (!clip.cut){
+      if (selW > clip.w && selW % clip.w === 0) tw = selW;
+      if (selH > clip.h && selH % clip.h === 0) th = selH;
+    } else {
+      for (j = 0; j < clip.h; j++) for (i = 0; i < clip.w; i++) delete cells[K(clip.c1 + i, clip.r1 + j)];
+    }
+    for (j = 0; j < th; j++) for (i = 0; i < tw; i++){
+      var dc = R.c1 + i, dr = R.r1 + j;
+      if (dc >= COLS || dr >= ROWS) continue;
+      var si = i % clip.w, sj = j % clip.h, src = clip.data[sj][si], raw = src ? src.v : '';
+      if (!clip.cut) raw = rewrite(raw, {type: 'shift', dc: dc - (clip.c1 + si), dr: dr - (clip.r1 + sj)});
+      putCell(dc, dr, raw, src && src.s ? clone(src.s) : undefined);
+    }
+    if (clip.cut){ clip.cut = false; clip.c1 = R.c1; clip.r1 = R.r1; }
+  } else {
+    if (text == null || text === ''){ flash('貼り付ける内容がありません(Ctrl+V をお使いください)'); return; }
+    var rows = parseDelim(normText(text), '\t');
+    if (!rows.length) return;
+    pushUndo();
+    th = rows.length; tw = 0;
+    for (j = 0; j < rows.length; j++) tw = Math.max(tw, rows[j].length);
+    if (th === 1 && tw === 1){
+      for (j = R.r1; j <= R.r2; j++) for (i = R.c1; i <= R.c2; i++) setRaw(i, j, normInput(rows[0][0]));
+      tw = selW; th = selH;
+    } else {
+      for (j = 0; j < th; j++) for (i = 0; i < rows[j].length; i++){
+        if (R.c1 + i >= COLS || R.r1 + j >= ROWS) continue;
+        setRaw(R.c1 + i, R.r1 + j, normInput(rows[j][i]));
+      }
+    }
+  }
+  sel.ac = R.c1; sel.ar = R.r1;
+  sel.fc = Math.min(COLS - 1, R.c1 + tw - 1); sel.fr = Math.min(ROWS - 1, R.r1 + th - 1);
+  render(); updateSel(false);
+}
+
+/* ================= オートフィル ================= */
+function fillTarget(R, c, r){
+  var dv = r < R.r1 ? R.r1 - r : r > R.r2 ? r - R.r2 : 0;
+  var dh = c < R.c1 ? R.c1 - c : c > R.c2 ? c - R.c2 : 0;
+  if (dv === 0 && dh === 0) return null;
+  if (dv >= dh) return r < R.r1 ? {c1: R.c1, r1: r, c2: R.c2, r2: R.r2} : {c1: R.c1, r1: R.r1, c2: R.c2, r2: r};
+  return c < R.c1 ? {c1: c, r1: R.r1, c2: R.c2, r2: R.r2} : {c1: R.c1, r1: R.r1, c2: c, r2: R.r2};
+}
+function seriesOf(c, r, dc, dr, n){
+  if (n < 2) return null;
+  var a = [];
+  for (var i = 0; i < n; i++){
+    var cell = cells[K(c + dc * i, r + dr * i)];
+    if (!cell) return null;
+    var t = cell.v.trim();
+    if (!NUMRE.test(t)) return null;
+    a.push(Number(t));
+  }
+  var step = a[1] - a[0];
+  for (var j = 2; j < n; j++) if (Math.abs(a[j] - a[j - 1] - step) > 1e-9) return null;
+  return {v0: a[0], step: step};
+}
+function fillOne(sc, sr, tc, tr, ser, off){
+  var s = cells[K(sc, sr)], raw = s ? s.v : '';
+  if (ser) raw = String(cleanNum(ser.v0 + ser.step * off));
+  else raw = rewrite(raw, {type: 'shift', dc: tc - sc, dr: tr - sr});
+  putCell(tc, tr, raw, s && s.s ? clone(s.s) : undefined);
+}
+function doFill(R, T){
+  var vert = T.r1 !== R.r1 || T.r2 !== R.r2, n, c, r, ser, off, si;
+  pushUndo();
+  if (vert){
+    n = R.r2 - R.r1 + 1;
+    for (c = R.c1; c <= R.c2; c++){
+      ser = seriesOf(c, R.r1, 0, 1, n);
+      for (r = T.r1; r <= T.r2; r++){
+        if (r >= R.r1 && r <= R.r2) continue;
+        off = r - R.r1; si = ((off % n) + n) % n;
+        fillOne(c, R.r1 + si, c, r, ser, off);
+      }
+    }
+  } else {
+    n = R.c2 - R.c1 + 1;
+    for (r = R.r1; r <= R.r2; r++){
+      ser = seriesOf(R.c1, r, 1, 0, n);
+      for (c = T.c1; c <= T.c2; c++){
+        if (c >= R.c1 && c <= R.c2) continue;
+        off = c - R.c1; si = ((off % n) + n) % n;
+        fillOne(R.c1 + si, r, c, r, ser, off);
+      }
+    }
+  }
+  sel.ac = T.c1; sel.ar = T.r1; sel.fc = T.c2; sel.fr = T.r2;
+  render(); updateSel(false);
+}
+
+/* ================= マウス操作 ================= */
+function hit(el){
+  while (el){ if (el._kind) return el; el = el.parentNode; }
+  return null;
+}
+function autoFit(c){
+  var w = 40;
+  for (var r = 0; r < ROWS; r++){ var td = tds[r][c]; if (td._t) w = Math.max(w, td.scrollWidth + 10); }
+  w = Math.min(420, w);
+  if (w !== colW[c]){ pushUndo(); colW[c] = w; applyColW(); updateSel(false); }
+}
+tbl.addEventListener('mousedown', function(e){
+  if (e.button !== 0) return;
+  var t = hit(e.target);
+  if (!t) return;
+  hideMenu();
+  if (t._kind === 'rz'){
+    e.preventDefault();
+    if (edit) commitEdit(0, 0);
+    drag = {mode: 'resize', c: t._c, x: e.clientX, w: colW[t._c], snap: snap()};
+    document.body.classList.add('colresize');
+    return;
+  }
+  e.preventDefault();
+  if (t._kind === 'cell'){
+    var c = t._c, r = t._r;
+    if (edit){
+      if (tryPoint(c, r)){ drag = {mode: 'point', c: c, r: r, c2: c, r2: r}; document.body.classList.add('dragging'); return; }
+      commitEdit(0, 0);
+    }
+    if (e.shiftKey){ sel.fc = c; sel.fr = r; }
+    else { sel.ac = sel.fc = c; sel.ar = sel.fr = r; }
+    drag = {mode: 'sel'};
+  } else {
+    if (edit) commitEdit(0, 0);
+    if (t._kind === 'colh'){
+      if (!e.shiftKey) sel.ac = t._c;
+      sel.fc = t._c; sel.ar = 0; sel.fr = ROWS - 1;
+      drag = {mode: 'col'};
+    } else if (t._kind === 'rowh'){
+      if (!e.shiftKey) sel.ar = t._r;
+      sel.fr = t._r; sel.ac = 0; sel.fc = COLS - 1;
+      drag = {mode: 'row'};
+    } else {
+      sel.ac = 0; sel.ar = 0; sel.fc = COLS - 1; sel.fr = ROWS - 1;
+    }
+  }
+  document.body.classList.add('dragging');
+  updateSel(false);
+  focusEd();
+});
+tbl.addEventListener('dblclick', function(e){
+  var t = hit(e.target);
+  if (!t) return;
+  if (t._kind === 'rz'){ autoFit(t._c); return; }
+  if (t._kind === 'cell' && !edit){
+    sel.ac = sel.fc = t._c; sel.ar = sel.fr = t._r;
+    updateSel(false);
+    beginEdit({});
+  }
+});
+fillh.addEventListener('mousedown', function(e){
+  if (e.button !== 0) return;
+  e.preventDefault();
+  if (edit) commitEdit(0, 0);
+  drag = {mode: 'fill', R: selRange(), T: null};
+  document.body.classList.add('dragging');
+});
+document.addEventListener('mousemove', function(e){
+  if (!drag) return;
+  if (drag.mode === 'resize'){
+    colW[drag.c] = Math.max(24, Math.round(drag.w + e.clientX - drag.x));
+    applyColW(); updateSel(false);
+    return;
+  }
+  var el = document.elementFromPoint(e.clientX, e.clientY), t = el && hit(el);
+  if (!t) return;
+  switch (drag.mode){
+    case 'sel':
+      if (t._kind === 'cell' && (t._c !== sel.fc || t._r !== sel.fr)){ sel.fc = t._c; sel.fr = t._r; updateSel(false); }
+      break;
+    case 'col':
+      if (t._c >= 0 && t._c !== sel.fc){ sel.fc = t._c; updateSel(false); }
+      break;
+    case 'row':
+      if (t._r >= 0 && t._r !== sel.fr){ sel.fr = t._r; updateSel(false); }
+      break;
+    case 'point':
+      if (t._kind === 'cell' && pointing && (t._c !== drag.c2 || t._r !== drag.r2)){
+        drag.c2 = t._c; drag.r2 = t._r;
+        var a = refText(Math.min(drag.c, drag.c2), Math.min(drag.r, drag.r2));
+        var b = refText(Math.max(drag.c, drag.c2), Math.max(drag.r, drag.r2));
+        insertPoint(pointing.inp, pointing.start, pointing.end, a === b ? a : a + ':' + b);
+      }
+      break;
+    case 'fill':
+      if (t._kind === 'cell'){
+        drag.T = fillTarget(drag.R, t._c, t._r);
+        if (drag.T) place(fillbox, rectOf(drag.T.c1, drag.T.r1, drag.T.c2, drag.T.r2));
+        else fillbox.style.display = 'none';
+      }
+      break;
+  }
+});
+document.addEventListener('mouseup', function(){
+  if (!drag) return;
+  var d = drag;
+  drag = null;
+  document.body.classList.remove('dragging');
+  document.body.classList.remove('colresize');
+  if (d.mode === 'fill'){
+    fillbox.style.display = 'none';
+    if (d.T) doFill(d.R, d.T);
+    focusEd();
+  } else if (d.mode === 'resize'){
+    if (colW[d.c] !== d.w) pushUndo(d.snap);
+    updateSel(false);
+    focusEd();
+  }
+});
+
+/* ================= 右クリックメニュー ================= */
+var MENU = [
+  ['切り取り', 'cut'], ['コピー', 'copy'], ['貼り付け', 'paste'], ['内容を消去', 'clear'], null,
+  ['上に行を挿入', 'insRow'], ['下に行を挿入', 'insRowBelow'], ['行を削除', 'delRow'], null,
+  ['左に列を挿入', 'insCol'], ['右に列を挿入', 'insColRight'], ['列を削除', 'delCol']
+];
+(function(){
+  for (var i = 0; i < MENU.length; i++){
+    if (!MENU[i]){ menu.appendChild(document.createElement('hr')); continue; }
+    var d = document.createElement('div');
+    d.className = 'mi'; d.textContent = MENU[i][0]; d._act = MENU[i][1];
+    menu.appendChild(d);
+  }
+})();
+function showMenu(x, y){
+  menu.style.display = 'block';
+  var w = menu.offsetWidth, h = menu.offsetHeight;
+  menu.style.left = Math.max(4, Math.min(x, window.innerWidth - w - 4)) + 'px';
+  menu.style.top = Math.max(4, Math.min(y, window.innerHeight - h - 4)) + 'px';
+}
+function hideMenu(){ menu.style.display = 'none'; }
+tbl.addEventListener('contextmenu', function(e){
+  var t = hit(e.target);
+  if (!t) return;
+  e.preventDefault();
+  if (edit) commitEdit(0, 0);
+  var R = selRange();
+  if (t._kind === 'cell'){
+    if (t._c < R.c1 || t._c > R.c2 || t._r < R.r1 || t._r > R.r2){ sel.ac = sel.fc = t._c; sel.ar = sel.fr = t._r; }
+  } else if (t._kind === 'colh' || t._kind === 'rz'){
+    if (!(R.r1 === 0 && R.r2 === ROWS - 1 && t._c >= R.c1 && t._c <= R.c2)){ sel.ac = sel.fc = t._c; sel.ar = 0; sel.fr = ROWS - 1; }
+  } else if (t._kind === 'rowh'){
+    if (!(R.c1 === 0 && R.c2 === COLS - 1 && t._r >= R.r1 && t._r <= R.r2)){ sel.ar = sel.fr = t._r; sel.ac = 0; sel.fc = COLS - 1; }
+  }
+  updateSel(false);
+  focusEd();
+  showMenu(e.clientX, e.clientY);
+});
+menu.addEventListener('mousedown', function(e){ e.preventDefault(); });
+menu.addEventListener('click', function(e){
+  var a = e.target._act;
+  hideMenu();
+  if (a) doAct(a);
+});
+document.addEventListener('mousedown', function(e){
+  if (menu.style.display === 'block' && !menu.contains(e.target)) hideMenu();
+});
+window.addEventListener('blur', hideMenu);
+
+/* ================= コマンド ================= */
+function toggleProp(p){ setProp(p, !styleOf(sel.ac, sel.ar)[p]); }
+function setAlign(a){ setProp('al', styleOf(sel.ac, sel.ar).al === a ? null : a); }
+function doAct(act){
+  if (edit) commitEdit(0, 0);
+  var R = selRange();
+  switch (act){
+    case 'undo': undo(); break;
+    case 'redo': redo(); break;
+    case 'bold': toggleProp('b'); break;
+    case 'italic': toggleProp('i'); break;
+    case 'underline': toggleProp('u'); break;
+    case 'left': setAlign('left'); break;
+    case 'center': setAlign('center'); break;
+    case 'right': setAlign('right'); break;
+    case 'clearfmt': applyStyle(function(s){ for (var p in s) delete s[p]; }); break;
+    case 'decUp': changeDec(1); break;
+    case 'decDown': changeDec(-1); break;
+    case 'insRow': insertLines('r', R.r1, R.r2 - R.r1 + 1); break;
+    case 'insRowBelow': insertLines('r', R.r2 + 1, 1); break;
+    case 'delRow': deleteLines('r', R.r1, R.r2); break;
+    case 'insCol': insertLines('c', R.c1, R.c2 - R.c1 + 1); break;
+    case 'insColRight': insertLines('c', R.c2 + 1, 1); break;
+    case 'delCol': deleteLines('c', R.c1, R.c2); break;
+    case 'cut': makeClip(true); writeSysClip(); break;
+    case 'copy': makeClip(false); writeSysClip(); break;
+    case 'paste': doPaste(null); break;
+    case 'clear': clearSelection(); break;
+    case 'csv': openDlg('pCsv'); $('csvText').value = toCSV(false); return;
+    case 'help': openDlg('pHelp'); return;
+    case 'new':
+      pushUndo(); cells = {};
+      for (var i = 0; i < COLS; i++) colW[i] = DEFW;
+      sel.ac = sel.ar = sel.fc = sel.fr = 0;
+      applyColW(); render(); updateSel();
+      flash('すべて消去しました(Ctrl+Z で元に戻せます)');
+      break;
+  }
+  focusEd();
+}
+function writeSysClip(){
+  try {
+    if (clip && navigator.clipboard && navigator.clipboard.writeText){
+      var p = navigator.clipboard.writeText(clip.text);
+      if (p && p.catch) p.catch(function(){});
+    }
+  } catch (e){}
+}
+var toolbar = $('toolbar');
+toolbar.addEventListener('mousedown', function(e){
+  var t = e.target;
+  while (t && t !== toolbar){
+    if (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'LABEL') return;
+    t = t.parentNode;
+  }
+  e.preventDefault();
+});
+toolbar.addEventListener('click', function(e){
+  var t = e.target;
+  while (t && t !== toolbar){
+    if (t.tagName === 'BUTTON' && t.getAttribute('data-act')){ doAct(t.getAttribute('data-act')); return; }
+    t = t.parentNode;
+  }
+});
+$('fg').addEventListener('change', function(){
+  if (edit) commitEdit(0, 0);
+  var v = this.value.toLowerCase();
+  $('fgSw').style.background = v;
+  setProp('fg', v === '#000000' ? null : v);
+  focusEd();
+});
+$('bg').addEventListener('change', function(){
+  if (edit) commitEdit(0, 0);
+  var v = this.value.toLowerCase();
+  $('bgSw').style.background = v;
+  setProp('bg', v === '#ffffff' ? null : v);
+  focusEd();
+});
+fmtSel.addEventListener('change', function(){
+  if (edit) commitEdit(0, 0);
+  var v = this.value;
+  applyStyle(function(s){ if (v) s.fmt = v; else delete s.fmt; delete s.dec; });
+  focusEd();
+});
+
+/* ================= キーボード ================= */
+var ARROW = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
+function idleKey(e){
+  var k = e.key, ctrl = e.ctrlKey || e.metaKey, a = ARROW[k];
+  if (ctrl && !e.altKey){
+    if (a){
+      e.preventDefault();
+      var p = jump(sel.fc, sel.fr, a[0], a[1]);
+      if (e.shiftKey){ sel.fc = p[0]; sel.fr = p[1]; } else { sel.ac = sel.fc = p[0]; sel.ar = sel.fr = p[1]; }
+      updateSel();
+      return;
+    }
+    switch (k.toLowerCase()){
+      case 'z': e.preventDefault(); if (e.shiftKey) redo(); else undo(); return;
+      case 'y': e.preventDefault(); redo(); return;
+      case 'a': e.preventDefault(); sel.ac = 0; sel.ar = 0; sel.fc = COLS - 1; sel.fr = ROWS - 1; updateSel(false); return;
+      case 'b': e.preventDefault(); toggleProp('b'); return;
+      case 'i': e.preventDefault(); toggleProp('i'); return;
+      case 'u': e.preventDefault(); toggleProp('u'); return;
+      case 'c': makeClip(false); writeSysClip(); return;
+      case 'x': makeClip(true); writeSysClip(); return;
+      case 'home': e.preventDefault(); sel.ac = sel.fc = 0; sel.ar = sel.fr = 0; updateSel(); return;
+    }
+    return;
+  }
+  if (e.altKey) return;
+  if (a){ e.preventDefault(); moveSel(a[0], a[1], e.shiftKey); return; }
+  switch (k){
+    case 'Tab': e.preventDefault(); moveSel(e.shiftKey ? -1 : 1, 0, false); break;
+    case 'Enter': e.preventDefault(); moveSel(0, e.shiftKey ? -1 : 1, false); break;
+    case 'Delete': case 'Backspace': e.preventDefault(); clearSelection(); break;
+    case 'F2': e.preventDefault(); beginEdit({}); break;
+    case 'Home': e.preventDefault(); if (e.shiftKey) sel.fc = 0; else { sel.ac = sel.fc = 0; sel.fr = sel.ar; } updateSel(); break;
+    case 'End':
+      e.preventDefault();
+      var last = 0;
+      for (var c = COLS - 1; c >= 0; c--) if (hasData(c, sel.fr)){ last = c; break; }
+      if (e.shiftKey) sel.fc = last; else { sel.ac = sel.fc = last; sel.fr = sel.ar; }
+      updateSel();
+      break;
+    case 'PageDown': e.preventDefault(); moveSel(0, 15, e.shiftKey); break;
+    case 'PageUp': e.preventDefault(); moveSel(0, -15, e.shiftKey); break;
+    case 'Escape': hideCopyBox(); if (clip) clip.cut = false; hideMenu(); break;
+  }
+}
+ed.addEventListener('keydown', function(e){
+  if (e.isComposing || e.keyCode === 229) return;
+  if (!edit){ idleKey(e); return; }
+  var k = e.key;
+  if (k === 'Enter'){ e.preventDefault(); commitEdit(0, e.shiftKey ? -1 : 1); }
+  else if (k === 'Tab'){ e.preventDefault(); commitEdit(e.shiftKey ? -1 : 1, 0); }
+  else if (k === 'Escape'){ e.preventDefault(); cancelEdit(); }
+  else if (k === 'F2'){ e.preventDefault(); edit.quick = false; }
+  else if (ARROW[k] && edit.quick && ed.value[0] !== '=' && ed.value[0] !== '＝' && !e.shiftKey && !e.ctrlKey && !e.metaKey){
+    e.preventDefault(); commitEdit(ARROW[k][0], ARROW[k][1]);
+  }
+});
+ed.addEventListener('input', function(){
+  if (!edit){
+    if (ed.value === '') return;
+    beginEdit({quick: true, typed: true});
+  }
+  pointing = null;
+  bar.value = ed.value;
+  growEd();
+});
+ed.addEventListener('compositionstart', function(){
+  if (!edit) beginEdit({quick: true, typed: true});
+});
+ed.addEventListener('mousedown', function(){ if (edit) edit.quick = false; });
+bar.addEventListener('focus', function(){
+  if (!edit) beginEdit({fromBar: true});
+  else edit.quick = false;
+});
+bar.addEventListener('input', function(){
+  if (!edit) beginEdit({fromBar: true, typed: true});
+  pointing = null;
+  ed.value = bar.value;
+  growEd();
+});
+bar.addEventListener('keydown', function(e){
+  if (e.isComposing || e.keyCode === 229) return;
+  if (!edit) return;
+  if (e.key === 'Enter'){ e.preventDefault(); commitEdit(0, e.shiftKey ? -1 : 1); }
+  else if (e.key === 'Tab'){ e.preventDefault(); commitEdit(e.shiftKey ? -1 : 1, 0); }
+  else if (e.key === 'Escape'){ e.preventDefault(); cancelEdit(); }
+});
+nameBox.addEventListener('focus', function(){ if (edit) commitEdit(0, 0, true); nameBox.select(); });
+nameBox.addEventListener('keydown', function(e){
+  if (e.key === 'Enter'){
+    e.preventDefault();
+    var m = /^\s*\$?([A-Za-z]{1,2})\$?(\d+)(?:\s*:\s*\$?([A-Za-z]{1,2})\$?(\d+))?\s*$/.exec(nameBox.value);
+    if (m){
+      var c1 = colIdx(m[1]), r1 = parseInt(m[2], 10) - 1;
+      var c2 = m[3] ? colIdx(m[3]) : c1, r2 = m[3] ? parseInt(m[4], 10) - 1 : r1;
+      if (inb(c1, r1) && inb(c2, r2)){
+        sel.ac = c1; sel.ar = r1; sel.fc = c2; sel.fr = r2;
+        focusEd(); updateSel();
+        if (c1 !== c2 || r1 !== r2) revealCell(c1, r1);
+        return;
+      }
+    }
+    flash('セル番地が正しくありません(例: B3 または A1:C5、範囲は A1〜' + refText(COLS - 1, ROWS - 1) + ')');
+    focusEd(); updateSel(false);
+  } else if (e.key === 'Escape'){
+    e.preventDefault(); focusEd(); updateSel(false);
+  }
+});
+nameBox.addEventListener('blur', function(){ updateSel(false); });
+document.addEventListener('keydown', function(e){
+  if (dialogOpen){ if (e.key === 'Escape') closeDlg(); return; }
+  if (e.target === document.body || e.target === gridc || e.target === document.documentElement){
+    if (edit) return;
+    focusEd();
+    idleKey(e);
+  }
+});
+
+function gridFocused(e){
+  if (edit || dialogOpen) return false;
+  var t = e.target;
+  return t === ed || t === document.body || t === document.documentElement || gridc.contains(t);
+}
+document.addEventListener('copy', function(e){
+  if (!gridFocused(e)) return;
+  makeClip(false);
+  if (e.clipboardData){ e.clipboardData.setData('text/plain', clip.text); e.preventDefault(); }
+});
+document.addEventListener('cut', function(e){
+  if (!gridFocused(e)) return;
+  makeClip(true);
+  if (e.clipboardData){ e.clipboardData.setData('text/plain', clip.text); e.preventDefault(); }
+});
+document.addEventListener('paste', function(e){
+  if (!gridFocused(e)) return;
+  e.preventDefault();
+  var text = '';
+  try { text = (e.clipboardData || window.clipboardData).getData('text'); } catch (err){ text = ''; }
+  doPaste(text);
+});
+
+/* ================= CSV ================= */
+function csvEsc(s){ return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function toCSV(formulas){
+  var maxC = -1, maxR = -1;
+  for (var ks in cells){
+    if (cells[ks].v === '') continue;
+    var k = +ks, c = k % COLS, r = (k - c) / COLS;
+    if (c > maxC) maxC = c;
+    if (r > maxR) maxR = r;
+  }
+  var lines = [];
+  for (var rr = 0; rr <= maxR; rr++){
+    var row = [];
+    for (var cc = 0; cc <= maxC; cc++) row.push(csvEsc(formulas ? rawOf(cc, rr) : tds[rr][cc]._t));
+    lines.push(row.join(','));
+  }
+  return lines.join('\n');
+}
+function importCSV(text){
+  text = String(text).replace(/^﻿/, '');
+  var first = text.split('\n')[0] || '';
+  var d = (first.indexOf('\t') >= 0 && first.indexOf(',') < 0) ? '\t' : ',';
+  var rows = parseDelim(text, d);
+  if (!rows.length){ flash('読み込む内容がありません'); return false; }
+  pushUndo();
+  cells = {};
+  var cut = false;
+  for (var j = 0; j < rows.length; j++){
+    if (j >= ROWS){ cut = true; break; }
+    for (var i = 0; i < rows[j].length; i++){
+      if (i >= COLS){ if (rows[j][i] !== '') cut = true; continue; }
+      if (rows[j][i] !== '') putCell(i, j, rows[j][i]);
+    }
+  }
+  sel.ac = sel.ar = sel.fc = sel.fr = 0;
+  render(); updateSel();
+  flash(cut ? '読み込みました(' + COLS + ' 列 × ' + ROWS + ' 行を超える部分は切り捨てました)' : 'CSV を読み込みました');
+  return true;
+}
+function openDlg(id){
+  dialogOpen = true;
+  dlg.classList.add('open');
+  $('pCsv').classList.toggle('open', id === 'pCsv');
+  $('pHelp').classList.toggle('open', id === 'pHelp');
+}
+function closeDlg(){
+  dialogOpen = false;
+  dlg.classList.remove('open');
+  focusEd();
+}
+dlg.addEventListener('mousedown', function(e){ if (e.target === dlg) closeDlg(); });
+dlg.addEventListener('click', function(e){
+  var t = e.target, d = t.getAttribute && t.getAttribute('data-d');
+  if (!d) return;
+  var ta = $('csvText');
+  switch (d){
+    case 'close': closeDlg(); break;
+    case 'expVal': ta.value = toCSV(false); ta.focus(); ta.select(); break;
+    case 'expRaw': ta.value = toCSV(true); ta.focus(); ta.select(); break;
+    case 'imp': if (importCSV(ta.value)) closeDlg(); break;
+    case 'open': $('csvFile').click(); break;
+    case 'save':
+      try {
+        var blob = new Blob(['﻿' + ta.value], {type: 'text/csv;charset=utf-8'});
+        var url = URL.createObjectURL(blob), a = document.createElement('a');
+        a.href = url; a.download = 'sheet.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      } catch (err){ flash('ファイルに保存できませんでした。テキストをコピーしてご利用ください'); }
+      break;
+  }
+});
+$('csvFile').addEventListener('change', function(){
+  var f = this.files && this.files[0], self = this;
+  if (!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){ $('csvText').value = String(fr.result).replace(/^﻿/, ''); self.value = ''; };
+  fr.onerror = function(){ flash('ファイルを読み込めませんでした'); self.value = ''; };
+  fr.readAsText(f);
+});
+
+/* ================= 初期データ ================= */
+function sample(){
+  var head = {b: true, bg: '#d5ebe8', al: 'center'};
+  var data = [
+    ['商品', '単価', '数量', '小計'],
+    ['りんご', '120', '5', '=B2*C2'],
+    ['みかん', '80', '12', '=B3*C3'],
+    ['バナナ', '150', '3', '=B4*C4'],
+    ['ぶどう', '480', '2', '=B5*C5'],
+    ['もも', '300', '4', '=B6*C6']
+  ];
+  for (var r = 0; r < data.length; r++) for (var c = 0; c < 4; c++){
+    var st = r === 0 ? clone(head) : (c === 1 || c === 3) ? {fmt: 'cur'} : undefined;
+    putCell(c, r, data[r][c], st);
+  }
+  putCell(0, 7, '合計', {b: true});
+  putCell(2, 7, '=SUM(C2:C6)', {b: true});
+  putCell(3, 7, '=SUM(D2:D6)', {b: true, fmt: 'cur'});
+  putCell(0, 8, '平均単価');
+  putCell(1, 8, '=ROUND(AVERAGE(B2:B6),1)', {fmt: 'cur', dec: 1});
+  putCell(0, 9, '消費税 (10%)');
+  putCell(3, 9, '=ROUNDDOWN(D8*0.1,0)', {fmt: 'cur'});
+  putCell(0, 10, '税込合計', {b: true});
+  putCell(3, 10, '=D8+D10', {b: true, fmt: 'cur', bg: '#fff3c4'});
+  putCell(0, 11, '判定');
+  putCell(3, 11, '=IF(D11>3000,"予算オーバー","予算内")', {al: 'right'});
+  putCell(5, 0, '使い方', clone(head));
+  putCell(5, 1, 'セルを選んで入力。= で始めると数式になります');
+  putCell(5, 2, '数式の入力中にセルをクリックすると参照を挿入できます');
+  putCell(5, 3, '右下の ■ をドラッグでオートフィル、右クリックで行・列の操作');
+  putCell(5, 4, '関数の一覧はツールバーの「ヘルプ」から');
+  colW[0] = 120; colW[4] = 28;
+}
+
+/* ================= 起動 ================= */
+build();
+sample();
+applyColW();
+render();
+updateSel(false);
+focusEd();
+window.addEventListener('resize', function(){ updateSel(false); });
+})();
+</script>
+</body>
+</html>

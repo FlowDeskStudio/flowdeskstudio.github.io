@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-slbZEEIPgrrPjrrDoidFBkTFjC7XAlHCeXrTc3A9CBo='; script-src-attr 'none'; style-src 'sha256-kkBqzLMcPZmImwKVsQVU4P5hsBPS5XweSN9fHuFB93Y='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>将棋 - コンピューター対戦</title>
+<style>
+:root{
+  --cw:max(26px,min(58px,9.4vw,calc((100vh - 170px) / 12.8)));
+  --ch:calc(var(--cw) * 1.08);
+  --bg:#ece5d6;
+  --panel:#f7f2e7;
+  --ink:#2a231a;
+  --sub:#6b5f4e;
+  --line:#cfc4ad;
+  --accent:#a8321f;
+  --wood:#e3b565;
+  --wood-dark:#b98a45;
+  --grid:#4a3113;
+  --mincho:"Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP","MS PMincho",serif;
+  --gothic:"Yu Gothic UI","Hiragino Sans","Meiryo","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#1d1b17;--panel:#29261f;--ink:#efe8d9;--sub:#b3a892;--line:#453f33;--accent:#e2604a;}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;min-height:100vh}
+.app{max-width:1080px;margin:0 auto;padding:12px 16px 24px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:10px}
+h1{font-family:var(--mincho);font-size:26px;margin:0;letter-spacing:.2em}
+header p{margin:0;color:var(--sub);font-size:13px}
+.layout{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:center}
+.table{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.side{flex:1 1 260px;min-width:240px;max-width:360px;display:flex;flex-direction:column;gap:12px}
+
+.hand{display:flex;align-items:center;gap:4px;min-height:calc(var(--ch) + 10px);padding:4px 8px;background:var(--wood-dark);border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.25)}
+.hand .who{font-size:12px;color:#2b1c08;font-weight:700;margin-right:6px;white-space:nowrap;writing-mode:horizontal-tb}
+.hand .none{font-size:12px;color:#4d3718}
+.hp{position:relative;width:var(--cw);height:var(--ch);border:0;padding:0;background:transparent;display:grid;place-items:center;border-radius:4px;font:inherit}
+.hp.mine{cursor:pointer}
+.hp.mine:hover{background:rgba(255,255,255,.22)}
+.hp.sel{background:#f7e27a}
+.hp .cnt{position:absolute;right:-1px;bottom:-1px;min-width:1.3em;padding:0 3px;border-radius:9px;background:#2a1b08;color:#fff;font-size:11px;line-height:1.4;text-align:center;font-variant-numeric:tabular-nums}
+
+.boardwrap{position:relative;display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;background:var(--wood);padding:4px 2px 8px 8px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.2)}
+.files{display:grid;grid-template-columns:repeat(9,var(--cw));gap:1px;padding:0 1px;height:calc(var(--cw) * .42);font-size:calc(var(--cw) * .28);color:#3a2609;text-align:center;line-height:calc(var(--cw) * .42);font-variant-numeric:tabular-nums}
+.ranks{display:grid;grid-template-rows:repeat(9,var(--ch));gap:1px;padding:1px 0;width:calc(var(--cw) * .42);font-size:calc(var(--cw) * .28);color:#3a2609;text-align:center;font-family:var(--mincho)}
+.ranks span{display:grid;place-items:center}
+.board{display:grid;grid-template-columns:repeat(9,var(--cw));grid-auto-rows:var(--ch);gap:1px;padding:1px;background:var(--grid)}
+.cell{position:relative;border:0;padding:0;margin:0;background:var(--wood);display:grid;place-items:center;font:inherit;cursor:pointer;border-radius:0;-webkit-tap-highlight-color:transparent}
+.cell:focus-visible,.hp:focus-visible{outline:3px solid #1f5fbf;outline-offset:-3px;z-index:3}
+.cell.star::before{content:"";position:absolute;left:-4px;top:-4px;width:7px;height:7px;border-radius:50%;background:var(--grid);z-index:2;pointer-events:none}
+.cell.lastfrom{background:#d9a95a}
+.cell.last{background:#eecb6e}
+.cell.sel{background:#f7e27a}
+.cell.chk{background:radial-gradient(circle,#f08a70 0,#e3b565 75%)}
+.cell.tgt::after{content:"";position:absolute;width:26%;aspect-ratio:1;border-radius:50%;background:rgba(30,90,45,.6);pointer-events:none}
+.cell.tgtcap{box-shadow:inset 0 0 0 3px rgba(168,50,31,.85)}
+
+.pw{display:grid;place-items:center;filter:drop-shadow(0 1.5px 1px rgba(60,35,5,.55));pointer-events:none}
+.pw.opp{transform:rotate(180deg)}
+.pc{width:calc(var(--cw) * .84 * var(--k,1));height:calc(var(--ch) * .88 * var(--k,1));clip-path:polygon(50% 0,84% 15%,97% 100%,3% 100%,16% 15%);background:linear-gradient(175deg,#f9e6b6,#ebc983 70%,#d9ae62);display:grid;place-items:center;padding-top:14%;font-family:var(--mincho);font-weight:700;font-size:calc(var(--cw) * .5 * var(--k,1));line-height:1;color:#1d1408;user-select:none}
+.pc.pr{color:#b3261e}
+
+.overlay{position:absolute;inset:0;background:rgba(20,12,2,.45);display:grid;place-items:center;border-radius:6px;z-index:10}
+.dialog{background:var(--panel);color:var(--ink);padding:16px 18px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.4);text-align:center;max-width:90%}
+.dialog h2{margin:0 0 4px;font-family:var(--mincho);font-size:20px}
+.dialog p{margin:0 0 12px;color:var(--sub);font-size:14px}
+.dialog .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+#status{font-size:16px;font-weight:700;min-height:1.6em}
+#substatus{font-size:13px;color:var(--sub);min-height:1.6em}
+.check{color:var(--accent)}
+.controls{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center}
+.controls label{font-size:13px;color:var(--sub)}
+select,button.btn{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 12px;min-height:38px}
+select{width:100%}
+button.btn{cursor:pointer}
+button.btn:hover:not(:disabled){border-color:var(--sub)}
+button.btn:disabled{opacity:.45;cursor:default}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button.btn:focus-visible,select:focus-visible{outline:3px solid #1f5fbf;outline-offset:1px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btnrow .btn{flex:1 1 auto}
+.kifuhead{font-size:13px;color:var(--sub);margin:0 0 6px}
+#kifu{margin:0;padding:0;list-style:none;max-height:min(42vh,340px);overflow:auto;font-size:14px;display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-variant-numeric:tabular-nums}
+#kifu li{white-space:nowrap}
+#kifu li .n{display:inline-block;width:2.2em;color:var(--sub);text-align:right;margin-right:6px}
+#kifu:empty::after{content:"まだ指し手はありません";color:var(--sub);grid-column:1/-1}
+details{font-size:13px;color:var(--sub)}
+details summary{cursor:pointer}
+details ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:640px){
+  .app{padding:10px 8px 20px}
+  .side{max-width:none}
+  #kifu{max-height:200px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>将棋</h1>
+    <p>コンピューターと対局できます。駒を選んでから、移動先のマスを選んでください。</p>
+  </header>
+  <div class="layout">
+    <section class="table" aria-label="盤面">
+      <div class="hand" id="handTop"></div>
+      <div class="boardwrap">
+        <div class="files" id="files" aria-hidden="true"></div>
+        <div></div>
+        <div class="board" id="board"></div>
+        <div class="ranks" id="ranks" aria-hidden="true"></div>
+        <div class="overlay" id="promo" hidden>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+            <h2 id="promoTitle">成りますか?</h2>
+            <p id="promoText"></p>
+            <div class="row">
+              <button class="btn primary" id="promoYes" type="button">成る</button>
+              <button class="btn" id="promoNo" type="button">成らない</button>
+              <button class="btn" id="promoCancel" type="button">やめる</button>
+            </div>
+          </div>
+        </div>
+        <div class="overlay" id="result" hidden>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+            <h2 id="resultTitle"></h2>
+            <p id="resultText"></p>
+            <div class="row">
+              <button class="btn primary" id="resultNew" type="button">もう一局</button>
+              <button class="btn" id="resultClose" type="button">盤面を見る</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hand" id="handBottom"></div>
+    </section>
+
+    <aside class="side">
+      <div class="card">
+        <div id="status" role="status" aria-live="polite"></div>
+        <div id="substatus"></div>
+      </div>
+      <div class="card">
+        <div class="controls">
+          <label for="selSide">あなたの手番</label>
+          <select id="selSide">
+            <option value="1">先手(☗)</option>
+            <option value="-1">後手(☖)</option>
+            <option value="0">振り駒(おまかせ)</option>
+          </select>
+          <label for="selLevel">強さ</label>
+          <select id="selLevel">
+            <option value="0">やさしい</option>
+            <option value="1" selected>ふつう</option>
+            <option value="2">つよい(考える時間が長め)</option>
+          </select>
+        </div>
+        <div class="btnrow">
+          <button class="btn primary" id="btnNew" type="button">新しい対局</button>
+          <button class="btn" id="btnUndo" type="button">待った</button>
+          <button class="btn" id="btnResign" type="button">投了</button>
+        </div>
+      </div>
+      <div class="card">
+        <p class="kifuhead">棋譜</p>
+        <ol id="kifu"></ol>
+      </div>
+      <details class="card">
+        <summary>このゲームのルールについて</summary>
+        <ul>
+          <li>二歩・打ち歩詰め・行き所のない駒・王手放置は指せません。</li>
+          <li>同じ局面が4回現れると千日手で引き分けです(連続王手の千日手は王手をかけた側の負け)。</li>
+          <li>入玉宣言はありません。500手に達した場合は引き分けとします。</li>
+          <li>「手番」の変更は次の「新しい対局」から反映されます。</li>
+        </ul>
+      </details>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= 定数 ================= */
+// 駒種: 1歩 2香 3桂 4銀 5金 6角 7飛 8玉 9と 10成香 11成桂 12成銀 13馬 14龍
+// 盤: 先手は正、後手は負。row 0 が後手陣、row 8 が先手陣。先手は row が減る方向に進む。
+var PROMO=[0,9,10,11,12,0,13,14,0,0,0,0,0,0,0];
+var UNPROMO=[0,1,2,3,4,5,6,7,8,1,2,3,4,6,7];
+var GOLD=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,0]];
+var KING=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+var DIAG=[[-1,-1],[-1,1],[1,-1],[1,1]];
+var ORTH=[[-1,0],[1,0],[0,-1],[0,1]];
+var STEP=[[],[[-1,0]],[],[[-2,-1],[-2,1]],[[-1,-1],[-1,0],[-1,1],[1,-1],[1,1]],GOLD,[],[],KING,GOLD,GOLD,GOLD,GOLD,ORTH,DIAG];
+var SLIDE=[[],[],[[-1,0]],[],[],[],DIAG,ORTH,[],[],[],[],[],DIAG,ORTH];
+var STEPOK=[],SLIDEOK=[];
+(function(){
+  for(var t=0;t<15;t++){
+    var a=new Uint8Array(9),b=new Uint8Array(9),i;
+    for(i=0;i<STEP[t].length;i++){
+      var d=STEP[t][i];
+      if(d[0]>=-1&&d[0]<=1) a[(d[0]+1)*3+(d[1]+1)]=1;
+    }
+    for(i=0;i<SLIDE[t].length;i++){
+      var e=SLIDE[t][i];
+      b[(e[0]+1)*3+(e[1]+1)]=1;
+    }
+    STEPOK.push(a);SLIDEOK.push(b);
+  }
+})();
+var DR=[-1,-1,-1,0,0,1,1,1],DC=[-1,0,1,-1,1,-1,0,1];
+
+var VAL=[0,100,300,350,500,600,850,1000,0,600,560,570,590,1150,1300];
+var HANDVAL=[0,115,330,380,540,640,900,1050];
+var ATKW=[0,1,1,2,3,3,1,1,0,3,3,3,3,2,2];
+var DEFW=[0,0,0,0,2,3,0,0,0,2,2,2,2,3,1];
+var PROX=[0,12,9,6,3,1,0,0,0];
+var DPROX=[0,10,7,3,0,0,0,0,0];
+var KROW=[0,4,22,45,55,35,10,0,0];
+var INF=1000000,MATE=100000,MAXPLY=48,QMAX=8;
+var LEVELS=[{depth:2,time:700,noise:130},{depth:4,time:1200,noise:0},{depth:9,time:3500,noise:0}];
+
+var NAME=['','歩','香','桂','銀','金','角','飛','玉','と','成香','成桂','成銀','馬','龍'];
+var FACE=['','歩','香','桂','銀','金','角','飛','','と','杏','圭','全','馬','龍'];
+var SCALE=[1,.84,.87,.9,.94,.94,.98,.98,1,.84,.87,.9,.94,.98,.98];
+var ZEN=['','1','2','3','4','5','6','7','8','9'];
+var KAN=['','一','二','三','四','五','六','七','八','九'];
+var HAND_ORDER=[7,6,5,4,3,2,1];
+
+/* ================= 局面 ================= */
+var board=new Int8Array(81);
+var hands=[new Int8Array(15),new Int8Array(15)];
+var kingPos=[0,0];
+var turn=1;
+
+function setupInitial(){
+  board.fill(0);hands[0].fill(0);hands[1].fill(0);
+  var back=[2,3,4,5,8,5,4,3,2],c;
+  for(c=0;c<9;c++){
+    board[c]=-back[c];
+    board[72+c]=back[c];
+    board[18+c]=-1;
+    board[54+c]=1;
+  }
+  board[9+1]=-7;board[9+7]=-6;
+  board[63+1]=6;board[63+7]=7;
+  kingPos[0]=76;kingPos[1]=4;
+  turn=1;
+}
+
+// 指し手: from(0..80、打つときは 81+駒種) | to<<7 | 成り<<14
+function makeMove(m){
+  var from=m&127,to=(m>>7)&127,side=turn,hi=side===1?0:1,cap=0;
+  if(from>=81){
+    var t=from-81;
+    hands[hi][t]--;
+    board[to]=side*t;
+  }else{
+    var p=board[from];
+    cap=board[to];
+    if(cap!==0) hands[hi][UNPROMO[cap<0?-cap:cap]]++;
+    board[from]=0;
+    if(m&16384) board[to]=side*PROMO[p*side];
+    else board[to]=p;
+    if(p*side===8) kingPos[hi]=to;
+  }
+  turn=-side;
+  return cap;
+}
+function unmakeMove(m,cap){
+  var from=m&127,to=(m>>7)&127;
+  turn=-turn;
+  var side=turn,hi=side===1?0:1;
+  if(from>=81){
+    hands[hi][from-81]++;
+    board[to]=0;
+  }else{
+    var p=board[to];
+    if(m&16384) p=side*UNPROMO[p*side];
+    board[from]=p;
+    board[to]=cap;
+    if(cap!==0) hands[hi][UNPROMO[cap<0?-cap:cap]]--;
+    if(p*side===8) kingPos[hi]=from;
+  }
+}
+
+// sq が by 側の駒に利かされているか
+function attacked(sq,by){
+  var r=(sq/9)|0,c=sq%9,d,dr,dc,rr,cc,p,idx,t;
+  for(d=0;d<8;d++){
+    dr=DR[d];dc=DC[d];
+    rr=r+dr;cc=c+dc;
+    if(rr<0||rr>8||cc<0||cc>8) continue;
+    idx=(-dr*by+1)*3+(-dc+1);
+    p=board[rr*9+cc];
+    if(p!==0){
+      if(p*by>0){
+        t=p*by;
+        if(STEPOK[t][idx]||SLIDEOK[t][idx]) return true;
+      }
+      continue;
+    }
+    rr+=dr;cc+=dc;
+    while(rr>=0&&rr<=8&&cc>=0&&cc<=8){
+      p=board[rr*9+cc];
+      if(p!==0){
+        if(p*by>0&&SLIDEOK[p*by][idx]) return true;
+        break;
+      }
+      rr+=dr;cc+=dc;
+    }
+  }
+  var kr=r+2*by;
+  if(kr>=0&&kr<=8){
+    if(c>0&&board[kr*9+c-1]===3*by) return true;
+    if(c<8&&board[kr*9+c+1]===3*by) return true;
+  }
+  return false;
+}
+
+function pushMove(moves,from,to,t,side,fr,tr,forAI){
+  var base=from|(to<<7);
+  if(PROMO[t]!==0){
+    var inZone=side===1?(fr<=2||tr<=2):(fr>=6||tr>=6);
+    if(inZone){
+      moves.push(base|16384);
+      if(forAI&&(t===1||t===6||t===7)) return;
+      var last=side===1?tr:8-tr;
+      if((t===1||t===2)&&last===0) return;
+      if(t===3&&last<=1) return;
+      moves.push(base);
+      return;
+    }
+  }
+  moves.push(base);
+}
+
+// 擬似合法手(自玉の王手放置・打ち歩詰めは未チェック)
+function genMoves(capOnly,forAI){
+  var moves=[],side=turn,hi=side===1?0:1,sq,p,t,r,c,i,rr,cc,to,q,list,dr,dc;
+  for(sq=0;sq<81;sq++){
+    p=board[sq];
+    if(p*side<=0) continue;
+    t=p*side;r=(sq/9)|0;c=sq%9;
+    list=STEP[t];
+    for(i=0;i<list.length;i++){
+      rr=r+list[i][0]*side;cc=c+list[i][1];
+      if(rr<0||rr>8||cc<0||cc>8) continue;
+      to=rr*9+cc;q=board[to];
+      if(q*side>0) continue;
+      if(capOnly&&q===0) continue;
+      pushMove(moves,sq,to,t,side,r,rr,forAI);
+    }
+    list=SLIDE[t];
+    for(i=0;i<list.length;i++){
+      dr=list[i][0]*side;dc=list[i][1];
+      rr=r+dr;cc=c+dc;
+      while(rr>=0&&rr<=8&&cc>=0&&cc<=8){
+        to=rr*9+cc;q=board[to];
+        if(q*side>0) break;
+        if(!(capOnly&&q===0)) pushMove(moves,sq,to,t,side,r,rr,forAI);
+        if(q!==0) break;
+        rr+=dr;cc+=dc;
+      }
+    }
+  }
+  if(!capOnly){
+    var h=hands[hi],any=false;
+    for(t=1;t<=7;t++) if(h[t]>0){any=true;break;}
+    if(any){
+      var pc=[false,false,false,false,false,false,false,false,false];
+      if(h[1]>0){
+        for(sq=0;sq<81;sq++) if(board[sq]===side) pc[sq%9]=true;
+      }
+      for(sq=0;sq<81;sq++){
+        if(board[sq]!==0) continue;
+        r=(sq/9)|0;c=sq%9;
+        var last=side===1?r:8-r;
+        for(t=1;t<=7;t++){
+          if(h[t]===0) continue;
+          if(t===1){if(last===0||pc[c]) continue;}
+          else if(t===2){if(last===0) continue;}
+          else if(t===3){if(last<=1) continue;}
+          moves.push((81+t)|(sq<<7));
+        }
+      }
+    }
+  }
+  return moves;
+}
+
+function hasLegalMove(){
+  var side=turn,hi=side===1?0:1,ms=genMoves(false,true),i,cap,ok;
+  for(i=0;i<ms.length;i++){
+    cap=makeMove(ms[i]);
+    ok=!attacked(kingPos[hi],-side);
+    unmakeMove(ms[i],cap);
+    if(ok) return true;
+  }
+  return false;
+}
+
+function legalMoves(forAI){
+  var side=turn,hi=side===1?0:1,ms=genMoves(false,forAI),out=[],i,m,cap,ok;
+  for(i=0;i<ms.length;i++){
+    m=ms[i];
+    cap=makeMove(m);
+    ok=!attacked(kingPos[hi],-side);
+    if(ok&&(m&127)===82){
+      // 打ち歩詰め
+      if(attacked(kingPos[1-hi],side)&&!hasLegalMove()) ok=false;
+    }
+    unmakeMove(m,cap);
+    if(ok) out.push(m);
+  }
+  return out;
+}
+
+function posKey(){
+  return board.join(',')+'|'+hands[0].join('')+'|'+hands[1].join('')+'|'+turn;
+}
+
+/* ================= 思考 ================= */
+var nodes=0,deadline=0,timeUp=false;
+var hh=new Int32Array(16384);
+var killers=[];
+(function(){for(var i=0;i<=MAXPLY;i++) killers.push([0,0]);})();
+
+function evaluate(){
+  var s=0,a=kingPos[0],b=kingPos[1];
+  var ar=(a/9)|0,ac=a%9,br=(b/9)|0,bc=b%9,sq,p,r,c,d1,d2,x,y,t;
+  for(sq=0;sq<81;sq++){
+    p=board[sq];
+    if(p===0) continue;
+    r=(sq/9)|0;c=sq%9;
+    if(p>0){
+      if(p===8) continue;
+      x=r-br;if(x<0)x=-x;y=c-bc;if(y<0)y=-y;d1=x>y?x:y;
+      x=r-ar;if(x<0)x=-x;y=c-ac;if(y<0)y=-y;d2=x>y?x:y;
+      s+=VAL[p]+ATKW[p]*PROX[d1]+DEFW[p]*DPROX[d2];
+      if(p===1) s+=(8-r)*2;
+    }else{
+      t=-p;
+      if(t===8) continue;
+      x=r-ar;if(x<0)x=-x;y=c-ac;if(y<0)y=-y;d1=x>y?x:y;
+      x=r-br;if(x<0)x=-x;y=c-bc;if(y<0)y=-y;d2=x>y?x:y;
+      s-=VAL[t]+ATKW[t]*PROX[d1]+DEFW[t]*DPROX[d2];
+      if(t===1) s-=r*2;
+    }
+  }
+  var h0=hands[0],h1=hands[1];
+  for(t=1;t<=7;t++) s+=(h0[t]-h1[t])*HANDVAL[t];
+  s-=KROW[8-ar];
+  s+=KROW[br];
+  return turn===1?s:-s;
+}
+
+function scoreMoves(moves,ply){
+  var n=moves.length,sc=new Int32Array(n),k=killers[ply],i,m,from,to,v,s,a;
+  for(i=0;i<n;i++){
+    m=moves[i];from=m&127;to=(m>>7)&127;
+    v=board[to];
+    if(v!==0){
+      a=board[from];
+      s=100000+VAL[v<0?-v:v]*10-(VAL[a<0?-a:a]>>3);
+      if(m&16384) s+=3000;
+    }else if(m===k[0]) s=90000;
+    else if(m===k[1]) s=80000;
+    else{
+      s=hh[m&16383];
+      if(m&16384) s+=5000;
+    }
+    sc[i]=s;
+  }
+  return sc;
+}
+
+function quiesce(alpha,beta,ply,qd){
+  if((++nodes&2047)===0&&Date.now()>deadline) timeUp=true;
+  if(timeUp) return 0;
+  var stand=evaluate();
+  if(stand>=beta) return stand;
+  if(stand>alpha) alpha=stand;
+  if(qd>=QMAX||ply>=MAXPLY-1) return stand;
+  var side=turn,hi=side===1?0:1;
+  var moves=genMoves(true,true),n=moves.length;
+  if(n===0) return alpha;
+  var sc=scoreMoves(moves,ply),i,j,bi,bv,m,cap,v,tmp;
+  for(i=0;i<n;i++){
+    bi=i;bv=sc[i];
+    for(j=i+1;j<n;j++) if(sc[j]>bv){bv=sc[j];bi=j;}
+    if(bi!==i){tmp=moves[i];moves[i]=moves[bi];moves[bi]=tmp;sc[bi]=sc[i];sc[i]=bv;}
+    m=moves[i];
+    cap=makeMove(m);
+    if(attacked(kingPos[hi],-side)){unmakeMove(m,cap);continue;}
+    v=-quiesce(-beta,-alpha,ply+1,qd+1);
+    unmakeMove(m,cap);
+    if(timeUp) return 0;
+    if(v>alpha){
+      alpha=v;
+      if(v>=beta) break;
+    }
+  }
+  return alpha;
+}
+
+function search(depth,alpha,beta,ply,pawnDrop){
+  if((++nodes&2047)===0&&Date.now()>deadline) timeUp=true;
+  if(timeUp) return 0;
+  var side=turn,hi=side===1?0:1;
+  var inCheck=attacked(kingPos[hi],-side);
+  if(inCheck) depth++;
+  if(ply>=MAXPLY-1) return evaluate();
+  if(depth<=0) return quiesce(alpha,beta,ply,0);
+  var moves=genMoves(false,true),n=moves.length;
+  var sc=scoreMoves(moves,ply),best=-INF,legal=0,i,j,bi,bv,m,cap,v,tmp,k,idx;
+  for(i=0;i<n;i++){
+    bi=i;bv=sc[i];
+    for(j=i+1;j<n;j++) if(sc[j]>bv){bv=sc[j];bi=j;}
+    if(bi!==i){tmp=moves[i];moves[i]=moves[bi];moves[bi]=tmp;sc[bi]=sc[i];sc[i]=bv;}
+    m=moves[i];
+    cap=makeMove(m);
+    if(attacked(kingPos[hi],-side)){unmakeMove(m,cap);continue;}
+    legal++;
+    v=-search(depth-1,-beta,-alpha,ply+1,(m&127)===82);
+    unmakeMove(m,cap);
+    if(timeUp) return 0;
+    if(v>best){
+      best=v;
+      if(v>alpha){
+        alpha=v;
+        if(v>=beta){
+          if(cap===0){
+            k=killers[ply];
+            if(k[0]!==m){k[1]=k[0];k[0]=m;}
+            idx=m&16383;
+            hh[idx]+=depth*depth;
+            if(hh[idx]>70000) hh[idx]=70000;
+          }
+          break;
+        }
+      }
+    }
+  }
+  if(legal===0){
+    // 歩を打って詰ませた形は反則(打ち歩詰め)なので、打った側の大損として扱う
+    return pawnDrop?MATE:-MATE+ply;
+  }
+  return best;
+}
+
+function think(levelIdx){
+  var lv=LEVELS[levelIdx]||LEVELS[1];
+  var root=legalMoves(true);
+  if(root.length===0) return 0;
+  if(root.length===1) return root[0];
+  var side=turn,hi=side===1?0:1,i,j,m,cap,tmp;
+  // 同点の手が毎回同じにならないよう混ぜる
+  for(i=root.length-1;i>0;i--){
+    j=Math.floor(Math.random()*(i+1));
+    tmp=root[i];root[i]=root[j];root[j]=tmp;
+  }
+  hh.fill(0);
+  for(i=0;i<killers.length;i++){killers[i][0]=0;killers[i][1]=0;}
+  var pre=scoreMoves(root,0),order=[];
+  for(i=0;i<root.length;i++) order.push({m:root[i],s:pre[i]});
+  order.sort(function(a,b){return b.s-a.s;});
+  for(i=0;i<root.length;i++) root[i]=order[i].m;
+  // 千日手になりそうな手を調べておく
+  var rep=new Map();
+  for(i=0;i<root.length;i++){
+    m=root[i];
+    cap=makeMove(m);
+    if((posCount.get(posKey())||0)>=2) rep.set(m,attacked(kingPos[1-hi],side)?2:1);
+    unmakeMove(m,cap);
+  }
+  nodes=0;timeUp=false;deadline=Date.now()+lv.time;
+  var best=root[0],d,alpha,bm,bs,sc,rp;
+  for(d=1;d<=lv.depth;d++){
+    alpha=-INF;bm=0;bs=-INF;
+    for(i=0;i<root.length;i++){
+      m=root[i];
+      rp=rep.get(m);
+      if(rp){
+        sc=rp===2?-3000:-50;
+      }else{
+        cap=makeMove(m);
+        sc=-search(d-1,-INF,lv.noise?INF:-alpha,1,(m&127)===82);
+        unmakeMove(m,cap);
+        if(timeUp) break;
+      }
+      if(lv.noise) sc+=Math.floor((Math.random()*2-1)*lv.noise);
+      if(sc>bs){bs=sc;bm=m;}
+      if(sc>alpha) alpha=sc;
+    }
+    if(bm!==0){
+      best=bm;
+      j=root.indexOf(bm);
+      if(j>0){root.splice(j,1);root.unshift(bm);}
+    }
+    if(timeUp) break;
+    if(bs>MATE-1000||bs<-MATE+1000) break;
+  }
+  return best;
+}
+
+/* ================= 対局の進行 ================= */
+var human=1,gameOver=false,busy=false,aiToken=0;
+var sel=null,curLegal=[],lastMove=null,pendingPromo=null;
+var posHist=[],posCount=new Map(),kifu=[],snaps=[],moveCount=0;
+var resultInfo=null;
+
+var elBoard=document.getElementById('board');
+var elFiles=document.getElementById('files');
+var elRanks=document.getElementById('ranks');
+var elHandTop=document.getElementById('handTop');
+var elHandBottom=document.getElementById('handBottom');
+var elStatus=document.getElementById('status');
+var elSub=document.getElementById('substatus');
+var elKifu=document.getElementById('kifu');
+var elPromo=document.getElementById('promo');
+var elPromoText=document.getElementById('promoText');
+var elResult=document.getElementById('result');
+var elResultTitle=document.getElementById('resultTitle');
+var elResultText=document.getElementById('resultText');
+var selSide=document.getElementById('selSide');
+var selLevel=document.getElementById('selLevel');
+var btnUndo=document.getElementById('btnUndo');
+var btnResign=document.getElementById('btnResign');
+var cells=[];
+
+function buildBoard(){
+  var i,b,s;
+  for(i=0;i<81;i++){
+    b=document.createElement('button');
+    b.type='button';
+    b.className='cell';
+    b.dataset.i=String(i);
+    elBoard.appendChild(b);
+    cells.push(b);
+  }
+  for(i=0;i<9;i++){
+    s=document.createElement('span');elFiles.appendChild(s);
+    s=document.createElement('span');elRanks.appendChild(s);
+  }
+  elBoard.addEventListener('click',function(ev){
+    var t=ev.target.closest('.cell');
+    if(!t) return;
+    var i=Number(t.dataset.i);
+    onCell(human===-1?80-i:i);
+  });
+  function handClick(ev){
+    var t=ev.target.closest('.hp.mine');
+    if(!t) return;
+    onHand(Number(t.dataset.t));
+  }
+  elHandTop.addEventListener('click',handClick);
+  elHandBottom.addEventListener('click',handClick);
+}
+
+function sideName(s){return s===1?'先手':'後手';}
+function sideMark(s){return s===1?'☗':'☖';}
+
+function pieceHTML(t,side){
+  var ch=t===8?(side===1?'玉':'王'):FACE[t];
+  return '<span class="pw'+(side!==human?' opp':'')+'" style="--k:'+SCALE[t]+'"><span class="pc'+(t>8?' pr':'')+'">'+ch+'</span></span>';
+}
+
+function notate(m,side,prevTo){
+  var from=m&127,to=(m>>7)&127;
+  var tr=(to/9)|0,tc=to%9;
+  var s=(side===1?'▲':'△')+(prevTo===to?'同 ':ZEN[9-tc]+KAN[tr+1]);
+  if(from>=81) return s+NAME[from-81]+'打';
+  var p=board[from],t=p<0?-p:p,fr=(from/9)|0,fc=from%9;
+  s+=NAME[t];
+  if(m&16384) s+='成';
+  else if(curLegal.indexOf(m|16384)>=0) s+='不成';
+  return s+'('+(9-fc)+(fr+1)+')';
+}
+
+function takeSnapshot(){
+  snaps.push({
+    board:new Int8Array(board),
+    h0:new Int8Array(hands[0]),h1:new Int8Array(hands[1]),
+    k0:kingPos[0],k1:kingPos[1],turn:turn,
+    lastMove:lastMove,kifuLen:kifu.length,histLen:posHist.length,moveCount:moveCount
+  });
+}
+
+function recordPosition(){
+  var hi=turn===1?0:1;
+  var key=posKey();
+  var n=(posCount.get(key)||0)+1;
+  posCount.set(key,n);
+  posHist.push({key:key,inCheck:attacked(kingPos[hi],-turn)});
+  return n;
+}
+
+function doMove(m){
+  takeSnapshot();
+  var side=turn;
+  kifu.push(notate(m,side,lastMove?lastMove.to:-1));
+  makeMove(m);
+  lastMove={from:m&127,to:(m>>7)&127};
+  moveCount++;
+  sel=null;
+  afterMove();
+}
+
+function afterMove(){
+  var count=recordPosition();
+  curLegal=legalMoves(false);
+  if(curLegal.length===0){
+    endGame(-turn,'詰み');
+  }else if(count>=4){
+    var key=posHist[posHist.length-1].key,i0=0,i,n=posHist.length-1;
+    for(i=0;i<posHist.length;i++) if(posHist[i].key===key){i0=i;break;}
+    var allA=true,allB=n>i0+1;
+    for(i=i0;i<=n;i+=2) if(!posHist[i].inCheck){allA=false;break;}
+    for(i=i0+1;i<n;i+=2) if(!posHist[i].inCheck){allB=false;break;}
+    if(allA) endGame(turn,'連続王手の千日手');
+    else if(allB) endGame(-turn,'連続王手の千日手');
+    else endGame(0,'千日手');
+  }else if(moveCount>=500){
+    endGame(0,'500手に達しました');
+  }
+  render();
+  if(!gameOver&&turn!==human) scheduleAI();
+}
+
+function endGame(winner,reason){
+  gameOver=true;
+  sel=null;
+  var title,text;
+  if(winner===0){title='引き分け';text=reason+'のため、引き分けです。';}
+  else if(winner===human){title='あなたの勝ち';text=reason+'で、あなた('+sideName(human)+')の勝ちです。';}
+  else{title='コンピューターの勝ち';text=reason+'で、コンピューター('+sideName(-human)+')の勝ちです。';}
+  resultInfo={title:title,text:text};
+  elResultTitle.textContent=title;
+  elResultText.textContent=text+' ('+moveCount+'手)';
+  elResult.hidden=false;
+  document.getElementById('resultNew').focus();
+}
+
+function scheduleAI(){
+  busy=true;
+  var token=++aiToken;
+  render();
+  setTimeout(function(){
+    if(token!==aiToken) return;
+    var m=0;
+    try{
+      m=think(Number(selLevel.value));
+    }catch(e){
+      m=0;
+    }
+    if(token!==aiToken) return;
+    busy=false;
+    if(!m){
+      var ms=legalMoves(true);
+      if(ms.length===0){endGame(human,'詰み');render();return;}
+      m=ms[0];
+    }
+    doMove(m);
+  },60);
+}
+
+function newGame(){
+  aiToken++;
+  busy=false;gameOver=false;sel=null;lastMove=null;pendingPromo=null;resultInfo=null;
+  elPromo.hidden=true;elResult.hidden=true;
+  var v=Number(selSide.value);
+  human=v===0?(Math.random()<0.5?1:-1):v;
+  setupInitial();
+  posHist=[];posCount=new Map();kifu=[];snaps=[];moveCount=0;
+  recordPosition();
+  curLegal=legalMoves(false);
+  render();
+  if(turn!==human) scheduleAI();
+}
+
+function undo(){
+  if(busy||pendingPromo) return;
+  var idx=-1,i;
+  for(i=snaps.length-1;i>=0;i--) if(snaps[i].turn===human){idx=i;break;}
+  if(idx<0) return;
+  var s=snaps[idx];
+  snaps.length=idx;
+  board.set(s.board);hands[0].set(s.h0);hands[1].set(s.h1);
+  kingPos[0]=s.k0;kingPos[1]=s.k1;turn=s.turn;
+  lastMove=s.lastMove;kifu.length=s.kifuLen;posHist.length=s.histLen;moveCount=s.moveCount;
+  posCount=new Map();
+  for(i=0;i<posHist.length;i++) posCount.set(posHist[i].key,(posCount.get(posHist[i].key)||0)+1);
+  gameOver=false;resultInfo=null;sel=null;
+  elResult.hidden=true;
+  curLegal=legalMoves(false);
+  render();
+}
+
+function resign(){
+  if(gameOver||busy||pendingPromo) return;
+  endGame(-human,'投了');
+  render();
+}
+
+function canAct(){
+  return !busy&&!gameOver&&turn===human&&!pendingPromo;
+}
+
+function onCell(sq){
+  if(!canAct()) return;
+  if(sel){
+    var cands=[],i,m;
+    for(i=0;i<curLegal.length;i++){
+      m=curLegal[i];
+      if((m&127)===sel.from&&((m>>7)&127)===sq) cands.push(m);
+    }
+    if(cands.length===1){doMove(cands[0]);return;}
+    if(cands.length>=2){askPromo(cands);return;}
+  }
+  var p=board[sq];
+  if(p*human>0&&!(sel&&sel.from===sq)) sel={from:sq};
+  else sel=null;
+  render();
+}
+
+function onHand(t){
+  if(!canAct()) return;
+  if(sel&&sel.from===81+t) sel=null;
+  else sel={from:81+t};
+  render();
+}
+
+function askPromo(cands){
+  var pm=0,nm=0,i;
+  for(i=0;i<cands.length;i++){if(cands[i]&16384) pm=cands[i];else nm=cands[i];}
+  pendingPromo={yes:pm,no:nm};
+  var p=board[pm&127],t=p<0?-p:p;
+  elPromoText.textContent=NAME[t]+' を '+NAME[PROMO[t]]+' に成ることができます。';
+  elPromo.hidden=false;
+  document.getElementById('promoYes').focus();
+}
+function closePromo(choice){
+  if(!pendingPromo) return;
+  var pp=pendingPromo;
+  pendingPromo=null;
+  elPromo.hidden=true;
+  if(choice===1) doMove(pp.yes);
+  else if(choice===2) doMove(pp.no);
+  else render();
+}
+
+/* ================= 描画 ================= */
+function renderHand(el,side){
+  var h=hands[side===1?0:1],mine=side===human,html,i,t,any=false;
+  html='<span class="who">'+sideMark(side)+' '+(mine?'あなた':'CPU')+'</span>';
+  for(i=0;i<HAND_ORDER.length;i++){
+    t=HAND_ORDER[i];
+    if(h[t]<=0) continue;
+    any=true;
+    var cls='hp'+(mine?' mine':'')+(mine&&sel&&sel.from===81+t?' sel':'');
+    var label=(mine?'あなた':'コンピューター')+'の持ち駒 '+NAME[t]+' '+h[t]+'枚';
+    if(mine){
+      html+='<button type="button" class="'+cls+'" data-t="'+t+'" aria-label="'+label+'">'+pieceHTML(t,side)+(h[t]>1?'<span class="cnt">'+h[t]+'</span>':'')+'</button>';
+    }else{
+      html+='<span class="'+cls+'" role="img" aria-label="'+label+'">'+pieceHTML(t,side)+(h[t]>1?'<span class="cnt">'+h[t]+'</span>':'')+'</span>';
+    }
+  }
+  if(!any) html+='<span class="none">持ち駒なし</span>';
+  el.innerHTML=html;
+}
+
+function render(){
+  var flip=human===-1,i,sq,p,r,c,cls,cell,t,m;
+  var hi=turn===1?0:1;
+  var inCheck=attacked(kingPos[hi],-turn);
+  var targets=new Map();
+  if(sel&&canAct()){
+    for(i=0;i<curLegal.length;i++){
+      m=curLegal[i];
+      if((m&127)===sel.from) targets.set((m>>7)&127,true);
+    }
+  }
+  for(i=0;i<81;i++){
+    sq=flip?80-i:i;
+    p=board[sq];r=(sq/9)|0;c=sq%9;
+    cls='cell';
+    var dr=(i/9)|0,dc=i%9;
+    if((dr===3||dr===6)&&(dc===3||dc===6)) cls+=' star';
+    if(lastMove){
+      if(lastMove.to===sq) cls+=' last';
+      else if(lastMove.from===sq) cls+=' lastfrom';
+    }
+    if(inCheck&&sq===kingPos[hi]) cls+=' chk';
+    if(sel&&sel.from===sq) cls+=' sel';
+    if(targets.has(sq)) cls+=p!==0?' tgtcap':' tgt';
+    cell=cells[i];
+    cell.className=cls;
+    var label=(9-c)+KAN[r+1]+' ';
+    if(p!==0){
+      t=p<0?-p:p;
+      cell.innerHTML=pieceHTML(t,p>0?1:-1);
+      label+=((p>0?1:-1)===human?'あなたの':'相手の')+NAME[t];
+    }else{
+      cell.innerHTML='';
+      label+='空き';
+    }
+    if(targets.has(sq)) label+='(移動できます)';
+    cell.setAttribute('aria-label',label);
+  }
+  for(i=0;i<9;i++){
+    elFiles.children[i].textContent=String(flip?i+1:9-i);
+    elRanks.children[i].textContent=KAN[flip?9-i:i+1];
+  }
+  renderHand(elHandTop,-human);
+  renderHand(elHandBottom,human);
+
+  // 状況表示
+  var st='',sub='';
+  if(gameOver){
+    st=resultInfo?resultInfo.title:'対局終了';
+    sub=resultInfo?resultInfo.text:'';
+  }else if(turn===human){
+    st=(inCheck?'<span class="check">王手!</span> ':'')+'あなたの番です';
+    sub='あなたは'+sideName(human)+'('+sideMark(human)+')・'+(moveCount+1)+'手目';
+  }else{
+    st='コンピューターが考えています…';
+    sub='あなたは'+sideName(human)+'('+sideMark(human)+')・'+(moveCount+1)+'手目';
+  }
+  elStatus.innerHTML=st;
+  elSub.textContent=sub;
+
+  // 棋譜
+  if(elKifu.children.length!==kifu.length){
+    var html='';
+    for(i=0;i<kifu.length;i++) html+='<li><span class="n">'+(i+1)+'</span>'+kifu[i]+'</li>';
+    elKifu.innerHTML=html;
+    elKifu.scrollTop=elKifu.scrollHeight;
+  }
+
+  var canUndo=false;
+  for(i=0;i<snaps.length;i++) if(snaps[i].turn===human){canUndo=true;break;}
+  btnUndo.disabled=busy||!canUndo;
+  btnResign.disabled=busy||gameOver;
+}
+
+/* ================= イベント ================= */
+document.getElementById('btnNew').addEventListener('click',newGame);
+btnUndo.addEventListener('click',undo);
+btnResign.addEventListener('click',resign);
+document.getElementById('promoYes').addEventListener('click',function(){closePromo(1);});
+document.getElementById('promoNo').addEventListener('click',function(){closePromo(2);});
+document.getElementById('promoCancel').addEventListener('click',function(){closePromo(0);});
+elPromo.addEventListener('click',function(ev){if(ev.target===elPromo) closePromo(0);});
+document.getElementById('resultNew').addEventListener('click',newGame);
+document.getElementById('resultClose').addEventListener('click',function(){elResult.hidden=true;});
+document.addEventListener('keydown',function(ev){
+  if(ev.key!=='Escape') return;
+  if(pendingPromo) closePromo(0);
+  else if(!elResult.hidden) elResult.hidden=true;
+  else if(sel){sel=null;render();}
+});
+
+buildBoard();
+newGame();
+})();
+</script>
+</body>
+</html>

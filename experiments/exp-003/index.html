@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>AIに一言で頼むと、どこまで作れるのか。15個作らせて境目を探した — FlowDeskStudio</title>
+  <meta name="description" content="題材を一言だけ伝え、テストも手直しもなしでAIに15個作らせました。将棋、表計算、3Dの箱庭、1時間のRPGまで15個すべてが確認した範囲で使え、作れなくなる境目は見つかりませんでした。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-003/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-003/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-003/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-003/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-003/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="AIに一言で頼むと、どこまで作れるのか。15個作らせて境目を探した — FlowDeskStudio">
+  <meta property="og:description" content="定番から「無茶」まで5段階・15個。一言の依頼とテストなしで、どこから壊れるかを探した記録です。">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AIに一言で頼むと、どこまで作れるのか。15個作らせて境目を探した — FlowDeskStudio">
+  <meta name="twitter:description" content="15個すべてが確認した範囲で使えた。作れなくなる境目は見つからなかった。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-003/exp-003.css">
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a href="/downloads/">Downloads</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-003/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-003">
+      <p class="kicker">EXPERIMENT #003 / COMPLETE</p>
+      <h1>AIに一言で頼むと<br>どこまで作れるのか</h1>
+      <p class="article-deck">15個作らせて境目を探した<br>境目は見つからなかった</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.10.09</span>
+        <span>CLAUDE OPUS 5.5</span>
+        <span>15 BUILDS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>先に結果を書く。</p>
+        <p>題材を一言だけ伝えて、AIに15個のゲームやアプリを作らせた。作り直しも手直しもなし。AIには、書いたものを自分で動かして確かめることも禁じた。</p>
+        <p>15個すべてが、作る前に決めておいた確かめる点を満たした。</p>
+        <p>難しさは「神経衰弱」から「3Dの箱庭」「1時間遊べるRPG」まで5段階に上げた。どこかで壊れ始める想定で、打ち切りの条件まで決めていた。しかし今回の15個の中に、その境目はなかった。</p>
+      </div>
+
+      <div class="article-copy">
+        <section>
+          <h2>何を確かめたかったのか</h2>
+          <p>「AIに頼めばゲームもアプリも作れる」という話は、ネット上にいくらでもある。ただ、紹介されているのは数個の作例がほとんどで、難しさを変えながら同じ条件で数えた記録は、探した範囲では見つからなかった。</p>
+          <p>そこで、条件をそろえて数えることにした。問いは一つ。</p>
+          <p class="article-pause">一言の依頼だけで、AIはどの難しさまで作れるのか。</p>
+          <p>作ったのはClaude Code。触って判定したのは人(このサイトの運営者)だ。</p>
+        </section>
+
+        <section>
+          <h2>条件</h2>
+          <ul class="article-list">
+            <li>依頼は1回だけ。作り直し、追加の依頼、人やAIによる手直しはしない</li>
+            <li>依頼文は全部同じ型で、題材の部分だけを差し替える</li>
+            <li>1個ごとに新しい会話で作らせ、前の題材の内容を引き継がせない</li>
+            <li>AIは、書いたコードを実行もテストもせず、そのまま保存する</li>
+            <li>成果物はHTMLファイル1つ。外部の素材、通信、ブラウザの保存機能は使わない</li>
+            <li>題材ごとに「確かめる点」を3つ、作る前に決めておく。出来を見てから基準を動かさない</li>
+          </ul>
+          <p>判定は3段階にした。確かめる点が3つとも満たされれば「使える」。開いて動くがどれかが欠けていれば「動くが使えない」。開けない、始められない、すぐ壊れるなら「動かない」。面白さや難易度の調整は、判定に入れていない。</p>
+          <p>難しさは5段階に分け、各段階3個ずつ、計15個を選んだ。段階1は、ネット上で「AIで作れた」とよく紹介されている定番。そこから、ルールが多いもの、技術的に難しいもの、対戦相手や規模が必要なもの、無茶だと思うものへ上げていった。</p>
+        </section>
+
+        <section>
+          <h2>結果</h2>
+          <p class="score-line"><span>確認した範囲で使えた</span><strong>15 / 15</strong></p>
+          <p>15個とも開けて、最初の画面がエラーなく表示された。「動かない」「動くが使えない」と判定されたものは一つもなかった。</p>
+<div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>題材</th><th>作る前に決めた確かめる点</th><th>制作時間</th><th>判定</th></tr></thead><tbody>
+<tr class="stage-row"><td colspan="5">段階1 / 定番(基準)</td></tr>
+<tr><td>01</td><td>落ち物パズル</td><td>ブロックの移動と回転 / 1列そろうと消える / ゲームオーバーとやり直し</td><td>約4分</td><td class="verdict">使える</td></tr>
+<tr><td>02</td><td>神経衰弱</td><td>2枚めくれる / そろう・戻るの判定 / 全部そろうと終わる</td><td>約2分</td><td class="verdict">使える</td></tr>
+<tr><td>03</td><td>誕生日カード作成ページ</td><td>名前とメッセージが反映される / デザインを変えられる / 完成したカードを見られる</td><td>約5分</td><td class="verdict">使える</td></tr>
+<tr class="stage-row"><td colspan="5">段階2 / ルールが多い</td></tr>
+<tr><td>04</td><td>2人で対戦できる将棋</td><td>駒が正しく動く / 持ち駒を打てる・成れる / 反則の手が指せない</td><td>約4分</td><td class="verdict">使える</td></tr>
+<tr><td>05</td><td>数式が使える表計算</td><td>数字と文字を入力できる / =A1+B1 が計算される / 元のセルを変えると結果も変わる</td><td>約13分</td><td class="verdict">使える</td></tr>
+<tr><td>06</td><td>毎回ダンジョンが変わるローグライク</td><td>始めるたびにマップが変わる / 戦闘とアイテム / 次の階へ進める・倒れると終わる</td><td>約9分</td><td class="verdict">使える</td></tr>
+<tr class="stage-row"><td colspan="5">段階3 / 技術的に難しい</td></tr>
+<tr><td>07</td><td>一人称視点の3D迷路</td><td>立体的に見える / 歩けて壁をすり抜けない / ゴールで終わる</td><td>約5分</td><td class="verdict">使える</td></tr>
+<tr><td>08</td><td>ピンボール</td><td>重力とはね返り / 左右のフリッパー / 得点とボールの消費</td><td>約6分</td><td class="verdict">使える</td></tr>
+<tr><td>09</td><td>音が鳴る作曲ツール</td><td>マス目に音を置ける / 置いた通りに鳴る / テンポを変えられる</td><td>約6分</td><td class="verdict">使える</td></tr>
+<tr class="stage-row"><td colspan="5">段階4 / 相手や規模が要る</td></tr>
+<tr><td>10</td><td>コンピューターと対戦できる将棋</td><td>コンピューターが反則でない手を指す / 詰みで勝敗がつくまで1局指せる / 明らかな只取りを見逃さない</td><td>約6分</td><td class="verdict">使える</td></tr>
+<tr><td>11</td><td>街づくりシミュレーション</td><td>道や建物を置ける / 時間が進み人口やお金が変わる / 置き方で結果が変わる</td><td>約11分</td><td class="verdict">使える</td></tr>
+<tr><td>12</td><td>レイヤーが使えるお絵かきソフト</td><td>ペンで描けて色と太さを変えられる / レイヤーの追加・表示切替・並べ替え / 元に戻す</td><td>約8分</td><td class="verdict">使える</td></tr>
+<tr class="stage-row"><td colspan="5">段階5 / 無茶</td></tr>
+<tr><td>13</td><td>パソコンのデスクトップ画面風の環境</td><td>ウィンドウを開く・動かす・閉じる / 中身の違うアプリが3つ以上使える / 複数のウィンドウを切り替えられる</td><td>約10分</td><td class="verdict">使える</td></tr>
+<tr><td>14</td><td>3Dでブロックを置いて壊せる箱庭</td><td>立体の世界を歩き回れる / ブロックを置ける / ブロックを壊せる</td><td>約8分</td><td class="verdict">使える</td></tr>
+<tr><td>15</td><td>町・ダンジョン・ボスがある1時間RPG</td><td>町で会話や買い物 / ダンジョン探索と戦闘 / ボスを倒して終わりまで行ける</td><td>約35分</td><td class="verdict">使える</td></tr>
+</tbody></table></div>
+          <p>制作時間は、依頼してからファイルが保存されるまでの時間。最短は神経衰弱の約2分、最長はRPGの約35分で、ほかの13個は約4分から13分に収まった。</p>
+        </section>
+      </div>
+
+<figure class="article-wide-figure">
+<img src="/experiments/exp-003/assets/stage-1.webp" alt="段階1の3個を開いた直後の画面。左から落ち物パズル、神経衰弱、誕生日カード作成ページ。公開していない題材の画面は載せていない" width="1952" height="465" loading="lazy">
+<figcaption><strong>段階1 / 定番(基準)</strong>落ち物パズル、神経衰弱、誕生日カード作成ページ。開いた直後の画面を、手を加えずに並べたもの。公開していない題材は、画面も載せていない。</figcaption>
+</figure>
+<figure class="article-wide-figure">
+<img src="/experiments/exp-003/assets/stage-2.webp" alt="段階2の3個を開いた直後の画面。左から2人で対戦できる将棋、数式が使える表計算、毎回ダンジョンが変わるローグライク" width="1952" height="465" loading="lazy">
+<figcaption><strong>段階2 / ルールが多い</strong>2人で対戦できる将棋、数式が使える表計算、毎回ダンジョンが変わるローグライク。開いた直後の画面を、手を加えずに並べたもの。</figcaption>
+</figure>
+<figure class="article-wide-figure">
+<img src="/experiments/exp-003/assets/stage-3.webp" alt="段階3の3個を開いた直後の画面。左から一人称視点の3D迷路、ピンボール、音が鳴る作曲ツール" width="1952" height="465" loading="lazy">
+<figcaption><strong>段階3 / 技術的に難しい</strong>一人称視点の3D迷路、ピンボール、音が鳴る作曲ツール。開いた直後の画面を、手を加えずに並べたもの。</figcaption>
+</figure>
+<figure class="article-wide-figure">
+<img src="/experiments/exp-003/assets/stage-4.webp" alt="段階4の3個を開いた直後の画面。左からコンピューターと対戦できる将棋、街づくりシミュレーション、レイヤーが使えるお絵かきソフト" width="1952" height="465" loading="lazy">
+<figcaption><strong>段階4 / 相手や規模が要る</strong>コンピューターと対戦できる将棋、街づくりシミュレーション、レイヤーが使えるお絵かきソフト。開いた直後の画面を、手を加えずに並べたもの。</figcaption>
+</figure>
+<figure class="article-wide-figure">
+<img src="/experiments/exp-003/assets/stage-5.webp" alt="段階5の3個を開いた直後の画面。左からパソコンのデスクトップ画面風の環境、3Dでブロックを置いて壊せる箱庭、町・ダンジョン・ボスがある1時間RPG。公開していない題材の画面は載せていない" width="1952" height="465" loading="lazy">
+<figcaption><strong>段階5 / 無茶</strong>パソコンのデスクトップ画面風の環境、3Dでブロックを置いて壊せる箱庭、町・ダンジョン・ボスがある1時間RPG。開いた直後の画面を、手を加えずに並べたもの。公開していない題材は、画面も載せていない。</figcaption>
+</figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>実際に触る</h2>
+          <p>作った25個(本番15個、予行10個)のうち、20個をこのサイトの中で開けるようにした。AIが書いた中身には手を入れていない。加えたのは、外部と通信できないようにするための設定を先頭に入れたことと、改行コードをそろえたことだけだ。</p>
+<ul class="build-list">
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-02/" target="_blank" rel="noopener">神経衰弱 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-03/" target="_blank" rel="noopener">誕生日カード作成ページ <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-04/" target="_blank" rel="noopener">2人で対戦できる将棋 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-05/" target="_blank" rel="noopener">数式が使える表計算 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-06/" target="_blank" rel="noopener">毎回ダンジョンが変わるローグライク <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-07/" target="_blank" rel="noopener">一人称視点の3D迷路 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-08/" target="_blank" rel="noopener">ピンボール <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-09/" target="_blank" rel="noopener">音が鳴る作曲ツール <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-10/" target="_blank" rel="noopener">コンピューターと対戦できる将棋 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-11/" target="_blank" rel="noopener">街づくりシミュレーション <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-12/" target="_blank" rel="noopener">レイヤーが使えるお絵かきソフト <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">本番</span><a href="/experiments/exp-003/builds/main-13/" target="_blank" rel="noopener">パソコンのデスクトップ画面風の環境 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-02/" target="_blank" rel="noopener">もぐらたたき <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-03/" target="_blank" rel="noopener">神経衰弱(予行) <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-04/" target="_blank" rel="noopener">シューティング <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-06/" target="_blank" rel="noopener">クイズ <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-07/" target="_blank" rel="noopener">ぬりえ <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-08/" target="_blank" rel="noopener">週間タスク管理 <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-09/" target="_blank" rel="noopener">誕生日カード(予行) <span aria-hidden="true">↗</span></a></li>
+<li><span class="build-tag">予行</span><a href="/experiments/exp-003/builds/pilot-10/" target="_blank" rel="noopener">架空の商品紹介ページ <span aria-hidden="true">↗</span></a></li>
+</ul>
+          <p>どれも外部と通信できない枠の中で動き、入力した内容や描いた絵がどこかへ送られることはない。パソコンで使う前提のものが多く、クイズの答えなど中身の正確さは確認していない。</p>
+          <p>残りの5個(落ち物パズル2個、3Dの箱庭、1時間RPG、RPG風バトル)は公開していない。見た目や仕組み、用語が、すでにある有名な作品に近いと判断したためだ。一言で頼むと、AIがよく知られた作品に寄せたものを返してくることがある。これも今回分かったことの一つだった。</p>
+        </section>
+
+        <section>
+          <h2>どこまで確かめたか</h2>
+          <p>「使える」は、決めておいた3つの点を人が実際に触って確かめた、という意味だ。最後までやらないと分からない点については、次のとおり確認している。</p>
+          <ul class="article-list">
+            <li>2人対戦の将棋:二歩などの反則を実際に試し、指せないことを確認した</li>
+            <li>コンピューター対戦の将棋:詰みで勝敗がつくまで1局指した</li>
+            <li>ローグライク:次の階へ進むところと、倒れて終わるところの両方を見た</li>
+            <li>RPG:町、ダンジョン、戦闘を確認し、ボスを倒してエンディングまで進めた</li>
+          </ul>
+          <p>一方で、確かめていないことも多い。長く使い続けたときに壊れないか。将棋の細かいルール(千日手や打ち歩詰めなど)が正しいか。ゲームとして難易度が適切か。表計算に入っているという約100種類の関数が全部正しいか。これらは今回の判定の外にある。</p>
+        </section>
+
+        <section>
+          <h2>予行の10個</h2>
+          <p>本番の前日に、定番の題材だけで10個の予行をした。落ち物パズル、もぐらたたき、神経衰弱、シューティング、RPG風バトル、クイズ、塗り絵、週間タスク管理、誕生日カード、商品紹介ページ。</p>
+          <p>10個とも開いて動いた。触ったあとの感想はこうだった。</p>
+          <blockquote>どれもよくできている。ゲームとして公開するなら、テストプレイを重ねて難易度を調整する必要はある。それでも、一度の依頼で作ったとは思えない出来だった。</blockquote>
+          <p>この予行は、上の15個には数えていない。条件が違うからだ。予行ではAIが保存前に自分で確かめることを止めておらず、書いただけのものから、自動で動かしてテストし、難しさを調整したものまで、題材によってばらつきがあった。確かめる点も先に決めていなかった。</p>
+          <p>定番では差が出ないと分かったので、本番では「テストなし」を依頼文に入れて条件をそろえ、難しさを段階的に上げることにした。</p>
+        </section>
+
+        <section>
+          <h2>頼んでいないものが付いてくる</h2>
+          <p>依頼は「落ち物パズルゲームを作ってください」のような一言だった。返ってきたものには、頼んでいない機能が多く入っていた。</p>
+          <p>落ち物パズルには、次のブロックの表示、ホールド、効果音、タッチ操作。将棋には、待った、棋譜、千日手の判定。表計算には、書式設定、行と列の挿入、CSVの読み書き。デスクトップ風の環境には、メモ帳、電卓、ペイント、マインスイーパーなど8つのアプリ。</p>
+          <p>これらはAI自身の報告と、開いた画面で見えた範囲の話で、一つひとつが正しく動くかは確かめていない。確かめたのは、先に決めた3つの点だけだ。</p>
+        </section>
+
+        <section>
+          <h2>境目は見つからなかった</h2>
+          <p>15個が全部通ったあと、さらに難しい題材を6個考えた。4人打ち麻雀の点数計算、積み木の物理、50ステージすべてが解けるパズルなどだ。</p>
+          <p>ただ、この案は採用しなかった。並べてみると、本当に難しくなったのかが分かりにくい。それに、確かめる側の手間が大きすぎる。50ステージが全部解けるかを人が確かめるのは現実的ではない。</p>
+          <p>題材を一つに固定して、頼む数だけを増やしていく案も出た。こちらは、最初の問いからずれ始めていた。</p>
+          <p>そこで、ここで区切った。「どこから作れなくなるか」には答えられていない。分かったのは、今回試した範囲では壊れなかった、ということまでだ。</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>確かめる側が先に限界になった</h2>
+          <p>今回、Claude Code(Claude Opus 5.5)は、一言の依頼から、テストなしで15個を作った。神経衰弱から、反則を防ぐ将棋、数式が計算される表計算、3Dの箱庭、1時間のRPGまで、15個すべてが先に決めた3つの点を満たした。</p>
+          <p>想定と違ったのは、難しさを上げていく途中で先に限界が来たのが、作る側ではなく確かめる側だったことだ。作るのは数分から数十分。それが正しいかを人が確かめるには、将棋を詰みまで指し、RPGを最後まで遊ぶ時間が要る。</p>
+          <p>この結果から言えることには限りがある。モデルは一つ、題材ごとに作ったのは1回だけ、判定したのは一人、確かめたのは3つの点だけだ。同じ依頼をもう一度出せば、違うものが返ってくる。「AIは何でも一発で作れる」とは言えない。</p>
+          <p class="conclusion-line">言えるのは、定番から無茶までの15個で、一言の依頼が壊れるところを、今回は見つけられなかったということだ。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>実験データ</h2>
+          <dl>
+            <div><dt>実験日</dt><dd>予行 2026年10月8日 / 本番 2026年10月9日</dd></div>
+            <div><dt>実行環境</dt><dd>Claude Code(デスクトップアプリ)</dd></div>
+            <div><dt>モデル</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
+            <div><dt>作らせ方</dt><dd>題材ごとに新しい会話(サブエージェント)を1つ立て、依頼文を1回だけ渡した</dd></div>
+            <div><dt>本番の個数</dt><dd>5段階 × 3個 = 15個</dd></div>
+            <div><dt>判定</dt><dd>使える 15 / 動くが使えない 0 / 動かない 0</dd></div>
+            <div><dt>制作時間</dt><dd>最短 約2分 / 最長 約35分</dd></div>
+            <div><dt>ファイルの大きさ</dt><dd>1個あたり 約20KB〜91KB(HTMLファイル1つ)</dd></div>
+            <div><dt>AIによるテスト</dt><dd>なし(依頼文で禁止。15個ともAIが「実行していない」と報告)</dd></div>
+            <div><dt>機械的な確認</dt><dd>Claude Codeが実施。ファイルが1つであること、外部の素材・通信・保存機能の記述がないこと、ブラウザで開いてエラーが出ないことを15個すべてで確認</dd></div>
+            <div><dt>人の判定</dt><dd>運営者1人が実際に触って、確かめる点に○×を付けた</dd></div>
+            <div><dt>予行</dt><dd>定番10個。条件が異なるため、上の数には含めない</dd></div>
+            <div><dt>役割</dt><dd>企画案・条件の下書き・制作・機械的な確認・この記事の下書きはClaude Code。企画の選択、条件の承認、判定、公開の承認は人</dd></div>
+            <div><dt>成果物の公開</dt><dd>25個のうち20個を公開。既存の作品に近いと判断した5個は非公開。公開分は、通信を禁じる設定の追加と改行コードの統一以外、作られたままの内容</dd></div>
+            <div><dt>追加費用</dt><dd>0円 / 今回のための新規契約・購入なし</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>実際に渡した依頼文の型</summary>
+            <blockquote>{題材}を作ってください。HTMLファイル1つで完結させ、外部の素材・ライブラリ・通信・ブラウザの保存機能(localStorage、Cookieなど)は使わないでください。書いたコードを実行したりテストしたりせず、書き上げたものをそのまま {保存先} に保存してください。質問はせず、この1回の依頼で完成させてください。</blockquote>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>

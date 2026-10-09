@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/TjxeqPc1egTkdb0550QEzfthMS4JOosVT2U6ShjXTk='; script-src-attr 'none'; style-src 'sha256-FKOuEjSZZnjRMoo9Aqb6eONAym9NeeeXqz7GkBIY2QA='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ネオン・ピンボール</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #05060f; color: #e8ecff;
+    font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
+    overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app {
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    max-width: 720px; margin: 0 auto;
+  }
+  #hud {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 10px;
+    background: linear-gradient(#12142e, #0a0b1c);
+    border-bottom: 1px solid #2a2f6a;
+    flex: 0 0 auto;
+  }
+  .box { display: flex; flex-direction: column; line-height: 1.1; }
+  .box small { font-size: 10px; letter-spacing: 1px; color: #7f88c9; }
+  .box b { font-size: 18px; font-variant-numeric: tabular-nums; color: #fff; }
+  #scoreBox { flex: 1 1 auto; }
+  #scoreBox b { font-size: 24px; color: #6ff3ff; text-shadow: 0 0 8px #18c8ff; }
+  #mult { color: #ffd84a; }
+  .btn {
+    font: inherit; font-size: 12px; color: #cfd6ff;
+    background: #1b1f4a; border: 1px solid #3b428f; border-radius: 6px;
+    padding: 6px 8px; cursor: pointer;
+  }
+  .btn:active { background: #2b3170; }
+  #stage {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; touch-action: none;
+  }
+  canvas { display: block; touch-action: none; }
+  #help {
+    flex: 0 0 auto; text-align: center; font-size: 11px; color: #6c74b5;
+    padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="box" id="scoreBox"><small>SCORE</small><b id="score">0</b></div>
+    <div class="box"><small>HI</small><b id="hi">0</b></div>
+    <div class="box"><small>BALL</small><b id="balls">-</b></div>
+    <div class="box"><small>倍率</small><b id="mult">x1</b></div>
+    <button class="btn" id="btnPause" type="button">一時停止</button>
+    <button class="btn" id="btnMute" type="button">音 ON</button>
+  </div>
+  <div id="stage"><canvas id="cv" width="480" height="800"></canvas></div>
+  <div id="help">← → / Z ・ / : フリッパー　Space長押し: 発射　↑: 台を揺らす　P: 一時停止　M: 音　｜　タッチ: 画面の左右</div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // ---------- 基本定数 ----------
+  var W = 480, H = 800, R = 9;
+  var G = 1100;            // 重力 px/s^2
+  var STEP = 1 / 480;      // 物理ステップ
+  var MAXV = 1900;
+  var GATE_X = 438;
+  var FL = 60;             // フリッパー長
+  var FL_UP = 20, FL_DOWN = 13;
+  var TOTAL_BALLS = 3;
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var stage = document.getElementById('stage');
+  var elScore = document.getElementById('score');
+  var elHi = document.getElementById('hi');
+  var elBalls = document.getElementById('balls');
+  var elMult = document.getElementById('mult');
+  var btnPause = document.getElementById('btnPause');
+  var btnMute = document.getElementById('btnMute');
+
+  function mx(x) { return 448 - x; } // プレイフィールド中心 x=224 での左右反転
+
+  // ---------- 盤面の構築 ----------
+  var segs = [];
+  function seg(x1, y1, x2, y2, opt) {
+    var s = { x1: x1, y1: y1, x2: x2, y2: y2, e: 0.5, kind: 'wall' };
+    if (opt) { for (var k in opt) { s[k] = opt[k]; } }
+    var dx = x2 - x1, dy = y2 - y1;
+    s.len2 = dx * dx + dy * dy;
+    s.len = Math.sqrt(s.len2);
+    segs.push(s);
+    return s;
+  }
+
+  // 上部アーチ
+  var ARC = { x: 240, y: 240, r: 230 };
+  (function () {
+    var N = 36;
+    for (var i = 0; i < N; i++) {
+      var a1 = Math.PI + Math.PI * i / N;
+      var a2 = Math.PI + Math.PI * (i + 1) / N;
+      seg(ARC.x + ARC.r * Math.cos(a1), ARC.y + ARC.r * Math.sin(a1),
+          ARC.x + ARC.r * Math.cos(a2), ARC.y + ARC.r * Math.sin(a2), { kind: 'arc' });
+    }
+  })();
+
+  // 外壁・発射レーン
+  seg(10, 240, 10, 638);
+  seg(470, 240, 470, 800);
+  seg(GATE_X, 250, GATE_X, 800);
+  seg(GATE_X, 782, 470, 782, { e: 0.1 });
+  // 一方通行ゲート（レーン → 盤面のみ通過可）
+  seg(GATE_X, 123, GATE_X, 250, { kind: 'gate', gate: true });
+
+  // フリッパーへのガイド
+  seg(10, 638, 142, 692);
+  seg(mx(10), 638, mx(142), 692);
+  seg(142, 692, 142, 800);
+  seg(mx(142), 692, mx(142), 800);
+
+  // スリングショット
+  var slings = [];
+  function makeSling(ax, ay, bx, by, cx, cy) {
+    var o = { ax: ax, ay: ay, bx: bx, by: by, cx: cx, cy: cy, flash: 0 };
+    seg(ax, ay, bx, by, { kind: 'slingwall' });
+    seg(bx, by, cx, cy, { kind: 'slingwall' });
+    seg(ax, ay, cx, cy, { kind: 'sling', sling: o });
+    slings.push(o);
+  }
+  makeSling(70, 540, 70, 618, 128, 650);
+  makeSling(mx(70), 540, mx(70), 618, mx(128), 650);
+
+  // ロールオーバーレーンのポスト
+  var POSTS = [164, 204, 244, 284];
+  POSTS.forEach(function (x) { seg(x, 110, x, 150, { kind: 'post' }); });
+  var lanes = [
+    { x: 184, lit: false, inside: false },
+    { x: 224, lit: false, inside: false },
+    { x: 264, lit: false, inside: false }
+  ];
+
+  // スタンドアップターゲット（左右 3 枚ずつ）
+  var banks = [[], []];
+  (function () {
+    var ys = [400, 436, 472];
+    for (var b = 0; b < 2; b++) {
+      for (var i = 0; i < 3; i++) {
+        var x = b === 0 ? 17 : mx(17);
+        var t = { bank: b, lit: false, flash: 0, x: x, y1: ys[i], y2: ys[i] + 30 };
+        seg(x, t.y1, x, t.y2, { kind: 'target', target: t, e: 0.6 });
+        banks[b].push(t);
+      }
+    }
+  })();
+
+  // バンパー
+  var bumpers = [
+    { x: 150, y: 270, r: 24, flash: 0 },
+    { x: 298, y: 270, r: 24, flash: 0 },
+    { x: 224, y: 350, r: 24, flash: 0 }
+  ];
+
+  // キックアウトホール
+  var hole = { x: 224, y: 210, hold: 0, cool: 0 };
+
+  // フリッパー
+  function makeFlipper(px, py, rest, active, side) {
+    return { px: px, py: py, rest: rest, active: active, angle: rest, omega: 0, pressed: false, side: side };
+  }
+  var flipL = makeFlipper(146, 700, 0.5, -0.5, 'L');
+  var flipR = makeFlipper(mx(146), 700, Math.PI - 0.5, Math.PI + 0.5, 'R');
+  var flippers = [flipL, flipR];
+
+  // ---------- ゲーム状態 ----------
+  var state = 'title'; // title | play | over
+  var paused = false;
+  var score = 0, hi = 0, mult = 1, ballNo = 1;
+  var ball = { x: 454, y: 773, vx: 0, vy: 0, held: false, fresh: true, wasLane: true };
+  var trail = [];
+  var charge = 0, plungeArmed = false;
+  var saveT = 0, stuckT = 0, nudgeCool = 0, shakeT = 0, overT = 0, time = 0;
+  var particles = [], popups = [];
+  var msg = { text: '', t: 0 };
+  var input = { left: false, right: false, plunge: false };
+  var keys = {};
+  var pointers = {};
+  var lastHud = '';
+
+  // ---------- サウンド（Web Audio で合成） ----------
+  var ac = null, muted = false, lastWallSnd = 0;
+  function initAudio() {
+    try {
+      if (!ac) {
+        var C = window.AudioContext || window.webkitAudioContext;
+        if (C) { ac = new C(); }
+      }
+      if (ac && ac.state === 'suspended') { ac.resume(); }
+    } catch (e) { ac = null; }
+  }
+  function beep(freq, dur, type, vol, slide, delay) {
+    if (!ac || muted) { return; }
+    try {
+      var t = ac.currentTime + (delay || 0);
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'square';
+      o.frequency.setValueAtTime(freq, t);
+      if (slide) { o.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t + dur); }
+      g.gain.setValueAtTime(vol || 0.06, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* 無視 */ }
+  }
+  var sfx = {
+    flip: function () { beep(160, 0.06, 'square', 0.04, 90); },
+    bumper: function () { beep(520 + Math.random() * 120, 0.09, 'square', 0.06, 260); },
+    sling: function () { beep(330, 0.07, 'sawtooth', 0.05, 660); },
+    wall: function () { beep(110, 0.03, 'triangle', 0.04, 70); },
+    target: function () { beep(880, 0.1, 'triangle', 0.07, 1320); },
+    lane: function () { beep(1040, 0.08, 'sine', 0.07, 1560); },
+    launch: function () { beep(120, 0.3, 'sawtooth', 0.06, 700); },
+    hole: function () { beep(300, 0.25, 'sine', 0.08, 900); },
+    bonus: function () {
+      beep(660, 0.1, 'square', 0.06, 0, 0);
+      beep(880, 0.1, 'square', 0.06, 0, 0.1);
+      beep(1320, 0.18, 'square', 0.06, 0, 0.2);
+    },
+    drain: function () { beep(400, 0.5, 'sawtooth', 0.07, 60); },
+    save: function () { beep(500, 0.12, 'sine', 0.07, 1000); },
+    over: function () {
+      beep(392, 0.2, 'square', 0.06, 0, 0);
+      beep(311, 0.2, 'square', 0.06, 0, 0.22);
+      beep(196, 0.5, 'square', 0.06, 0, 0.44);
+    }
+  };
+
+  // ---------- 補助 ----------
+  function showMsg(text, dur) { msg.text = text; msg.t = dur || 1.8; }
+  function addScore(n, x, y) {
+    var v = n * mult;
+    score += v;
+    if (x !== undefined) {
+      popups.push({ x: x, y: y, text: '+' + v, t: 0.9 });
+      if (popups.length > 24) { popups.shift(); }
+    }
+  }
+  function burst(x, y, color, n) {
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 220;
+      particles.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.35 + Math.random() * 0.3, color: color });
+    }
+    if (particles.length > 220) { particles.splice(0, particles.length - 220); }
+  }
+  function spawnBall(fresh) {
+    ball.x = 454; ball.y = 773; ball.vx = 0; ball.vy = 0;
+    ball.held = false; ball.fresh = fresh; ball.wasLane = true;
+    trail.length = 0; charge = 0; stuckT = 0;
+  }
+  function startGame() {
+    score = 0; mult = 1; ballNo = 1; saveT = 0;
+    lanes.forEach(function (l) { l.lit = false; l.inside = false; });
+    banks.forEach(function (b) { b.forEach(function (t) { t.lit = false; t.flash = 0; }); });
+    particles.length = 0; popups.length = 0;
+    hole.hold = 0; hole.cool = 0;
+    spawnBall(true);
+    plungeArmed = false;
+    state = 'play'; paused = false;
+    btnPause.textContent = '一時停止';
+    showMsg('Space長押し / 画面長押しで発射', 3);
+  }
+  function onDrain() {
+    if (saveT > 0) {
+      sfx.save();
+      showMsg('ボールセーブ！');
+      spawnBall(false);
+      return;
+    }
+    sfx.drain();
+    if (ballNo >= TOTAL_BALLS) {
+      state = 'over'; overT = 0;
+      if (score > hi) { hi = score; }
+      sfx.over();
+    } else {
+      ballNo++;
+      mult = 1;
+      lanes.forEach(function (l) { l.lit = false; });
+      spawnBall(true);
+      showMsg('ボール ' + ballNo);
+    }
+  }
+  function hitTarget(t) {
+    if (t.lit) { addScore(50, t.x, (t.y1 + t.y2) / 2); return; }
+    t.lit = true; t.flash = 0.3;
+    addScore(300, t.x + (t.bank === 0 ? 24 : -24), (t.y1 + t.y2) / 2);
+    sfx.target();
+    var bank = banks[t.bank];
+    if (bank[0].lit && bank[1].lit && bank[2].lit) {
+      addScore(5000, t.bank === 0 ? 70 : mx(70), 450);
+      bank.forEach(function (q) { q.lit = false; q.flash = 0.8; });
+      saveT = Math.max(saveT, 10);
+      showMsg('ターゲット全点灯！ +ボールセーブ');
+      sfx.bonus();
+    }
+  }
+  function checkLanes() {
+    if (lanes[0].lit && lanes[1].lit && lanes[2].lit) {
+      lanes.forEach(function (l) { l.lit = false; });
+      if (mult < 6) { mult++; }
+      addScore(2000, 224, 90);
+      showMsg('倍率アップ！ x' + mult);
+      sfx.bonus();
+    }
+  }
+  function rotateLanes(dir) {
+    var a = lanes[0].lit, b = lanes[1].lit, c = lanes[2].lit;
+    if (dir < 0) { lanes[0].lit = b; lanes[1].lit = c; lanes[2].lit = a; }
+    else { lanes[0].lit = c; lanes[1].lit = a; lanes[2].lit = b; }
+  }
+  function nudge() {
+    if (state !== 'play' || paused || nudgeCool > 0 || ball.held) { return; }
+    if (ball.x > GATE_X) { return; }
+    nudgeCool = 1.2; shakeT = 0.18;
+    ball.vy -= 190;
+    ball.vx += (Math.random() < 0.5 ? -1 : 1) * 130;
+    sfx.wall();
+  }
+
+  // ---------- 衝突処理 ----------
+  function collideSeg(b, s) {
+    if (s.gate && !(b.x < GATE_X && b.vx > 0)) { return; }
+    var dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    var t = ((b.x - s.x1) * dx + (b.y - s.y1) * dy) / s.len2;
+    if (t < 0) { t = 0; } else if (t > 1) { t = 1; }
+    var qx = s.x1 + dx * t, qy = s.y1 + dy * t;
+    var nx = b.x - qx, ny = b.y - qy;
+    var d2 = nx * nx + ny * ny;
+    if (d2 >= R * R) { return; }
+    var d = Math.sqrt(d2);
+    if (d < 1e-6) { nx = -dy / s.len; ny = dx / s.len; }
+    else { nx /= d; ny /= d; }
+    b.x = qx + nx * R; b.y = qy + ny * R;
+    var vn = b.vx * nx + b.vy * ny;
+    if (vn >= 0) { return; }
+    var e = vn > -40 ? 0 : s.e;
+    b.vx -= (1 + e) * vn * nx;
+    b.vy -= (1 + e) * vn * ny;
+    if (s.sling && t > 0.12 && t < 0.88 && vn < -60) {
+      b.vx += nx * 520; b.vy += ny * 520;
+      s.sling.flash = 0.15;
+      addScore(20);
+      sfx.sling();
+      burst(qx, qy, '#7dffb0', 5);
+    } else if (s.target && vn < -50) {
+      hitTarget(s.target);
+    } else if (vn < -300 && time - lastWallSnd > 0.06) {
+      lastWallSnd = time;
+      sfx.wall();
+    }
+  }
+
+  function collideBumper(b, bp) {
+    var nx = b.x - bp.x, ny = b.y - bp.y;
+    var rr = R + bp.r;
+    var d2 = nx * nx + ny * ny;
+    if (d2 >= rr * rr) { return; }
+    var d = Math.sqrt(d2);
+    if (d < 1e-6) { nx = 0; ny = -1; } else { nx /= d; ny /= d; }
+    b.x = bp.x + nx * rr; b.y = bp.y + ny * rr;
+    var vn = b.vx * nx + b.vy * ny;
+    if (vn < 0) {
+      b.vx -= 2 * vn * nx; b.vy -= 2 * vn * ny;
+      vn = -vn;
+    }
+    if (vn < 480) {
+      b.vx += (480 - vn) * nx; b.vy += (480 - vn) * ny;
+    }
+    if (bp.flash < 0.05) {
+      addScore(100, bp.x, bp.y - bp.r - 6);
+      sfx.bumper();
+      burst(b.x - nx * R, b.y - ny * R, '#ff6ad5', 8);
+    }
+    bp.flash = 0.18;
+  }
+
+  function collideFlipper(b, f) {
+    var c = Math.cos(f.angle), s = Math.sin(f.angle);
+    var rx = b.x - f.px, ry = b.y - f.py;
+    var t = (rx * c + ry * s) / FL;
+    if (t < 0) { t = 0; } else if (t > 1) { t = 1; }
+    var qx = f.px + c * FL * t, qy = f.py + s * FL * t;
+    var rad = R + (9 - 4 * t);
+    var nx = b.x - qx, ny = b.y - qy;
+    var d2 = nx * nx + ny * ny;
+    if (d2 >= rad * rad) { return; }
+    var d = Math.sqrt(d2);
+    if (d < 1e-6) { nx = 0; ny = -1; } else { nx /= d; ny /= d; }
+    b.x = qx + nx * rad; b.y = qy + ny * rad;
+    var svx = -f.omega * (qy - f.py), svy = f.omega * (qx - f.px);
+    var vn = (b.vx - svx) * nx + (b.vy - svy) * ny;
+    if (vn < 0) {
+      var e = vn > -40 ? 0 : 0.3;
+      var j = -(1 + e) * vn;
+      b.vx += j * nx; b.vy += j * ny;
+    }
+  }
+
+  function updateFlipper(f, dt) {
+    var target = f.pressed ? f.active : f.rest;
+    var sp = (f.pressed ? FL_UP : FL_DOWN) * dt;
+    var prev = f.angle;
+    var diff = target - f.angle;
+    if (Math.abs(diff) <= sp) { f.angle = target; }
+    else { f.angle += diff > 0 ? sp : -sp; }
+    f.omega = (f.angle - prev) / dt;
+  }
+
+  // ---------- 物理ステップ ----------
+  function step(dt) {
+    time += dt;
+    flipL.pressed = input.left;
+    flipR.pressed = input.right;
+    updateFlipper(flipL, dt);
+    updateFlipper(flipR, dt);
+
+    var i;
+    for (i = 0; i < bumpers.length; i++) { if (bumpers[i].flash > 0) { bumpers[i].flash -= dt; } }
+    for (i = 0; i < slings.length; i++) { if (slings[i].flash > 0) { slings[i].flash -= dt; } }
+    for (i = 0; i < 2; i++) {
+      for (var k = 0; k < 3; k++) { if (banks[i][k].flash > 0) { banks[i][k].flash -= dt; } }
+    }
+    if (msg.t > 0) { msg.t -= dt; }
+    if (shakeT > 0) { shakeT -= dt; }
+    if (nudgeCool > 0) { nudgeCool -= dt; }
+    if (state === 'over') { overT += dt; }
+    if (state !== 'play') { return; }
+
+    if (hole.cool > 0) { hole.cool -= dt; }
+
+    // プランジャー
+    var resting = ball.x > GATE_X && ball.y > 755 && !ball.held;
+    if (!input.plunge) { plungeArmed = true; }
+    if (input.plunge && plungeArmed && resting) {
+      charge = Math.min(1, charge + dt / 0.9);
+    } else if (charge > 0) {
+      if (resting && Math.abs(ball.vy) < 150) {
+        ball.vy = -(1250 + 650 * charge);
+        ball.vx = 0;
+        sfx.launch();
+      }
+      charge = 0;
+    }
+
+    var b = ball;
+    if (b.held) {
+      hole.hold -= dt;
+      if (hole.hold <= 0) {
+        b.held = false;
+        b.vx = (Math.random() - 0.5) * 280;
+        b.vy = 430;
+        hole.cool = 0.9;
+        sfx.sling();
+        burst(hole.x, hole.y, '#ffd84a', 10);
+      }
+      return;
+    }
+
+    b.vy += G * dt;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+
+    for (i = 0; i < segs.length; i++) { collideSeg(b, segs[i]); }
+    for (i = 0; i < bumpers.length; i++) { collideBumper(b, bumpers[i]); }
+    collideFlipper(b, flipL);
+    collideFlipper(b, flipR);
+
+    var sp2 = b.vx * b.vx + b.vy * b.vy;
+    if (sp2 > MAXV * MAXV) {
+      var kk = MAXV / Math.sqrt(sp2);
+      b.vx *= kk; b.vy *= kk;
+      sp2 = MAXV * MAXV;
+    }
+
+    // レーンから盤面へ出た瞬間
+    var inLane = b.x > GATE_X;
+    if (b.wasLane && !inLane) {
+      if (b.fresh) { b.fresh = false; saveT = 12; }
+    }
+    b.wasLane = inLane;
+    if (saveT > 0 && !inLane) { saveT -= dt; }
+
+    // ロールオーバー
+    for (i = 0; i < lanes.length; i++) {
+      var ln = lanes[i];
+      var ins = Math.abs(b.x - ln.x) < 17 && b.y > 114 && b.y < 146;
+      if (ins && !ln.inside) {
+        if (!ln.lit) { ln.lit = true; addScore(500, ln.x, 100); sfx.lane(); checkLanes(); }
+        else { addScore(100, ln.x, 100); }
+      }
+      ln.inside = ins;
+    }
+
+    // キックアウトホール
+    if (hole.cool <= 0) {
+      var hx = b.x - hole.x, hy = b.y - hole.y;
+      if (hx * hx + hy * hy < 121 && sp2 < 900 * 900) {
+        b.held = true; b.x = hole.x; b.y = hole.y; b.vx = 0; b.vy = 0;
+        hole.hold = 0.9;
+        addScore(1000, hole.x, hole.y - 22);
+        sfx.hole();
+        return;
+      }
+    }
+
+    // 動かなくなった場合の救済
+    if (!inLane && sp2 < 64 && !input.left && !input.right) {
+      stuckT += dt;
+      if (stuckT > 2.5) {
+        stuckT = 0;
+        b.vx = (Math.random() - 0.5) * 400;
+        b.vy = -350;
+      }
+    } else {
+      stuckT = 0;
+    }
+
+    // 落下
+    if (b.y > H + 30 || b.x < -40 || b.x > W + 40 || b.y < -60) { onDrain(); }
+  }
+
+  // ---------- 入力 ----------
+  function anyPointer(side) {
+    for (var id in pointers) { if (pointers[id] === side) { return true; } }
+    return false;
+  }
+  function hasPointer() {
+    for (var id in pointers) { return true; }
+    return false;
+  }
+  function refreshInput() {
+    var l = !!(keys.ArrowLeft || keys.KeyZ || keys.KeyA || keys.ShiftLeft) || anyPointer('L');
+    var r = !!(keys.ArrowRight || keys.Slash || keys.KeyL || keys.ShiftRight) || anyPointer('R');
+    var p = !!(keys.Space || keys.ArrowDown) || hasPointer();
+    if (state === 'play' && !paused) {
+      if (l && !input.left) { sfx.flip(); rotateLanes(-1); }
+      if (r && !input.right) { sfx.flip(); rotateLanes(1); }
+    }
+    input.left = l; input.right = r; input.plunge = p;
+  }
+  function tryStart() {
+    if (state === 'title' || (state === 'over' && overT > 0.8)) { startGame(); return true; }
+    return false;
+  }
+  function togglePause() {
+    if (state !== 'play') { return; }
+    paused = !paused;
+    btnPause.textContent = paused ? '再開' : '一時停止';
+  }
+  function toggleMute() {
+    muted = !muted;
+    btnMute.textContent = muted ? '音 OFF' : '音 ON';
+  }
+
+  var GAME_KEYS = {
+    ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1, Space: 1, Slash: 1,
+    KeyZ: 1, KeyA: 1, KeyL: 1, KeyN: 1, KeyP: 1, KeyM: 1, Enter: 1, ShiftLeft: 1, ShiftRight: 1
+  };
+  window.addEventListener('keydown', function (e) {
+    var c = e.code;
+    if (!GAME_KEYS[c]) { return; }
+    e.preventDefault();
+    if (e.repeat) { return; }
+    initAudio();
+    if (c === 'KeyP') { togglePause(); return; }
+    if (c === 'KeyM') { toggleMute(); return; }
+    if (c === 'Space' || c === 'Enter') {
+      if (paused) { togglePause(); return; }
+      if (tryStart()) { keys[c] = true; refreshInput(); return; }
+    }
+    if (c === 'ArrowUp' || c === 'KeyN') { nudge(); return; }
+    keys[c] = true;
+    refreshInput();
+  });
+  window.addEventListener('keyup', function (e) {
+    if (keys[e.code]) { delete keys[e.code]; refreshInput(); }
+  });
+  window.addEventListener('blur', function () {
+    keys = {}; pointers = {}; refreshInput();
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === 'play' && !paused) { togglePause(); }
+  });
+
+  stage.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    initAudio();
+    if (paused) { togglePause(); return; }
+    if (tryStart()) { /* 開始。押しっぱなしでは発射しない */ }
+    pointers[e.pointerId] = e.clientX < window.innerWidth / 2 ? 'L' : 'R';
+    refreshInput();
+  });
+  function pointerEnd(e) {
+    if (pointers[e.pointerId]) { delete pointers[e.pointerId]; refreshInput(); }
+  }
+  window.addEventListener('pointerup', pointerEnd);
+  window.addEventListener('pointercancel', pointerEnd);
+  stage.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  btnPause.addEventListener('click', function () { initAudio(); togglePause(); btnPause.blur(); });
+  btnMute.addEventListener('click', function () { initAudio(); toggleMute(); btnMute.blur(); });
+
+  // ---------- 描画 ----------
+  function resize() {
+    var r = stage.getBoundingClientRect();
+    var s = Math.min(r.width / W, r.height / H);
+    if (!(s > 0)) { s = 1; }
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.style.width = Math.floor(W * s) + 'px';
+    cv.style.height = Math.floor(H * s) + 'px';
+    cv.width = Math.max(1, Math.floor(W * s * dpr));
+    cv.height = Math.max(1, Math.floor(H * s * dpr));
+  }
+  window.addEventListener('resize', resize);
+
+  var stars = [];
+  (function () {
+    for (var i = 0; i < 70; i++) {
+      stars.push({ x: 20 + Math.random() * 410, y: 30 + Math.random() * 740, r: Math.random() * 1.3 + 0.3, p: Math.random() * 6 });
+    }
+  })();
+
+  function tablePath() {
+    ctx.beginPath();
+    ctx.moveTo(10, H);
+    ctx.lineTo(10, 240);
+    ctx.arc(ARC.x, ARC.y, ARC.r, Math.PI, Math.PI * 2, false);
+    ctx.lineTo(470, H);
+    ctx.closePath();
+  }
+
+  function drawFlipper(f) {
+    ctx.save();
+    ctx.translate(f.px, f.py);
+    ctx.rotate(f.angle);
+    ctx.beginPath();
+    ctx.arc(0, 0, 9, Math.PI / 2, Math.PI * 1.5, false);
+    ctx.lineTo(FL, -5);
+    ctx.arc(FL, 0, 5, -Math.PI / 2, Math.PI / 2, false);
+    ctx.closePath();
+    var g = ctx.createLinearGradient(0, -9, 0, 9);
+    g.addColorStop(0, '#fff3a0');
+    g.addColorStop(1, '#ff9a1f');
+    ctx.fillStyle = g;
+    ctx.shadowColor = '#ffb030'; ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#5a3200';
+    ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function centerText(text, y, size, color, glow) {
+    ctx.font = 'bold ' + size + 'px "Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 16; }
+    ctx.fillStyle = color;
+    ctx.fillText(text, 224, y);
+    ctx.shadowBlur = 0;
+  }
+
+  function draw() {
+    var k = cv.width / W;
+    ctx.setTransform(k, 0, 0, cv.height / H, 0, 0);
+    ctx.fillStyle = '#05060f';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.save();
+    if (shakeT > 0) { ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8); }
+
+    // 盤面
+    tablePath();
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#1a1150');
+    bg.addColorStop(0.5, '#0f1238');
+    bg.addColorStop(1, '#0a0a22');
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    ctx.save();
+    tablePath();
+    ctx.clip();
+    // 星
+    var i, s;
+    for (i = 0; i < stars.length; i++) {
+      s = stars[i];
+      ctx.globalAlpha = 0.25 + 0.25 * Math.sin(time * 1.5 + s.p);
+      ctx.fillStyle = '#b9c4ff';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 装飾リング
+    ctx.strokeStyle = 'rgba(120,140,255,0.10)';
+    ctx.lineWidth = 2;
+    for (i = 1; i <= 4; i++) {
+      ctx.beginPath(); ctx.arc(224, 300, i * 55, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 発射レーンの床色
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(GATE_X, 250, 32, 550);
+    // エプロン
+    ctx.fillStyle = '#141a4d';
+    ctx.beginPath(); ctx.moveTo(10, 638); ctx.lineTo(142, 692); ctx.lineTo(142, H); ctx.lineTo(10, H); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(mx(10), 638); ctx.lineTo(mx(142), 692); ctx.lineTo(mx(142), H); ctx.lineTo(mx(10), H); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // ボールセーブ表示
+    if (state === 'play' && saveT > 0) {
+      var blink = saveT > 3 || Math.floor(time * 6) % 2 === 0;
+      if (blink) {
+        ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#7dffb0'; ctx.shadowColor = '#2dff8a'; ctx.shadowBlur = 10;
+        ctx.fillText('BALL SAVE', 224, 770);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // ロールオーバーレーン
+    for (i = 0; i < lanes.length; i++) {
+      var ln = lanes[i];
+      ctx.beginPath(); ctx.arc(ln.x, 130, 8, 0, Math.PI * 2);
+      if (ln.lit) {
+        ctx.fillStyle = '#ffe66a'; ctx.shadowColor = '#ffd020'; ctx.shadowBlur = 14;
+      } else {
+        ctx.fillStyle = '#3a3566';
+      }
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+    ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,230,120,0.55)';
+    ctx.fillText('3つ点灯で倍率UP', 224, 166);
+
+    // ホール
+    ctx.beginPath(); ctx.arc(hole.x, hole.y, 14, 0, Math.PI * 2);
+    ctx.fillStyle = '#02020a'; ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = ball.held ? '#ffe66a' : '#8a6cff';
+    ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = ball.held ? 18 : 8;
+    ctx.stroke(); ctx.shadowBlur = 0;
+
+    // ターゲット
+    ctx.lineCap = 'round';
+    for (i = 0; i < 2; i++) {
+      for (var j = 0; j < 3; j++) {
+        var t = banks[i][j];
+        var on = t.lit || (t.flash > 0 && Math.floor(time * 16) % 2 === 0);
+        ctx.strokeStyle = on ? '#ff5a5a' : '#6b2a3a';
+        ctx.shadowColor = '#ff3030'; ctx.shadowBlur = on ? 14 : 0;
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(t.x, t.y1 + 2); ctx.lineTo(t.x, t.y2 - 2); ctx.stroke();
+      }
+    }
+    ctx.shadowBlur = 0;
+
+    // バンパー
+    for (i = 0; i < bumpers.length; i++) {
+      var bp = bumpers[i];
+      var hot = bp.flash > 0;
+      var rr = bp.r + (hot ? 3 : 0);
+      var g = ctx.createRadialGradient(bp.x - 6, bp.y - 6, 2, bp.x, bp.y, rr);
+      g.addColorStop(0, hot ? '#ffffff' : '#ffb3ec');
+      g.addColorStop(0.6, hot ? '#ff8ae0' : '#d6309f');
+      g.addColorStop(1, '#5a0f4a');
+      ctx.beginPath(); ctx.arc(bp.x, bp.y, rr, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.shadowColor = '#ff4fd0'; ctx.shadowBlur = hot ? 28 : 12;
+      ctx.fill(); ctx.shadowBlur = 0;
+      ctx.lineWidth = 3; ctx.strokeStyle = '#ffd6f6'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(bp.x, bp.y, rr * 0.45, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+    }
+
+    // スリングショット
+    for (i = 0; i < slings.length; i++) {
+      var sl = slings[i];
+      ctx.beginPath(); ctx.moveTo(sl.ax, sl.ay); ctx.lineTo(sl.bx, sl.by); ctx.lineTo(sl.cx, sl.cy); ctx.closePath();
+      ctx.fillStyle = sl.flash > 0 ? '#2f8f62' : '#153a3a';
+      ctx.fill();
+      ctx.lineWidth = 3; ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#3fd8a0'; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sl.ax, sl.ay); ctx.lineTo(sl.cx, sl.cy);
+      ctx.strokeStyle = sl.flash > 0 ? '#ffffff' : '#7dffb0';
+      ctx.shadowColor = '#2dff8a'; ctx.shadowBlur = sl.flash > 0 ? 20 : 8;
+      ctx.lineWidth = 4; ctx.stroke(); ctx.shadowBlur = 0;
+    }
+
+    // 壁
+    ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#5ee6ff';
+    ctx.shadowColor = '#18b8ff'; ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(10, 638); ctx.lineTo(10, 240);
+    ctx.arc(ARC.x, ARC.y, ARC.r, Math.PI, Math.PI * 2, false);
+    ctx.lineTo(470, H);
+    ctx.moveTo(GATE_X, 250); ctx.lineTo(GATE_X, H);
+    ctx.moveTo(10, 638); ctx.lineTo(142, 692); ctx.lineTo(142, H);
+    ctx.moveTo(mx(10), 638); ctx.lineTo(mx(142), 692); ctx.lineTo(mx(142), H);
+    for (i = 0; i < POSTS.length; i++) { ctx.moveTo(POSTS[i], 110); ctx.lineTo(POSTS[i], 150); }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // ゲート
+    ctx.setLineDash([5, 6]);
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,216,74,0.8)';
+    ctx.beginPath(); ctx.moveTo(GATE_X, 125); ctx.lineTo(GATE_X, 250); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // プランジャー
+    var py = 784 + charge * 12;
+    ctx.fillStyle = '#c9d2ff';
+    ctx.fillRect(445, py, 18, 5);
+    ctx.fillStyle = '#6a74c0';
+    ctx.fillRect(451, py + 5, 6, 20);
+    if (charge > 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(474, 640, 4, 140);
+      ctx.fillStyle = charge > 0.85 ? '#ff5a5a' : '#ffd84a';
+      ctx.fillRect(474, 780 - 140 * charge, 4, 140 * charge);
+    }
+
+    // ボール
+    if (state === 'play') {
+      for (i = 0; i < trail.length; i++) {
+        var tp = trail[i];
+        ctx.globalAlpha = 0.05 + 0.25 * (i / trail.length);
+        ctx.fillStyle = '#9fd8ff';
+        ctx.beginPath(); ctx.arc(tp.x, tp.y, R * (0.4 + 0.6 * i / trail.length), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      var bgd = ctx.createRadialGradient(ball.x - 3, ball.y - 3, 1, ball.x, ball.y, R);
+      bgd.addColorStop(0, '#ffffff');
+      bgd.addColorStop(0.5, '#cfd6e6');
+      bgd.addColorStop(1, '#6a7390');
+      ctx.fillStyle = bgd;
+      ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.held ? R * 0.8 : R, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // フリッパー
+    drawFlipper(flipL);
+    drawFlipper(flipR);
+
+    // パーティクル
+    for (i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 2.5));
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+
+    // 得点ポップアップ
+    ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (i = 0; i < popups.length; i++) {
+      var pp = popups[i];
+      ctx.globalAlpha = Math.max(0, Math.min(1, pp.t * 2));
+      ctx.fillStyle = '#fff6b0';
+      ctx.fillText(pp.text, Math.max(30, Math.min(418, pp.x)), pp.y - (0.9 - pp.t) * 30);
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+
+    // メッセージ
+    if (state === 'play' && msg.t > 0 && !paused) {
+      ctx.globalAlpha = Math.min(1, msg.t * 2);
+      centerText(msg.text, 480, 20, '#ffffff', '#6ff3ff');
+      ctx.globalAlpha = 1;
+    }
+
+    // オーバーレイ
+    if (state === 'title') {
+      ctx.fillStyle = 'rgba(4,5,18,0.72)'; ctx.fillRect(0, 0, W, H);
+      centerText('NEON PINBALL', 250, 44, '#6ff3ff', '#18c8ff');
+      centerText('ネオン・ピンボール', 300, 20, '#ffd6f6', '#ff4fd0');
+      if (Math.floor(time * 2) % 2 === 0) { centerText('Space / タップ でスタート', 390, 22, '#ffe66a', '#ffb030'); }
+      centerText('← →（Z ・ /）: 左右フリッパー', 470, 15, '#cfd6ff');
+      centerText('Space 長押し → 離す: ボール発射', 496, 15, '#cfd6ff');
+      centerText('↑: 台を揺らす　P: 一時停止　M: 音', 522, 15, '#cfd6ff');
+      centerText('タッチ: 画面の左半分 / 右半分', 548, 15, '#cfd6ff');
+      centerText('レーン3つ点灯で倍率UP・フリッパーで灯りを移動', 600, 13, '#8f98d8');
+    } else if (state === 'over') {
+      ctx.fillStyle = 'rgba(4,5,18,0.75)'; ctx.fillRect(0, 0, W, H);
+      centerText('GAME OVER', 290, 46, '#ff6a8a', '#ff2050');
+      centerText('スコア  ' + score.toLocaleString('en-US'), 370, 26, '#ffffff', '#6ff3ff');
+      centerText('ハイスコア  ' + hi.toLocaleString('en-US'), 410, 18, '#ffe66a');
+      if (score > 0 && score >= hi) { centerText('ハイスコア更新！', 450, 18, '#7dffb0', '#2dff8a'); }
+      if (overT > 0.8 && Math.floor(time * 2) % 2 === 0) { centerText('Space / タップ でもう一度', 520, 20, '#ffe66a', '#ffb030'); }
+    } else if (paused) {
+      ctx.fillStyle = 'rgba(4,5,18,0.65)'; ctx.fillRect(0, 0, W, H);
+      centerText('一時停止', 380, 40, '#ffffff', '#6ff3ff');
+      centerText('P / タップ で再開', 430, 18, '#cfd6ff');
+    }
+  }
+
+  function updateHud() {
+    var key = score + '|' + hi + '|' + ballNo + '|' + mult + '|' + state;
+    if (key === lastHud) { return; }
+    lastHud = key;
+    elScore.textContent = score.toLocaleString('en-US');
+    elHi.textContent = Math.max(hi, score).toLocaleString('en-US');
+    elBalls.textContent = state === 'title' ? '-' : (ballNo + '/' + TOTAL_BALLS);
+    elMult.textContent = 'x' + mult;
+  }
+
+  // ---------- メインループ ----------
+  var lastT = 0, acc = 0;
+  function frame(now) {
+    var dt = (now - lastT) / 1000;
+    lastT = now;
+    if (!(dt > 0)) { dt = 0; }
+    if (dt > 0.05) { dt = 0.05; }
+
+    if (!paused) {
+      acc += dt;
+      var n = 0;
+      while (acc >= STEP && n < 40) { step(STEP); acc -= STEP; n++; }
+      if (acc > STEP) { acc = 0; }
+
+      var i;
+      for (i = particles.length - 1; i >= 0; i--) {
+        var p = particles[i];
+        p.life -= dt;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 500 * dt;
+      }
+      for (i = popups.length - 1; i >= 0; i--) {
+        popups[i].t -= dt;
+        if (popups[i].t <= 0) { popups.splice(i, 1); }
+      }
+      if (state === 'play') {
+        trail.push({ x: ball.x, y: ball.y });
+        if (trail.length > 8) { trail.shift(); }
+      }
+    } else {
+      time += dt; // 点滅表示用
+    }
+
+    updateHud();
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  requestAnimationFrame(function (t) { lastT = t; requestAnimationFrame(frame); });
+})();
+</script>
+</body>
+</html>

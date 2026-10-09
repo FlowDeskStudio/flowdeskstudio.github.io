@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-knh9gZSwxC5WtnhrW6IgO/eFew+a6MMV1Q26JjBNqm8='; script-src-attr 'none'; style-src 'sha256-H4IUETlJnFh4Cl5xwOdo0fLTYH73k+Gt2FSz6J+T2pY='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おとマス - マス目作曲ツール</title>
+<style>
+:root{
+  color-scheme: light dark;
+  --cw:32px;
+  --bg:#f3efe6; --panel:#fffdf8; --ink:#25221c; --muted:#6a6458;
+  --line:#e4ddcd; --line2:#cdc4b0; --line3:#8f866f;
+  --cell:#fcf9f2; --cell-alt:#f6f1e5; --root:#efe2c4; --bar-tint:rgba(120,100,60,.06);
+  --accent:#c2410c; --accent-ink:#ffffff; --focus:#1d4ed8;
+  --i0:#2f7fd1; --i1:#7c5cd6; --i2:#1f9d55; --i3:#d6336c; --drum:#4a453b;
+  --play:rgba(194,65,12,.20);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#151518; --panel:#1e1f23; --ink:#eceae4; --muted:#a09c93;
+    --line:#2b2c32; --line2:#3d3e46; --line3:#6c6d78;
+    --cell:#1a1b1f; --cell-alt:#1f2025; --root:#2b2a24; --bar-tint:rgba(255,255,255,.035);
+    --accent:#ff8a5c; --accent-ink:#1d0f06; --focus:#8ab4ff;
+    --i0:#5aa9ff; --i1:#a78bfa; --i2:#4ade80; --i3:#ff7aa8; --drum:#d9d5ca;
+    --play:rgba(255,138,92,.22);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:15px; line-height:1.6;
+}
+.app{max-width:1280px; margin:0 auto; padding:20px 16px 48px}
+header{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+h1{font-size:24px; margin:0; letter-spacing:.04em}
+header p{margin:0; color:var(--muted); font-size:14px}
+
+.bar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px;
+  background:var(--panel); border:1px solid var(--line2); border-radius:12px;
+  padding:12px 14px; margin-bottom:10px;
+}
+.field{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); white-space:nowrap}
+.field output{color:var(--ink); min-width:3.2em; font-variant-numeric:tabular-nums}
+.grow{flex:1 1 auto}
+input[type=range]{width:120px; accent-color:var(--accent)}
+input[type=checkbox]{accent-color:var(--accent); width:16px; height:16px}
+select,button,textarea{font:inherit; color:var(--ink)}
+select{
+  background:var(--cell); border:1px solid var(--line2); border-radius:8px; padding:6px 8px; min-height:34px;
+}
+button{
+  background:var(--cell); border:1px solid var(--line2); border-radius:8px;
+  padding:6px 12px; min-height:34px; cursor:pointer; white-space:nowrap;
+}
+button:hover:not(:disabled){border-color:var(--line3)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.45; cursor:default}
+button.primary{
+  background:var(--accent); color:var(--accent-ink); border-color:var(--accent);
+  font-weight:700; min-width:108px; min-height:40px; font-size:15px;
+}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px; border:0; padding:0; margin:0; align-items:center}
+.chips legend{float:left; padding:0; margin-right:10px; font-size:13px; color:var(--muted); line-height:34px}
+.chip{position:relative; cursor:pointer}
+.chip input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer}
+.chip span{
+  display:flex; align-items:center; gap:7px; min-height:34px; padding:5px 12px 5px 10px;
+  border:1px solid var(--line2); border-radius:999px; background:var(--cell); font-size:14px;
+}
+.chip i{width:12px; height:12px; border-radius:4px; background:var(--c); display:block}
+.chip kbd{font:inherit; font-size:11px; color:var(--muted)}
+.chip input:checked + span{border-color:var(--c); box-shadow:inset 0 0 0 1px var(--c); font-weight:700}
+.chip input:focus-visible + span{outline:2px solid var(--focus); outline-offset:2px}
+
+.stage{
+  display:flex; background:var(--panel); border:1px solid var(--line2);
+  border-radius:12px; overflow:hidden;
+}
+.labels{flex:0 0 88px; border-right:1px solid var(--line2); background:var(--panel)}
+.labels .sp{height:26px; border-bottom:1px solid var(--line2)}
+.labels .gap{height:16px; font-size:10px; line-height:16px; color:var(--muted); padding-left:8px; letter-spacing:.1em}
+.lab{
+  display:flex; justify-content:space-between; align-items:center; width:100%;
+  height:26px; min-height:0; padding:0 8px; border:0; border-bottom:1px solid var(--line);
+  border-radius:0; background:transparent; font-size:12px; text-align:left;
+}
+.lab small{color:var(--muted); font-size:11px}
+.lab.root{background:var(--root); font-weight:700}
+.lab.drum{height:30px}
+.lab:hover{background:var(--cell-alt)}
+.lab:active{transform:none}
+.scroller{flex:1 1 auto; min-width:0; overflow-x:auto; overflow-y:hidden}
+.content{position:relative}
+.ruler{
+  display:flex; height:26px; border-bottom:1px solid var(--line2);
+  background-image:repeating-linear-gradient(to right,var(--line2) 0,var(--line2) 1px,transparent 1px,transparent calc(var(--cw) * 4));
+}
+.ruler div{
+  flex:0 0 calc(var(--cw) * 16); padding:3px 7px; font-size:12px; color:var(--muted);
+  border-left:2px solid var(--line3); font-variant-numeric:tabular-nums;
+}
+canvas{display:block; touch-action:pan-y; cursor:pointer; user-select:none; -webkit-user-select:none}
+canvas:focus-visible{outline:2px solid var(--focus); outline-offset:-2px}
+.playhead{
+  position:absolute; top:0; left:0; width:var(--cw); height:100%;
+  background:var(--play); border-left:2px solid var(--accent);
+  pointer-events:none; display:none;
+}
+.playhead.on{display:block}
+
+#status{min-height:1.6em; margin:10px 2px; font-size:14px; color:var(--muted)}
+details{
+  background:var(--panel); border:1px solid var(--line2); border-radius:12px;
+  padding:10px 14px; margin-top:10px;
+}
+summary{cursor:pointer; font-weight:700}
+details ul{margin:8px 0 4px; padding-left:1.3em}
+details li{margin:3px 0}
+textarea{
+  width:100%; min-height:110px; margin-top:8px; padding:8px; resize:vertical;
+  background:var(--cell); border:1px solid var(--line2); border-radius:8px;
+  font-family:ui-monospace,Consolas,monospace; font-size:12px;
+}
+.row{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center}
+.row span{font-size:13px; color:var(--muted)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+@media (max-width:600px){
+  .labels{flex-basis:70px}
+  .lab small{display:none}
+  input[type=range]{width:96px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>おとマス</h1>
+    <p>マス目に音を置いて、再生するだけの作曲ツール</p>
+  </header>
+
+  <section class="bar" aria-label="再生と曲の設定">
+    <button id="playBtn" class="primary" type="button" aria-pressed="false">▶ 再生</button>
+    <label class="field">テンポ
+      <input id="bpm" type="range" min="60" max="200" step="1" value="112">
+      <output id="bpmOut">112</output>
+    </label>
+    <label class="field">長さ
+      <select id="bars">
+        <option value="1">1小節</option>
+        <option value="2" selected>2小節</option>
+        <option value="4">4小節</option>
+        <option value="8">8小節</option>
+      </select>
+    </label>
+    <label class="field">キー
+      <select id="key"></select>
+    </label>
+    <label class="field">音階
+      <select id="scale"></select>
+    </label>
+    <label class="field">はね具合
+      <input id="swing" type="range" min="0" max="50" step="1" value="0">
+      <output id="swingOut">0%</output>
+    </label>
+    <label class="field">音量
+      <input id="vol" type="range" min="0" max="100" step="1" value="80">
+    </label>
+    <label class="field"><input id="follow" type="checkbox" checked>再生位置を追う</label>
+  </section>
+
+  <section class="bar" aria-label="音色と編集">
+    <fieldset class="chips" id="chips">
+      <legend>置く音色</legend>
+    </fieldset>
+    <span class="grow"></span>
+    <button id="undoBtn" type="button" disabled>元に戻す</button>
+    <button id="redoBtn" type="button" disabled>やり直す</button>
+    <button id="clearBtn" type="button">全部消す</button>
+    <button id="demoBtn" type="button">サンプル曲</button>
+  </section>
+
+  <section class="stage" aria-label="マス目">
+    <div class="labels" id="labels"></div>
+    <div class="scroller" id="scroller">
+      <div class="content" id="content">
+        <div class="ruler" id="ruler"></div>
+        <canvas id="grid" tabindex="0" role="application"
+          aria-label="音を置くマス目。矢印キーで移動、Enterで音を置く・消す、Shift+左右で音の長さを変更"></canvas>
+        <div class="playhead" id="playhead"></div>
+      </div>
+    </div>
+  </section>
+
+  <p id="status" role="status"></p>
+  <div id="cursorSay" class="sr" aria-live="polite"></div>
+
+  <details open>
+    <summary>使い方</summary>
+    <ul>
+      <li>空いているマスをクリックすると音が置かれます。そのまま右へドラッグすると音が長くなります。</li>
+      <li>置いた音をクリックすると消えます(右クリックやドラッグでまとめて消せます)。</li>
+      <li>「置く音色」を切り替えると、ほかの音色の音は細い線で薄く表示されます。同じマスに重ねて置けます。</li>
+      <li>下の4行はドラムです。クリックで置く・消す、横にドラッグで連続して塗れます。</li>
+      <li>左端の音名を押すとその音を試聴できます。キーや音階を変えると、置いた形のまま曲の雰囲気が変わります。</li>
+      <li>キーボード操作:スペース=再生/停止、1〜4=音色切替、Ctrl+Z=元に戻す、Ctrl+Y=やり直す。マス目上では矢印キーで移動、Enterで置く・消す、Shift+左右で長さ変更。</li>
+      <li>スマートフォンでは、上の小節番号の帯を横になぞるとマス目を左右に動かせます。</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>曲をテキストで保存・読み込み</summary>
+    <div class="row">
+      <button id="exportBtn" type="button">いまの曲を書き出す</button>
+      <button id="importBtn" type="button">テキストから読み込む</button>
+      <span>このツールはブラウザに何も保存しません。書き出したテキストをメモ帳などに貼って保管してください。</span>
+    </div>
+    <label class="sr" for="io">曲データのテキスト</label>
+    <textarea id="io" spellcheck="false" placeholder="ここに曲データが表示されます。保存しておいたテキストを貼り付けて「テキストから読み込む」を押すと復元できます。"></textarea>
+  </details>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- 定数 ---------- */
+var CW=32, RH=26, DH=30, GAP=16, ROWS=16, SPB=16, MAXC=128, NDRUM=4;
+var MEL_H=ROWS*RH, DRUM_Y=MEL_H+GAP, CANVAS_H=DRUM_Y+NDRUM*DH;
+var NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+var KANA=['ド','ド#','レ','レ#','ミ','ファ','ファ#','ソ','ソ#','ラ','ラ#','シ'];
+var SCALES=[
+  {id:'major', name:'メジャー(明るい)', iv:[0,2,4,5,7,9,11]},
+  {id:'minor', name:'マイナー(切ない)', iv:[0,2,3,5,7,8,10]},
+  {id:'penta', name:'ペンタトニック(外れにくい)', iv:[0,2,4,7,9]},
+  {id:'mpenta',name:'マイナーペンタ', iv:[0,3,5,7,10]},
+  {id:'ryukyu',name:'琉球音階', iv:[0,4,5,7,11]},
+  {id:'chroma',name:'半音階(すべての音)', iv:[0,1,2,3,4,5,6,7,8,9,10,11]}
+];
+var INSTS=[
+  {name:'ピアノ', oct:0},
+  {name:'シンセ', oct:0},
+  {name:'ピコピコ', oct:1},
+  {name:'ベース', oct:-1}
+];
+var DRUMS=['ハイハット','クラップ','スネア','キック'];
+
+/* ---------- 状態 ---------- */
+var state={bpm:112, bars:2, key:0, scale:'major', swing:0, volume:0.8, inst:0, notes:[], drums:[]};
+function emptyDrums(){
+  var a=[]; for(var d=0;d<NDRUM;d++){ var r=[]; for(var c=0;c<MAXC;c++) r.push(0); a.push(r); }
+  return a;
+}
+state.drums=emptyDrums();
+
+var undoStack=[], redoStack=[], pendingSnap=null;
+var drag=null;
+var cur={c:0,y:ROWS-1-7}, showCursor=false;
+var T={}, dpr=1;
+
+/* ---------- 要素 ---------- */
+function $(id){ return document.getElementById(id); }
+var canvas=$('grid'), g=canvas.getContext('2d');
+var scroller=$('scroller'), content=$('content'), ruler=$('ruler'), playhead=$('playhead');
+var labels=$('labels'), statusEl=$('status'), cursorSay=$('cursorSay');
+var playBtn=$('playBtn'), bpmEl=$('bpm'), bpmOut=$('bpmOut'), barsEl=$('bars'), keyEl=$('key');
+var scaleEl=$('scale'), swingEl=$('swing'), swingOut=$('swingOut'), volEl=$('vol'), followEl=$('follow');
+var undoBtn=$('undoBtn'), redoBtn=$('redoBtn'), io=$('io'), chips=$('chips');
+
+function setStatus(s){ statusEl.textContent=s; }
+function cols(){ return state.bars*SPB; }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function scaleIv(){
+  for(var i=0;i<SCALES.length;i++) if(SCALES[i].id===state.scale) return SCALES[i].iv;
+  return SCALES[0].iv;
+}
+function rowMidi(r,inst){
+  var iv=scaleIv(), n=iv.length;
+  return 48+state.key+Math.floor(r/n)*12+iv[r%n]+INSTS[inst].oct*12;
+}
+function midiName(m){ return NOTE_NAMES[((m%12)+12)%12]+(Math.floor(m/12)-1); }
+function midiKana(m){ return KANA[((m%12)+12)%12]; }
+
+/* ---------- 音 ---------- */
+var ac=null, master=null, noiseBuf=null;
+function ensureAudio(){
+  if(!ac){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC){ setStatus('このブラウザは音の再生に対応していません。'); return false; }
+    try{ ac=new AC(); }catch(err){ ac=null; setStatus('音の準備に失敗しました。'); return false; }
+    master=ac.createGain(); master.gain.value=state.volume;
+    var comp=ac.createDynamicsCompressor();
+    comp.threshold.value=-14; comp.ratio.value=4; comp.attack.value=0.004; comp.release.value=0.18;
+    master.connect(comp); comp.connect(ac.destination);
+    var len=ac.sampleRate;
+    noiseBuf=ac.createBuffer(1,len,ac.sampleRate);
+    var ch=noiseBuf.getChannelData(0);
+    for(var i=0;i<len;i++) ch[i]=Math.random()*2-1;
+  }
+  if(ac.state==='suspended'){
+    var p=ac.resume();
+    if(p&&p.catch) p.catch(function(){});
+  }
+  return true;
+}
+
+function playTone(inst,midi,t,dur){
+  var f=440*Math.pow(2,(midi-69)/12);
+  var env=ac.createGain();
+  var oscs=[];
+  function osc(type,freq,det){
+    var o=ac.createOscillator(); o.type=type; o.frequency.value=freq;
+    if(det) o.detune.value=det;
+    oscs.push(o); return o;
+  }
+  var peak,a,decTC,sus,relTC,lp,sub;
+  if(inst===0){
+    var h=ac.createGain(); h.gain.value=0.25;
+    osc('triangle',f).connect(env);
+    osc('sine',f*2).connect(h); h.connect(env);
+    peak=0.30; a=0.004; decTC=0.30; sus=0; relTC=0.06;
+  }else if(inst===1){
+    lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1700; lp.Q.value=0.7;
+    osc('sawtooth',f,-7).connect(lp); osc('sawtooth',f,7).connect(lp); lp.connect(env);
+    peak=0.12; a=0.03; decTC=0.2; sus=0.75; relTC=0.09;
+  }else if(inst===2){
+    osc('square',f).connect(env);
+    peak=0.085; a=0.002; decTC=0.08; sus=0.6; relTC=0.02;
+  }else{
+    lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=1.2;
+    lp.frequency.setValueAtTime(900,t); lp.frequency.setTargetAtTime(240,t,0.12);
+    sub=ac.createGain(); sub.gain.value=0.6;
+    osc('sawtooth',f).connect(lp); lp.connect(env);
+    osc('sine',f).connect(sub); sub.connect(env);
+    peak=0.30; a=0.004; decTC=0.2; sus=0.55; relTC=0.05;
+  }
+  var d=Math.max(dur,a+0.03);
+  env.gain.setValueAtTime(0,t);
+  env.gain.linearRampToValueAtTime(peak,t+a);
+  env.gain.setTargetAtTime(peak*sus,t+a,decTC);
+  env.gain.setTargetAtTime(0,t+d,relTC);
+  var end=t+d+relTC*7+0.02;
+  env.connect(master);
+  for(var i=0;i<oscs.length;i++){ oscs[i].start(t); oscs[i].stop(end); }
+  oscs[0].onended=function(){ try{ env.disconnect(); }catch(err){} };
+}
+
+function noise(t,dur){
+  var s=ac.createBufferSource(); s.buffer=noiseBuf;
+  s.start(t,Math.random()*0.5); s.stop(t+dur);
+  return s;
+}
+function playDrum(d,t){
+  var o,gn,f,n;
+  if(d===3){
+    o=ac.createOscillator(); gn=ac.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(160,t); o.frequency.exponentialRampToValueAtTime(42,t+0.13);
+    gn.gain.setValueAtTime(0.9,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.32);
+    o.connect(gn); gn.connect(master); o.start(t); o.stop(t+0.34);
+  }else if(d===2){
+    n=noise(t,0.2); f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.value=1200;
+    gn=ac.createGain(); gn.gain.setValueAtTime(0.45,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.17);
+    n.connect(f); f.connect(gn); gn.connect(master);
+    o=ac.createOscillator(); o.type='triangle';
+    o.frequency.setValueAtTime(190,t); o.frequency.exponentialRampToValueAtTime(120,t+0.08);
+    var g2=ac.createGain(); g2.gain.setValueAtTime(0.35,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+    o.connect(g2); g2.connect(master); o.start(t); o.stop(t+0.12);
+  }else if(d===1){
+    n=noise(t,0.22); f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1400; f.Q.value=1.2;
+    gn=ac.createGain();
+    gn.gain.setValueAtTime(0.55,t); gn.gain.exponentialRampToValueAtTime(0.08,t+0.011);
+    gn.gain.setValueAtTime(0.55,t+0.012); gn.gain.exponentialRampToValueAtTime(0.08,t+0.023);
+    gn.gain.setValueAtTime(0.55,t+0.024); gn.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+    n.connect(f); f.connect(gn); gn.connect(master);
+  }else{
+    n=noise(t,0.07); f=ac.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
+    gn=ac.createGain(); gn.gain.setValueAtTime(0.2,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+    n.connect(f); f.connect(gn); gn.connect(master);
+  }
+}
+
+/* ---------- 再生 ---------- */
+var playing=false, timer=null, rafId=0, nextTime=0, curStep=0, queue=[], visStep=-1;
+
+function scheduleStep(step,t){
+  var C=cols(), d=60/state.bpm/4, i, n;
+  for(i=0;i<state.notes.length;i++){
+    n=state.notes[i];
+    if(n.s!==step) continue;
+    playTone(n.i,rowMidi(n.r,n.i),t,Math.min(n.l,C-n.s)*d*0.92);
+  }
+  for(i=0;i<NDRUM;i++) if(state.drums[i][step]) playDrum(i,t);
+}
+function tick(){
+  if(!playing) return;
+  var now=ac.currentTime;
+  if(nextTime<now-0.1) nextTime=now+0.02;
+  while(nextTime<now+0.12){
+    var C=cols();
+    if(curStep>=C) curStep=0;
+    scheduleStep(curStep,nextTime);
+    queue.push({step:curStep,time:nextTime});
+    var d=60/state.bpm/4;
+    nextTime+=(curStep%2===0)?d*(1+state.swing):d*(1-state.swing);
+    curStep=(curStep+1)%C;
+  }
+}
+function frame(){
+  if(!playing) return;
+  var now=ac.currentTime, st=visStep;
+  while(queue.length&&queue[0].time<=now) st=queue.shift().step;
+  if(st!==visStep){ visStep=st; movePlayhead(); }
+  rafId=requestAnimationFrame(frame);
+}
+function movePlayhead(){
+  var x=visStep*CW;
+  playhead.style.transform='translateX('+x+'px)';
+  playhead.classList.add('on');
+  if(followEl.checked){
+    var L=scroller.scrollLeft, W=scroller.clientWidth;
+    if(x<L||x+CW>L+W) scroller.scrollLeft=x;
+  }
+}
+function startPlay(){
+  if(playing||!ensureAudio()) return;
+  playing=true; curStep=0; queue=[]; visStep=-1;
+  nextTime=ac.currentTime+0.06;
+  timer=setInterval(tick,25); tick();
+  rafId=requestAnimationFrame(frame);
+  playBtn.textContent='■ 停止'; playBtn.setAttribute('aria-pressed','true');
+}
+function stopPlay(){
+  if(!playing) return;
+  playing=false;
+  clearInterval(timer); timer=null;
+  cancelAnimationFrame(rafId);
+  queue=[]; visStep=-1;
+  playhead.classList.remove('on');
+  playBtn.textContent='▶ 再生'; playBtn.setAttribute('aria-pressed','false');
+}
+function togglePlay(){ if(playing) stopPlay(); else startPlay(); }
+
+/* ---------- 取り消し ---------- */
+function snapshot(){ return JSON.stringify({n:state.notes,d:state.drums}); }
+function restore(s){ var o=JSON.parse(s); state.notes=o.n; state.drums=o.d; }
+function beginGesture(){ pendingSnap=snapshot(); }
+function touch(){
+  if(pendingSnap===null) return;
+  undoStack.push(pendingSnap); pendingSnap=null;
+  if(undoStack.length>200) undoStack.shift();
+  redoStack=[]; updateUndoButtons();
+}
+function updateUndoButtons(){
+  undoBtn.disabled=undoStack.length===0;
+  redoBtn.disabled=redoStack.length===0;
+}
+function undo(){
+  if(!undoStack.length) return;
+  drag=null;
+  redoStack.push(snapshot()); restore(undoStack.pop());
+  updateUndoButtons(); draw(); setStatus('元に戻しました。');
+}
+function redo(){
+  if(!redoStack.length) return;
+  drag=null;
+  undoStack.push(snapshot()); restore(redoStack.pop());
+  updateUndoButtons(); draw(); setStatus('やり直しました。');
+}
+
+/* ---------- 音データ操作 ---------- */
+function noteAt(inst,r,c){
+  for(var i=0;i<state.notes.length;i++){
+    var n=state.notes[i];
+    if(n.i===inst&&n.r===r&&c>=n.s&&c<n.s+n.l) return n;
+  }
+  return null;
+}
+function removeNote(n){
+  var k=state.notes.indexOf(n);
+  if(k>=0) state.notes.splice(k,1);
+}
+function maxLen(n){
+  var limit=cols();
+  for(var i=0;i<state.notes.length;i++){
+    var m=state.notes[i];
+    if(m!==n&&m.i===n.i&&m.r===n.r&&m.s>n.s&&m.s<limit) limit=m.s;
+  }
+  return Math.max(1,limit-n.s);
+}
+function preview(inst,r){
+  if(playing||!ensureAudio()) return;
+  playTone(inst,rowMidi(r,inst),ac.currentTime+0.01,0.25);
+}
+function previewDrum(d){
+  if(playing||!ensureAudio()) return;
+  playDrum(d,ac.currentTime+0.01);
+}
+function setDrum(d,c,val){
+  if(state.drums[d][c]===val) return;
+  state.drums[d][c]=val; touch();
+  if(val) previewDrum(d);
+}
+
+/* ---------- 描画 ---------- */
+function readTheme(){
+  var cs=getComputedStyle(document.documentElement);
+  function v(n){ return cs.getPropertyValue(n).trim(); }
+  T={cell:v('--cell'),cellAlt:v('--cell-alt'),root:v('--root'),barTint:v('--bar-tint'),
+     line:v('--line'),line2:v('--line2'),line3:v('--line3'),
+     inst:[v('--i0'),v('--i1'),v('--i2'),v('--i3')],drum:v('--drum'),focus:v('--focus')};
+}
+function rr(x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  g.beginPath();
+  g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r);
+  g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r);
+  g.arcTo(x,y,x+w,y,r);
+  g.closePath();
+}
+function drawNote(n,ghost,C){
+  var len=Math.min(n.l,C-n.s);
+  var top=(ROWS-1-n.r)*RH;
+  g.fillStyle=T.inst[n.i];
+  if(ghost){
+    g.globalAlpha=0.45;
+    rr(n.s*CW+3,top+RH/2-3,len*CW-5,7,3); g.fill();
+    g.globalAlpha=1;
+  }else{
+    var x=n.s*CW+2, y=top+3, w=len*CW-3, h=RH-5;
+    rr(x,y,w,h,5); g.fill();
+    g.fillStyle='rgba(255,255,255,.4)';
+    g.fillRect(x+4,y+4,3,h-8);
+  }
+}
+function draw(){
+  var C=cols(), w=C*CW, iv=scaleIv(), r, d, c, b, i, n, x, y;
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,w,CANVAS_H);
+  for(r=0;r<ROWS;r++){
+    g.fillStyle=(r%iv.length===0)?T.root:((r%2)?T.cellAlt:T.cell);
+    g.fillRect(0,(ROWS-1-r)*RH,w,RH);
+  }
+  for(d=0;d<NDRUM;d++){
+    g.fillStyle=(d%2)?T.cellAlt:T.cell;
+    g.fillRect(0,DRUM_Y+d*DH,w,DH);
+  }
+  g.fillStyle=T.barTint;
+  for(b=1;b<state.bars;b+=2){
+    g.fillRect(b*SPB*CW,0,SPB*CW,MEL_H);
+    g.fillRect(b*SPB*CW,DRUM_Y,SPB*CW,NDRUM*DH);
+  }
+  g.fillStyle=T.line;
+  for(r=1;r<ROWS;r++) g.fillRect(0,r*RH,w,1);
+  for(d=1;d<NDRUM;d++) g.fillRect(0,DRUM_Y+d*DH,w,1);
+  for(c=0;c<=C;c++){
+    x=c*CW;
+    var bar=(c%SPB===0);
+    g.fillStyle=bar?T.line3:((c%4===0)?T.line2:T.line);
+    g.fillRect(bar?x-1:x,0,bar?2:1,MEL_H);
+    g.fillRect(bar?x-1:x,DRUM_Y,bar?2:1,NDRUM*DH);
+  }
+  g.fillStyle=T.line2;
+  g.fillRect(0,MEL_H,w,1); g.fillRect(0,DRUM_Y-1,w,1);
+
+  for(i=0;i<state.notes.length;i++){
+    n=state.notes[i];
+    if(n.i!==state.inst&&n.s<C&&n.r<ROWS) drawNote(n,true,C);
+  }
+  for(i=0;i<state.notes.length;i++){
+    n=state.notes[i];
+    if(n.i===state.inst&&n.s<C&&n.r<ROWS) drawNote(n,false,C);
+  }
+  g.fillStyle=T.drum;
+  for(d=0;d<NDRUM;d++){
+    for(c=0;c<C;c++){
+      if(!state.drums[d][c]) continue;
+      rr(c*CW+4,DRUM_Y+d*DH+4,CW-7,DH-7,6); g.fill();
+    }
+  }
+  if(showCursor){
+    x=cur.c*CW;
+    if(cur.y<ROWS){ y=cur.y*RH; d=RH; } else { y=DRUM_Y+(cur.y-ROWS)*DH; d=DH; }
+    g.strokeStyle=T.focus; g.lineWidth=2;
+    g.strokeRect(x+1.5,y+1.5,CW-2,d-2);
+  }
+}
+function buildRuler(){
+  ruler.textContent='';
+  for(var b=0;b<state.bars;b++){
+    var el=document.createElement('div');
+    el.textContent=String(b+1);
+    ruler.appendChild(el);
+  }
+}
+function sizeCanvas(){
+  var w=cols()*CW;
+  dpr=Math.min(window.devicePixelRatio||1,2,8000/w);
+  canvas.style.width=w+'px'; canvas.style.height=CANVAS_H+'px';
+  canvas.width=Math.round(w*dpr); canvas.height=Math.round(CANVAS_H*dpr);
+  content.style.width=w+'px';
+  buildRuler();
+  cur.c=clamp(cur.c,0,cols()-1);
+  draw();
+}
+function buildLabels(){
+  labels.textContent='';
+  var sp=document.createElement('div'); sp.className='sp'; labels.appendChild(sp);
+  var iv=scaleIv();
+  function add(cls,main,sub,fn){
+    var b=document.createElement('button');
+    b.type='button'; b.className=cls; b.tabIndex=-1; b.title='押すと試聴できます';
+    var s1=document.createElement('span'); s1.textContent=main; b.appendChild(s1);
+    if(sub){ var s2=document.createElement('small'); s2.textContent=sub; b.appendChild(s2); }
+    b.addEventListener('click',fn);
+    labels.appendChild(b);
+  }
+  for(var y=0;y<ROWS;y++){
+    (function(r){
+      var m=rowMidi(r,state.inst);
+      add('lab'+((r%iv.length===0)?' root':''),midiName(m),midiKana(m),function(){
+        if(ensureAudio()) playTone(state.inst,rowMidi(r,state.inst),ac.currentTime+0.01,0.3);
+      });
+    })(ROWS-1-y);
+  }
+  var gp=document.createElement('div'); gp.className='gap'; gp.textContent='ドラム'; labels.appendChild(gp);
+  for(var d=0;d<NDRUM;d++){
+    (function(dd){
+      add('lab drum',DRUMS[dd],'',function(){ if(ensureAudio()) playDrum(dd,ac.currentTime+0.01); });
+    })(d);
+  }
+}
+
+/* ---------- マウス・タッチ ---------- */
+function cellAt(e){
+  var rc=canvas.getBoundingClientRect();
+  var x=e.clientX-rc.left, y=e.clientY-rc.top;
+  var p={c:clamp(Math.floor(x/CW),0,cols()-1),kind:null,r:0,d:0};
+  if(y<MEL_H){ p.kind='m'; p.r=clamp(ROWS-1-Math.floor(y/RH),0,ROWS-1); }
+  else if(y>=DRUM_Y){ p.kind='d'; p.d=clamp(Math.floor((y-DRUM_Y)/DH),0,NDRUM-1); }
+  return p;
+}
+canvas.addEventListener('pointerdown',function(e){
+  if(e.button!==0&&e.button!==2) return;
+  var p=cellAt(e);
+  if(!p.kind) return;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  ensureAudio();
+  showCursor=false;
+  beginGesture();
+  var erase=(e.button===2);
+  if(p.kind==='m'){
+    cur.c=p.c; cur.y=ROWS-1-p.r;
+    var n=noteAt(state.inst,p.r,p.c);
+    if(n||erase){
+      drag={mode:'erase'};
+      if(n){ removeNote(n); touch(); }
+    }else{
+      var nn={s:p.c,r:p.r,l:1,i:state.inst};
+      state.notes.push(nn); touch();
+      drag={mode:'extend',note:nn};
+      preview(state.inst,p.r);
+    }
+  }else{
+    cur.c=p.c; cur.y=ROWS+p.d;
+    var val=erase?0:(state.drums[p.d][p.c]?0:1);
+    drag={mode:'drum',val:val};
+    setDrum(p.d,p.c,val);
+  }
+  draw();
+});
+canvas.addEventListener('pointermove',function(e){
+  if(!drag) return;
+  var p=cellAt(e), n;
+  if(drag.mode==='extend'){
+    n=drag.note;
+    var l=clamp(p.c-n.s+1,1,maxLen(n));
+    if(l!==n.l){ n.l=l; draw(); }
+  }else if(drag.mode==='erase'){
+    if(p.kind==='m'){
+      n=noteAt(state.inst,p.r,p.c);
+      if(n){ removeNote(n); touch(); draw(); }
+    }
+  }else if(p.kind==='d'){
+    if(state.drums[p.d][p.c]!==drag.val){ setDrum(p.d,p.c,drag.val); draw(); }
+  }
+});
+function endDrag(){ drag=null; pendingSnap=null; }
+canvas.addEventListener('pointerup',endDrag);
+canvas.addEventListener('pointercancel',endDrag);
+canvas.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+
+/* ---------- キーボード(マス目) ---------- */
+function announce(){
+  var s;
+  if(cur.y<ROWS){
+    var r=ROWS-1-cur.y, m=rowMidi(r,state.inst), n=noteAt(state.inst,r,cur.c);
+    s=midiName(m)+' '+midiKana(m);
+    s+=n?'、音あり(長さ'+n.l+')':'、空き';
+  }else{
+    var d=cur.y-ROWS;
+    s=DRUMS[d]+(state.drums[d][cur.c]?'、音あり':'、空き');
+  }
+  cursorSay.textContent=(Math.floor(cur.c/SPB)+1)+'小節 '+(cur.c%SPB+1)+'マス目、'+s;
+}
+function revealCursor(){
+  var x=cur.c*CW, L=scroller.scrollLeft, W=scroller.clientWidth;
+  if(x<L) scroller.scrollLeft=x;
+  else if(x+CW>L+W) scroller.scrollLeft=x+CW-W;
+}
+canvas.addEventListener('keydown',function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  var C=cols(), handled=true, r, d, n, k=e.key;
+  if(k==='ArrowRight'||k==='ArrowLeft'){
+    var dir=(k==='ArrowRight')?1:-1;
+    if(e.shiftKey){
+      if(cur.y<ROWS){
+        n=noteAt(state.inst,ROWS-1-cur.y,cur.c);
+        if(n){
+          var l=clamp(n.l+dir,1,maxLen(n));
+          if(l!==n.l){ beginGesture(); n.l=l; touch(); pendingSnap=null; }
+          cur.c=n.s;
+        }
+      }
+    }else cur.c=clamp(cur.c+dir,0,C-1);
+  }else if(k==='ArrowUp') cur.y=Math.max(0,cur.y-1);
+  else if(k==='ArrowDown') cur.y=Math.min(ROWS+NDRUM-1,cur.y+1);
+  else if(k==='Home') cur.c=0;
+  else if(k==='End') cur.c=C-1;
+  else if(k==='Enter'||k==='Delete'||k==='Backspace'){
+    var onlyRemove=(k!=='Enter');
+    ensureAudio();
+    beginGesture();
+    if(cur.y<ROWS){
+      r=ROWS-1-cur.y; n=noteAt(state.inst,r,cur.c);
+      if(n){ removeNote(n); touch(); }
+      else if(!onlyRemove){ state.notes.push({s:cur.c,r:r,l:1,i:state.inst}); touch(); preview(state.inst,r); }
+    }else{
+      d=cur.y-ROWS;
+      if(state.drums[d][cur.c]) setDrum(d,cur.c,0);
+      else if(!onlyRemove) setDrum(d,cur.c,1);
+    }
+    pendingSnap=null;
+  }else handled=false;
+  if(handled){
+    e.preventDefault();
+    showCursor=true; revealCursor(); announce(); draw();
+  }
+});
+canvas.addEventListener('focus',function(){
+  var fv=true;
+  try{ fv=canvas.matches(':focus-visible'); }catch(err){}
+  showCursor=fv; draw();
+});
+canvas.addEventListener('blur',function(){ showCursor=false; draw(); });
+
+/* ---------- 全体のキー操作 ---------- */
+document.addEventListener('keydown',function(e){
+  var t=e.target, tag=t&&t.tagName;
+  if((e.ctrlKey||e.metaKey)&&!e.altKey){
+    if(tag==='TEXTAREA') return;
+    var k=(e.key||'').toLowerCase();
+    if(k==='z'){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); }
+    else if(k==='y'){ e.preventDefault(); redo(); }
+    return;
+  }
+  if(e.altKey) return;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='BUTTON'||tag==='SUMMARY') return;
+  if(e.key===' '||e.code==='Space'){ e.preventDefault(); togglePlay(); }
+  else if(e.key==='1'||e.key==='2'||e.key==='3'||e.key==='4') selectInst(Number(e.key)-1);
+});
+
+/* ---------- 操作パネル ---------- */
+function selectInst(i){
+  state.inst=i;
+  var rs=chips.querySelectorAll('input');
+  for(var k=0;k<rs.length;k++) rs[k].checked=(Number(rs[k].value)===i);
+  buildLabels(); draw();
+}
+function buildControls(){
+  var i, o;
+  for(i=0;i<12;i++){
+    o=document.createElement('option'); o.value=String(i);
+    o.textContent=NOTE_NAMES[i]+'('+KANA[i]+')';
+    keyEl.appendChild(o);
+  }
+  for(i=0;i<SCALES.length;i++){
+    o=document.createElement('option'); o.value=SCALES[i].id; o.textContent=SCALES[i].name;
+    scaleEl.appendChild(o);
+  }
+  for(i=0;i<INSTS.length;i++){
+    var lab=document.createElement('label'); lab.className='chip';
+    lab.style.setProperty('--c','var(--i'+i+')');
+    var inp=document.createElement('input'); inp.type='radio'; inp.name='inst'; inp.value=String(i);
+    if(i===state.inst) inp.checked=true;
+    var sp=document.createElement('span');
+    var dot=document.createElement('i');
+    var kb=document.createElement('kbd'); kb.textContent=String(i+1);
+    sp.appendChild(dot); sp.appendChild(document.createTextNode(INSTS[i].name)); sp.appendChild(kb);
+    lab.appendChild(inp); lab.appendChild(sp);
+    (function(idx){ inp.addEventListener('change',function(){ selectInst(idx); }); })(i);
+    chips.appendChild(lab);
+  }
+}
+function syncControls(){
+  bpmEl.value=String(state.bpm); bpmOut.textContent=String(state.bpm);
+  barsEl.value=String(state.bars);
+  keyEl.value=String(state.key);
+  scaleEl.value=state.scale;
+  swingEl.value=String(Math.round(state.swing*100)); swingOut.textContent=Math.round(state.swing*100)+'%';
+  volEl.value=String(Math.round(state.volume*100));
+}
+playBtn.addEventListener('click',togglePlay);
+bpmEl.addEventListener('input',function(){ state.bpm=Number(bpmEl.value); bpmOut.textContent=bpmEl.value; });
+barsEl.addEventListener('change',function(){ state.bars=Number(barsEl.value); sizeCanvas(); });
+keyEl.addEventListener('change',function(){ state.key=Number(keyEl.value); buildLabels(); draw(); });
+scaleEl.addEventListener('change',function(){ state.scale=scaleEl.value; buildLabels(); draw(); });
+swingEl.addEventListener('input',function(){ state.swing=Number(swingEl.value)/100; swingOut.textContent=swingEl.value+'%'; });
+volEl.addEventListener('input',function(){
+  state.volume=Number(volEl.value)/100;
+  if(ac&&master) master.gain.setTargetAtTime(state.volume,ac.currentTime,0.02);
+});
+undoBtn.addEventListener('click',undo);
+redoBtn.addEventListener('click',redo);
+$('clearBtn').addEventListener('click',function(){
+  beginGesture();
+  state.notes=[]; state.drums=emptyDrums();
+  touch(); pendingSnap=null; draw();
+  setStatus('すべて消しました。「元に戻す」で復元できます。');
+});
+$('demoBtn').addEventListener('click',function(){
+  beginGesture(); loadDemo(); touch(); pendingSnap=null;
+  syncControls(); buildLabels(); sizeCanvas();
+  setStatus('サンプル曲を読み込みました。');
+});
+
+/* ---------- サンプル曲 ---------- */
+function loadDemo(){
+  var N=[];
+  function add(i,s,r,l){ N.push({s:s,r:r,l:l,i:i}); }
+  [[0,0],[8,5],[16,3],[24,4]].forEach(function(p){
+    add(3,p[0],p[1],3); add(3,p[0]+4,p[1],2); add(3,p[0]+6,p[1],2);
+  });
+  [[0,[7,9,11]],[8,[7,9,12]],[16,[7,10,12]],[24,[8,11,13]]].forEach(function(p){
+    p[1].forEach(function(r){ add(1,p[0],r,8); });
+  });
+  [[0,9,2],[2,11,2],[4,14,3],[7,12,1],[8,12,2],[10,11,2],[12,9,4],
+   [16,10,2],[18,12,2],[20,14,3],[23,12,1],[24,13,2],[26,15,2],[28,11,4]].forEach(function(p){
+    add(0,p[0],p[1],p[2]);
+  });
+  [[14,9],[15,11],[30,11],[31,13]].forEach(function(p){ add(2,p[0],p[1],1); });
+  var D=emptyDrums(), c;
+  for(c=0;c<32;c+=2) D[0][c]=1;
+  [12,28].forEach(function(s){ D[1][s]=1; });
+  [4,12,20,28].forEach(function(s){ D[2][s]=1; });
+  [0,6,8,16,22,24].forEach(function(s){ D[3][s]=1; });
+  state.notes=N; state.drums=D;
+  state.bpm=112; state.bars=2; state.key=0; state.scale='major'; state.swing=0;
+}
+
+/* ---------- 書き出し・読み込み ---------- */
+$('exportBtn').addEventListener('click',function(){
+  var C=cols(), ds=[], d, c, s;
+  for(d=0;d<NDRUM;d++){
+    s='';
+    for(c=0;c<C;c++) s+=state.drums[d][c]?'x':'-';
+    ds.push(s);
+  }
+  var out={app:'otomasu',v:1,bpm:state.bpm,bars:state.bars,key:state.key,scale:state.scale,
+    swing:Math.round(state.swing*100),
+    notes:state.notes.map(function(n){ return [n.s,n.r,n.l,n.i]; }),
+    drums:ds};
+  io.value=JSON.stringify(out);
+  io.focus(); io.select();
+  setStatus('曲データを書き出しました。テキストをコピーして保管してください。');
+});
+function isInt(v){ return typeof v==='number'&&isFinite(v)&&Math.floor(v)===v; }
+$('importBtn').addEventListener('click',function(){
+  var o;
+  try{ o=JSON.parse(io.value); }catch(err){ o=null; }
+  if(!o||typeof o!=='object'||!Array.isArray(o.notes)){
+    setStatus('読み込めませんでした。書き出したテキストをそのまま貼り付けてください。');
+    return;
+  }
+  var N=[], D=emptyDrums(), i, a, d, c;
+  for(i=0;i<o.notes.length;i++){
+    a=o.notes[i];
+    if(!Array.isArray(a)||!isInt(a[0])||!isInt(a[1])||!isInt(a[2])||!isInt(a[3])) continue;
+    if(a[0]<0||a[0]>=MAXC||a[1]<0||a[1]>=ROWS||a[2]<1||a[3]<0||a[3]>=INSTS.length) continue;
+    N.push({s:a[0],r:a[1],l:Math.min(a[2],MAXC-a[0]),i:a[3]});
+  }
+  if(Array.isArray(o.drums)){
+    for(d=0;d<NDRUM;d++){
+      if(typeof o.drums[d]!=='string') continue;
+      for(c=0;c<MAXC&&c<o.drums[d].length;c++) if(o.drums[d].charAt(c)==='x') D[d][c]=1;
+    }
+  }
+  beginGesture();
+  state.notes=N; state.drums=D;
+  touch(); pendingSnap=null;
+  if(isInt(o.bpm)) state.bpm=clamp(o.bpm,60,200);
+  if(o.bars===1||o.bars===2||o.bars===4||o.bars===8) state.bars=o.bars;
+  if(isInt(o.key)) state.key=clamp(o.key,0,11);
+  for(i=0;i<SCALES.length;i++) if(SCALES[i].id===o.scale) state.scale=o.scale;
+  if(isInt(o.swing)) state.swing=clamp(o.swing,0,50)/100;
+  syncControls(); buildLabels(); sizeCanvas();
+  setStatus('曲を読み込みました(音 '+N.length+' 個)。');
+});
+
+/* ---------- 起動 ---------- */
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+function onScheme(){ readTheme(); draw(); }
+if(mq){
+  if(mq.addEventListener) mq.addEventListener('change',onScheme);
+  else if(mq.addListener) mq.addListener(onScheme);
+}
+buildControls();
+loadDemo();
+syncControls();
+readTheme();
+buildLabels();
+sizeCanvas();
+updateUndoButtons();
+setStatus('「再生」を押すとサンプル曲が鳴ります。マス目をクリックして音を置いてみましょう。');
+})();
+</script>
+</body>
+</html>
