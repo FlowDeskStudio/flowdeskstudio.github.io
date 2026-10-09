@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>How Far Can One Sentence Take an AI Build? I Asked for 15 Things to Find the Limit — FlowDeskStudio</title>
-  <meta name="description" content="One sentence per subject, no testing, no fixes. Out of 15 builds, from a memory game to shogi, a spreadsheet and a 3D sandbox, 14 were usable within what was checked. The limit was not found.">
+  <meta name="description" content="One sentence per subject, no testing, no fixes. All 15 builds, from a memory game to shogi, a spreadsheet, a 3D sandbox and a one-hour RPG, were usable within what was checked. The limit was not found.">
   <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-003/">
   <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-003/">
   <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-003/">
@@ -19,7 +19,7 @@
   <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="How Far Can One Sentence Take an AI Build? I Asked for 15 Things to Find the Limit — FlowDeskStudio">
-  <meta name="twitter:description" content="14 of 15 were usable within what was checked. One is on hold. The breaking point was not found.">
+  <meta name="twitter:description" content="All 15 were usable within what was checked. The breaking point was not found.">
   <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/experiments/exp-003/exp-003.css">
@@ -53,7 +53,7 @@
       <div class="article-copy article-opening">
         <p>The result first.</p>
         <p>I gave an AI one sentence per subject and had it build 15 games and apps. No retries and no fixes. The AI was also told not to run or test what it wrote.</p>
-        <p>Fourteen of the 15 met every checkpoint that had been set before building. The remaining one could not be checked to the end, so it is on hold.</p>
+        <p>All 15 met every checkpoint that had been set before building.</p>
         <p>Difficulty rose in five levels, from a memory card game to a 3D sandbox and a one-hour RPG. The plan assumed things would start breaking somewhere, and even set a rule for stopping early. Within these 15, nothing broke.</p>
       </div>
 
@@ -82,7 +82,7 @@
 
         <section>
           <h2>Results</h2>
-          <p class="score-line"><span>Usable within what was checked</span><strong>14 / 15</strong></p>
+          <p class="score-line"><span>Usable within what was checked</span><strong>15 / 15</strong></p>
           <p>All 15 opened and showed their first screen without errors. None was judged "does not run" or "runs but not usable".</p>
 <div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>Subject</th><th>Checkpoints set before building</th><th>Build time</th><th>Verdict</th></tr></thead><tbody>
 <tr class="stage-row"><td colspan="5">Level 1 / Staples (baseline)</td></tr>
@@ -104,7 +104,7 @@
 <tr class="stage-row"><td colspan="5">Level 5 / Unreasonable</td></tr>
 <tr><td>13</td><td>Desktop-style environment</td><td>Open, move and close windows / at least three different working apps / switch between several windows</td><td>about 10 min</td><td class="verdict">Usable</td></tr>
 <tr><td>14</td><td>3D sandbox for placing and breaking blocks</td><td>Walk around a 3D world / place blocks / break blocks</td><td>about 8 min</td><td class="verdict">Usable</td></tr>
-<tr><td>15</td><td>One-hour RPG with a town, dungeons and bosses</td><td>Talk and shop in town / explore dungeons and fight / beat the boss and reach the ending</td><td>about 35 min</td><td class="verdict held">On hold</td></tr>
+<tr><td>15</td><td>One-hour RPG with a town, dungeons and bosses</td><td>Talk and shop in town / explore dungeons and fight / beat the boss and reach the ending</td><td>about 35 min</td><td class="verdict">Usable</td></tr>
 </tbody></table></div>
           <p>Build time is the time from the request to the saved file. The shortest was the memory game at about 2 minutes and the longest was the RPG at about 35 minutes. The other 13 took between about 4 and 13 minutes.</p>
         </section>
@@ -139,17 +139,16 @@
             <li>Two-player shogi: illegal moves such as a second pawn on the same file were tried and were blocked</li>
             <li>Shogi against the computer: one full game was played to checkmate</li>
             <li>Roguelike: both taking the stairs to the next floor and dying to end the run were seen</li>
-            <li>RPG: the town, the dungeons and combat were checked. Beating the boss and reaching the ending was not</li>
+            <li>RPG: the town, the dungeons and combat were checked, and the game was played through the boss to the ending</li>
           </ul>
-          <p>The RPG is "on hold" because its third checkpoint was not confirmed. It was not found broken. Playing a game designed to take around an hour all the way through was not done this time.</p>
-          <p>Many things were not checked at all: whether the builds hold up over long use, whether the finer shogi rules such as repetition are correct, whether the games are well balanced, and whether all of the roughly 100 functions the spreadsheet is reported to have are correct. These are outside the verdict.</p>
+          <p>Many other things were not checked at all: whether the builds hold up over long use, whether the finer shogi rules such as repetition are correct, whether the games are well balanced, and whether all of the roughly 100 functions the spreadsheet is reported to have are correct. These are outside the verdict.</p>
         </section>
 
         <section>
           <h2>The ten-build pilot</h2>
           <p>The day before the main run, there was a pilot of ten staple subjects: a falling-block puzzle, whack-a-mole, a memory game, a shooter, an RPG-style battle, a quiz, a coloring app, a weekly task manager, a birthday card maker and a product landing page.</p>
           <p>All ten opened and ran. This was the reaction after trying them (translated from Japanese).</p>
-          <blockquote>They are all well made. If you were going to release the games you would of course need repeated test play and difficulty tuning, but my first impression is that every one of them is too good to believe it came from a single attempt.</blockquote>
+          <blockquote>They are all well made. Releasing them as games would still take repeated test play and difficulty tuning. Even so, it is hard to believe each one came from a single request.</blockquote>
           <p>The pilot is not counted in the 15 above because its conditions were different. The AI was not stopped from checking its own work before saving, and how much it did varied by subject, from writing only to running automated tests and tuning the difficulty. Checkpoints were not set in advance either.</p>
           <p>Since staples showed no differences, the main run added "no testing" to the request to even out the conditions and raised the difficulty step by step.</p>
         </section>
@@ -172,7 +171,7 @@
         <section class="article-conclusion">
           <p class="kicker">WHAT REMAINED</p>
           <h2>The checking side hit its limit first</h2>
-          <p>In this experiment, Claude Code running Claude Opus 5.5 built 15 things from one-sentence requests with no testing. From a memory game to shogi that blocks illegal moves, a spreadsheet that calculates formulas and a 3D sandbox, 14 met the three checkpoints set in advance. The remaining one also runs within what was checked.</p>
+          <p>In this experiment, Claude Code running Claude Opus 5.5 built 15 things from one-sentence requests with no testing. From a memory game to shogi that blocks illegal moves, a spreadsheet that calculates formulas, a 3D sandbox and a one-hour RPG, all 15 met the three checkpoints set in advance.</p>
           <p>What did not go as assumed is which side reached its limit first as the difficulty rose. It was the checking side, not the building side. Building took minutes to tens of minutes. Confirming that a build is correct takes the time to play shogi to checkmate or an RPG to its ending.</p>
           <p>There are clear limits on what this result supports. It used one model, built each subject once, had one judge and checked three points per build. The same request sent again would return something different. It does not show that AI can build anything in one attempt.</p>
           <p class="conclusion-line">What can be said is that across 15 subjects, from staples to unreasonable ones, this experiment did not find the point where a one-sentence request breaks.</p>
@@ -187,7 +186,7 @@
             <div><dt>Model</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
             <div><dt>How builds were run</dt><dd>One fresh conversation (subagent) per subject, given the request once</dd></div>
             <div><dt>Main run size</dt><dd>5 levels × 3 = 15 builds</dd></div>
-            <div><dt>Verdicts</dt><dd>Usable 14 / On hold 1 / Runs but not usable 0 / Does not run 0</dd></div>
+            <div><dt>Verdicts</dt><dd>Usable 15 / Runs but not usable 0 / Does not run 0</dd></div>
             <div><dt>Build time</dt><dd>Shortest about 2 minutes / longest about 35 minutes</dd></div>
             <div><dt>File size</dt><dd>About 20 KB to 91 KB each (one HTML file)</dd></div>
             <div><dt>Testing by the AI</dt><dd>None. The request forbade it, and the AI reported not running the code for all 15</dd></div>

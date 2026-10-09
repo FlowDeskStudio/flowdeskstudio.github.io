@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>AIに一言で頼むと、どこまで作れるのか。15個作らせて境目を探した — FlowDeskStudio</title>
-  <meta name="description" content="題材を一言だけ伝え、テストも手直しもなしでAIに15個作らせました。将棋、表計算、3Dの箱庭まで14個が確認した範囲で使え、作れなくなる境目は見つかりませんでした。">
+  <meta name="description" content="題材を一言だけ伝え、テストも手直しもなしでAIに15個作らせました。将棋、表計算、3Dの箱庭、1時間のRPGまで15個すべてが確認した範囲で使え、作れなくなる境目は見つかりませんでした。">
   <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-003/">
   <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-003/">
   <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-003/">
@@ -19,7 +19,7 @@
   <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AIに一言で頼むと、どこまで作れるのか。15個作らせて境目を探した — FlowDeskStudio">
-  <meta name="twitter:description" content="15個中14個が確認した範囲で使えた。残る1個は最後まで確かめられず保留。境目は見つからなかった。">
+  <meta name="twitter:description" content="15個すべてが確認した範囲で使えた。作れなくなる境目は見つからなかった。">
   <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/experiments/exp-003/exp-003.css">
@@ -53,7 +53,7 @@
       <div class="article-copy article-opening">
         <p>先に結果を書く。</p>
         <p>題材を一言だけ伝えて、AIに15個のゲームやアプリを作らせた。作り直しも手直しもなし。AIには、書いたものを自分で動かして確かめることも禁じた。</p>
-        <p>15個のうち14個は、作る前に決めておいた確かめる点をすべて満たした。残る1個は最後まで確かめきれず、保留にした。</p>
+        <p>15個すべてが、作る前に決めておいた確かめる点を満たした。</p>
         <p>難しさは「神経衰弱」から「3Dの箱庭」「1時間遊べるRPG」まで5段階に上げた。どこかで壊れ始める想定で、打ち切りの条件まで決めていた。しかし今回の15個の中に、その境目はなかった。</p>
       </div>
 
@@ -82,7 +82,7 @@
 
         <section>
           <h2>結果</h2>
-          <p class="score-line"><span>確認した範囲で使えた</span><strong>14 / 15</strong></p>
+          <p class="score-line"><span>確認した範囲で使えた</span><strong>15 / 15</strong></p>
           <p>15個とも開けて、最初の画面がエラーなく表示された。「動かない」「動くが使えない」と判定されたものは一つもなかった。</p>
 <div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>題材</th><th>作る前に決めた確かめる点</th><th>制作時間</th><th>判定</th></tr></thead><tbody>
 <tr class="stage-row"><td colspan="5">段階1 / 定番(基準)</td></tr>
@@ -104,7 +104,7 @@
 <tr class="stage-row"><td colspan="5">段階5 / 無茶</td></tr>
 <tr><td>13</td><td>パソコンのデスクトップ画面風の環境</td><td>ウィンドウを開く・動かす・閉じる / 中身の違うアプリが3つ以上使える / 複数のウィンドウを切り替えられる</td><td>約10分</td><td class="verdict">使える</td></tr>
 <tr><td>14</td><td>3Dでブロックを置いて壊せる箱庭</td><td>立体の世界を歩き回れる / ブロックを置ける / ブロックを壊せる</td><td>約8分</td><td class="verdict">使える</td></tr>
-<tr><td>15</td><td>町・ダンジョン・ボスがある1時間RPG</td><td>町で会話や買い物 / ダンジョン探索と戦闘 / ボスを倒して終わりまで行ける</td><td>約35分</td><td class="verdict held">保留</td></tr>
+<tr><td>15</td><td>町・ダンジョン・ボスがある1時間RPG</td><td>町で会話や買い物 / ダンジョン探索と戦闘 / ボスを倒して終わりまで行ける</td><td>約35分</td><td class="verdict">使える</td></tr>
 </tbody></table></div>
           <p>制作時間は、依頼してからファイルが保存されるまでの時間。最短は神経衰弱の約2分、最長はRPGの約35分で、ほかの13個は約4分から13分に収まった。</p>
         </section>
@@ -139,17 +139,16 @@
             <li>2人対戦の将棋:二歩などの反則を実際に試し、指せないことを確認した</li>
             <li>コンピューター対戦の将棋:詰みで勝敗がつくまで1局指した</li>
             <li>ローグライク:次の階へ進むところと、倒れて終わるところの両方を見た</li>
-            <li>RPG:町とダンジョン、戦闘までは確認した。ボスを倒してエンディングまで行けるかは確認していない</li>
+            <li>RPG:町、ダンジョン、戦闘を確認し、ボスを倒してエンディングまで進めた</li>
           </ul>
-          <p>RPGは、3つ目の点を確かめきれていないので「保留」にした。壊れていたわけではない。1時間前後かかる想定のゲームを最後まで遊ぶところまでは、今回はやっていない。</p>
-          <p>逆に、確かめていないことも多い。長く使い続けたときに壊れないか。将棋の細かいルール(千日手や打ち歩詰めなど)が正しいか。ゲームとして難易度が適切か。表計算に入っているという約100種類の関数が全部正しいか。これらは今回の判定の外にある。</p>
+          <p>一方で、確かめていないことも多い。長く使い続けたときに壊れないか。将棋の細かいルール(千日手や打ち歩詰めなど)が正しいか。ゲームとして難易度が適切か。表計算に入っているという約100種類の関数が全部正しいか。これらは今回の判定の外にある。</p>
         </section>
 
         <section>
           <h2>予行の10個</h2>
           <p>本番の前日に、定番の題材だけで10個の予行をした。落ち物パズル、もぐらたたき、神経衰弱、シューティング、RPG風バトル、クイズ、塗り絵、週間タスク管理、誕生日カード、商品紹介ページ。</p>
           <p>10個とも開いて動いた。触ったあとの感想はこうだった。</p>
-          <blockquote>どれもよくできています。もちろんゲームはリリースすることを考えればテストプレイ等を重ねた難易度調整などが必要だとは思いますが、どれも1発とは思えないほど、出来がいいというのが、わたしの初見です。</blockquote>
+          <blockquote>どれもよくできている。ゲームとして公開するなら、テストプレイを重ねて難易度を調整する必要はある。それでも、一度の依頼で作ったとは思えない出来だった。</blockquote>
           <p>この予行は、上の15個には数えていない。条件が違うからだ。予行ではAIが保存前に自分で確かめることを止めておらず、書いただけのものから、自動で動かしてテストし、難しさを調整したものまで、題材によってばらつきがあった。確かめる点も先に決めていなかった。</p>
           <p>定番では差が出ないと分かったので、本番では「テストなし」を依頼文に入れて条件をそろえ、難しさを段階的に上げることにした。</p>
         </section>
@@ -172,7 +171,7 @@
         <section class="article-conclusion">
           <p class="kicker">WHAT REMAINED</p>
           <h2>確かめる側が先に限界になった</h2>
-          <p>今回、Claude Code(Claude Opus 5.5)は、一言の依頼から、テストなしで15個を作った。神経衰弱から、反則を防ぐ将棋、数式が計算される表計算、3Dの箱庭まで、14個は先に決めた3つの点を満たした。残る1個も、確認した範囲では動いている。</p>
+          <p>今回、Claude Code(Claude Opus 5.5)は、一言の依頼から、テストなしで15個を作った。神経衰弱から、反則を防ぐ将棋、数式が計算される表計算、3Dの箱庭、1時間のRPGまで、15個すべてが先に決めた3つの点を満たした。</p>
           <p>想定と違ったのは、難しさを上げていく途中で先に限界が来たのが、作る側ではなく確かめる側だったことだ。作るのは数分から数十分。それが正しいかを人が確かめるには、将棋を詰みまで指し、RPGを最後まで遊ぶ時間が要る。</p>
           <p>この結果から言えることには限りがある。モデルは一つ、題材ごとに作ったのは1回だけ、判定したのは一人、確かめたのは3つの点だけだ。同じ依頼をもう一度出せば、違うものが返ってくる。「AIは何でも一発で作れる」とは言えない。</p>
           <p class="conclusion-line">言えるのは、定番から無茶までの15個で、一言の依頼が壊れるところを、今回は見つけられなかったということだ。</p>
@@ -187,7 +186,7 @@
             <div><dt>モデル</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
             <div><dt>作らせ方</dt><dd>題材ごとに新しい会話(サブエージェント)を1つ立て、依頼文を1回だけ渡した</dd></div>
             <div><dt>本番の個数</dt><dd>5段階 × 3個 = 15個</dd></div>
-            <div><dt>判定</dt><dd>使える 14 / 保留 1 / 動くが使えない 0 / 動かない 0</dd></div>
+            <div><dt>判定</dt><dd>使える 15 / 動くが使えない 0 / 動かない 0</dd></div>
             <div><dt>制作時間</dt><dd>最短 約2分 / 最長 約35分</dd></div>
             <div><dt>ファイルの大きさ</dt><dd>1個あたり 約20KB〜91KB(HTMLファイル1つ)</dd></div>
             <div><dt>AIによるテスト</dt><dd>なし(依頼文で禁止。15個ともAIが「実行していない」と報告)</dd></div>
