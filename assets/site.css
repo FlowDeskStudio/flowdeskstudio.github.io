@@ -755,6 +755,14 @@ h1 em::after {
   font-size: 0.75rem;
 }
 
+.site-footer .footer-contact {
+  grid-column: 1;
+}
+
+.site-footer .footer-contact a {
+  color: inherit;
+}
+
 .site-footer .copyright {
   grid-column: 2;
 }
