@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>I Had an AI Copy a Drawing 100 Times. What Was Left at the End? — FlowDeskStudio</title>
+  <meta name="description" content="An AI drew a picture, and the next AI saw only that picture and copied it. This was repeated 100 times for three subjects. The subject survived to the end, while the details were replaced by other things.">
+  <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-004/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-004/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-004/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-004/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://flowdeskstudio.net/en/experiments/exp-004/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="I Had an AI Copy a Drawing 100 Times. What Was Left at the End? — FlowDeskStudio">
+  <meta property="og:description" content="A picture telephone game, 100 rounds each for three subjects. A tail became an arm, and bacon became two red lines.">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="I Had an AI Copy a Drawing 100 Times. What Was Left at the End? — FlowDeskStudio">
+  <meta name="twitter:description" content="The subject still came through at round 100. What changed was the details.">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-004/exp-004.css">
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="/en/" aria-label="FlowDeskStudio home"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/experiments/" aria-current="page">Experiments</a>
+      <a href="/en/projects/">Projects</a>
+      <a href="/en/downloads/">Downloads</a>
+      <a class="nav-pill" href="/en/about.html">About</a>
+      <span class="language-switch" aria-label="Language"><a href="/experiments/exp-004/" lang="ja" hreflang="ja">JA</a><span aria-current="true">EN</span></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-004">
+      <p class="kicker">EXPERIMENT #004 / COMPLETE</p>
+      <h1>I had an AI copy<br>a drawing 100 times</h1>
+      <p class="article-deck">The subject came through to the end.<br>What changed was the details.</p>
+      <div class="article-meta" aria-label="Article information">
+        <span>2026.10.09</span>
+        <span>CLAUDE OPUS 5.5</span>
+        <span>3 × 100 STEPS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>The result first.</p>
+        <p>An AI drew a picture. The next AI saw only that picture and copied it. It is the telephone game, played with drawings. This was repeated 100 times for each of three subjects.</p>
+        <p>The round-100 pictures were shown to a separate AI that knew nothing about the experiment. For all three, it named the original subject correctly.</p>
+        <p>The contents of the pictures were not the same, though. The cat's tail had become an arm, the bacon had become red lines, and the hills outside the window had become green circles.</p>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/cat-first-last.webp" alt="Round 1 and round 100 of &quot;a cat riding a bicycle&quot;. In round 1 an orange tabby with a curled, raised tail pedals a red bicycle. In round 100, under a deep blue-violet sky, a cat with a pole-like body holds one arm straight out to the side" width="1036" height="384">
+        <figcaption><strong>A cat riding a bicycle</strong>Round 1 on the left, round 100 on the right.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>How it worked</h2>
+          <p>The first AI is given the subject in words and draws it. That drawing is turned into an image and shown to the next AI. The only request is to copy the same picture. It is not told the subject, and it is not told this is a telephone game.</p>
+          <p>The new drawing is turned into an image again and shown to the AI after that. This continues to round 100.</p>
+          <ul class="article-list">
+            <li>Every round is a fresh conversation. It sees only the one previous picture and nothing earlier</li>
+            <li>The request text is the same every round</li>
+            <li>The AI does not render its own drawing to check it</li>
+            <li>No redraws or fixes because of how a picture turned out</li>
+            <li>Subjects are everyday words only. No existing characters or works</li>
+          </ul>
+          <p>The three subjects were "a cat riding a bicycle", "a seaside with a lighthouse" and "a breakfast table". They were chosen to differ: a creature with a machine, a landscape, and a scene with many small objects.</p>
+          <p>The pictures were drawn as SVG, a format that builds a picture out of shapes. It does not blur the way a photo of a photo would. If anything changes, it is because of how an AI read the previous picture.</p>
+        </section>
+
+        <section>
+          <h2>A cat riding a bicycle</h2>
+          <p>In the first three rounds the picture was simplified a lot. The markings on the face, the thin lines of the wheels and the chain disappeared. The number of shapes went from 94 in round 1 to 61 in round 2.</p>
+          <p>After that, it changed slowly.</p>
+          <p>The clearest case is the tail. In round 1 it was a curled, raised tail. It shifted shape little by little, and from around round 14 it looked like a raised arm. The AI that drew round 17 wrote "a cat waving its hand" in its own report. The AI that drew round 1 had written that the cat was holding the handlebars with both hands.</p>
+          <p>Once the tail had become an arm, it did not go back to being a tail. For the next AI, it had been an arm from the start. The cat in round 100 holds one arm straight out to the side.</p>
+          <p>Other things changed too. The blue scarf became a band across the chest. The pedal became a red box and then a bright pink square. The sky went from light blue to deep blue-violet, and the sun from yellow to orange.</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/cat-every10.webp" alt="Round 1 and every tenth round up to 100 of &quot;a cat riding a bicycle&quot;. The tail turns into an arm and the sky grows darker" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>A cat riding a bicycle</strong>Round 1 and every tenth round. The number at the top left is the round.</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/cat-100.webp" alt="An animated image that steps through rounds 1 to 100 of &quot;a cat riding a bicycle&quot; in order" width="512" height="384" loading="lazy">
+        <figcaption><strong>All 100 rounds in sequence</strong>Rounds 1 to 100 shown one after another.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>A seaside with a lighthouse</h2>
+          <p>Round 1 was a dusk scene in muted colors. By round 10 the sky was pink and purple and the sea was emerald. The colors kept getting stronger with each round after that.</p>
+          <p>The birds in the sky became symbols like wavy lines and arcs. One of the clouds became a dark purple ellipse. The hut beside the lighthouse became something like a pink wall.</p>
+          <p>The rock had a pale triangle that stood for its lit face. Between rounds 70 and 80, that triangle turned blue. A shape that had described how the light fell came to be drawn as an object: a blue triangle.</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-first-last.webp" alt="Round 1 and round 100 of &quot;a seaside with a lighthouse&quot;. Round 1 is a dusk scene in muted colors. In round 100 the sky is deep pink and purple, the sea is emerald, and the triangle on the rock has turned blue" width="1036" height="384" loading="lazy">
+        <figcaption><strong>A seaside with a lighthouse</strong>Round 1 on the left, round 100 on the right.</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-every10.webp" alt="Round 1 and every tenth round up to 100 of &quot;a seaside with a lighthouse&quot;. The colors grow stronger and more vivid" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>A seaside with a lighthouse</strong>Round 1 and every tenth round.</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-100.webp" alt="An animated image that steps through rounds 1 to 100 of &quot;a seaside with a lighthouse&quot; in order" width="512" height="384" loading="lazy">
+        <figcaption><strong>All 100 rounds in sequence</strong></figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>A breakfast table</h2>
+          <p>This subject has many small objects, and each of them turned into a different shape.</p>
+          <p>The wavy bacon became two red lines. The glass of orange juice became a striped cylinder and then something like a bundle of thin sticks. The toast became a yellow diamond, and the wood-grain table became plain. The steam rising from the coffee was gone by round 30.</p>
+          <p>The biggest change was outside the window. The hills started inside the window and grew with each round. Between rounds 60 and 70 they spilled past the window frame, and by round 100 they are two large green circles overlapping the window.</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/breakfast-first-last.webp" alt="Round 1 and round 100 of &quot;a breakfast table&quot;. Round 1 shows a fried egg, bacon, toast, juice and coffee on a wood-grain table. In round 100 the table is plain, the bacon is two red lines, and two large green circles sit outside the window" width="1036" height="384" loading="lazy">
+        <figcaption><strong>A breakfast table</strong>Round 1 on the left, round 100 on the right.</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/breakfast-every10.webp" alt="Round 1 and every tenth round up to 100 of &quot;a breakfast table&quot;. The hills outside the window grow and spill past the window frame" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>A breakfast table</strong>Round 1 and every tenth round.</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/breakfast-100.webp" alt="An animated image that steps through rounds 1 to 100 of &quot;a breakfast table&quot; in order" width="512" height="384" loading="lazy">
+        <figcaption><strong>All 100 rounds in sequence</strong></figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>Asking a separate AI what each picture shows</h2>
+          <p>Round 1 and every tenth round were shown, one picture at a time, to a separate AI that knew nothing. The only question was what the picture shows, in one sentence. The answers were given in Japanese and are translated here.</p>
+          <p class="score-line"><span>Subject still recognized at round 100</span><strong>3 / 3</strong></p>
+          <p>These were the answers for the round-100 pictures.</p>
+          <ul class="article-list">
+            <li>A picture of an orange cat riding a red bicycle along a road under a clear blue sky.</li>
+            <li>A flat illustration of a seaside at sunset, with a glowing lighthouse striped in pink and white, a small boat, and a starfish on the sand.</li>
+            <li>An illustration of a breakfast scene: a table with a plate of fried egg, toast, a fork, a knife, a blue mug and a jar of jam, with the sun and green trees visible through the window.</li>
+          </ul>
+          <p>All three subjects are still there. Lined up by round, though, the answers show things that dropped out or changed along the way.</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Subject</th><th>What dropped out of the answers or changed</th></tr></thead><tbody>
+            <tr><td>A cat riding a bicycle</td><td>"Blue scarf" appears in the answers up to round 20 and in none from round 30 on</td></tr>
+            <tr><td>A seaside with a lighthouse</td><td>"Red and white stripes" became "pink and white stripes" from round 90</td></tr>
+            <tr><td>A breakfast table</td><td>"Steam" appears up to round 10 and "bacon" up to round 50. From round 80 the view outside the window is described as "green trees" instead of "green hills"</td></tr>
+          </tbody></table></div>
+        </section>
+
+        <section>
+          <h2>What the three had in common</h2>
+          <ul class="article-list">
+            <li>A large simplification in roughly the first ten rounds, then slow change</li>
+            <li>Colors that grew stronger and more vivid with each round</li>
+            <li>A misreading, once made, was never undone. From the next round on it was handed down as the original</li>
+          </ul>
+          <p>The plan assumed that after enough rounds a picture might fall apart into something else, and it included a rule to stop a chain once there was nothing left to copy. That rule was never used. All three reached round 100 while still working as pictures.</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>The frame stayed and the details were swapped</h2>
+          <p>In this experiment, Claude Code running Claude Opus 5.5 copied each of three subjects 100 times. What each picture was of still came through to a separate AI at round 100.</p>
+          <p>What changed was the details. They did not fade into a blur. A tail became an arm, hills became green circles, and the lit face of a rock became a blue triangle. Each was replaced by something else that was just as definite.</p>
+          <p>There are clear limits on what this supports. There were three subjects and each was run once. Running the same subject again would produce a different drift. One kind of AI was used, and the AI that looked at the pictures and answered was the same kind. A person looking at them might see it differently.</p>
+          <p>The descriptions of how the pictures changed were put together by the AI from looking at every tenth round side by side. The rounds in between were not checked one by one. The pictures themselves are shown above, so please compare them.</p>
+          <p class="conclusion-line">What 100 rounds of the telephone game lost was not the picture but the small facts inside it.</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>Experiment data</h2>
+          <dl>
+            <div><dt>Date</dt><dd>9 October 2026 (pilot and main run)</dd></div>
+            <div><dt>Environment</dt><dd>Claude Code (desktop app)</dd></div>
+            <div><dt>Drawing model</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
+            <div><dt>Rounds</dt><dd>3 subjects × 100 = 300. Rounds 1 to 20 of the cat came from the pilot, and the main run continued from round 21</dd></div>
+            <div><dt>How each round ran</dt><dd>A fresh conversation (subagent) per round, given the one previous image and the same request text</dd></div>
+            <div><dt>Turning drawings into images</dt><dd>The same method every round, keeping the drawing's own proportions with the longer side at 512 pixels. All 300 images are 512×384</dd></div>
+            <div><dt>Number of shapes (round 1 → 50 → 100)</dt><dd>Cat 94→59→39 / Lighthouse 65→53→52 / Breakfast 66→58→45</dd></div>
+            <div><dt>Chains that stopped early</dt><dd>None. No drawing contained unsafe content</dd></div>
+            <div><dt>Rounds that were redrawn</dt><dd>Two. Round 2 of the pilot, because a flaw in the image conversion had added white bands above and below the picture, and round 73 of the breakfast table, because the conversation was cut off mid-drawing. No round was redrawn because of how it looked</dd></div>
+            <div><dt>Behind-the-scenes work</dt><dd>Converting each drawing to an image and passing it to the next round was done by a separate, smaller AI model that only ran one fixed command. For round 80 of the cat, the same command was run by hand</dd></div>
+            <div><dt>Milestone check</dt><dd>33 pictures (round 1 and every tenth round), each shown to a separate fresh conversation that answered in one sentence</dd></div>
+            <div><dt>Roles</dt><dd>Claude Code: proposals, draft conditions, running the experiment, records and the draft of this article. Human: choosing the plan, approving the conditions and approving publication</dd></div>
+            <div><dt>Added cost</dt><dd>0 yen / no new subscriptions or purchases for this experiment</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>The request text as actually sent (Japanese)</summary>
+            <blockquote lang="ja">1回目:「{お題}」の絵をSVGで描いてください。外部の素材は使わず、SVGファイル1つで完結させてください。描いたSVGを画像に変換して確かめたりせず、書き上げたものをそのまま {保存先} に保存してください。ほかのファイルやフォルダは見ないでください。質問はせず、この1回の依頼で完成させてください。<br><br>2回目以降:{画像の場所} にある画像を見て、同じ絵をSVGで描き写してください。外部の素材は使わず、SVGファイル1つで完結させてください。描いたSVGを画像に変換して確かめたりせず、書き上げたものをそのまま {保存先} に保存してください。ほかのファイルやフォルダは見ないでください。質問はせず、この1回の依頼で完成させてください。</blockquote>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="Article navigation"><a href="/en/experiments/">← Back to experiment log</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>

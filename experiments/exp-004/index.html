@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>AIに絵を100回描き写させたら、最後に何が残るか — FlowDeskStudio</title>
+  <meta name="description" content="AIに絵を描かせ、その絵だけを次のAIに見せて描き写させる。これを3つのお題で100回ずつくり返しました。何の絵かは最後まで伝わり、細部は別のものに入れ替わりました。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-004/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-004/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-004/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-004/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-004/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="AIに絵を100回描き写させたら、最後に何が残るか — FlowDeskStudio">
+  <meta property="og:description" content="絵の伝言ゲームを、3つのお題で100回ずつ。しっぽは腕になり、ベーコンは赤い線になりました。">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AIに絵を100回描き写させたら、最後に何が残るか — FlowDeskStudio">
+  <meta name="twitter:description" content="何の絵かは100回目でも伝わった。変わったのは細部だった。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-004/exp-004.css">
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a href="/downloads/">Downloads</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-004/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-004">
+      <p class="kicker">EXPERIMENT #004 / COMPLETE</p>
+      <h1>AIに絵を100回<br>描き写させたら</h1>
+      <p class="article-deck">何の絵かは最後まで伝わった<br>変わったのは細部だった</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.10.09</span>
+        <span>CLAUDE OPUS 5.5</span>
+        <span>3 × 100 STEPS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>先に結果を書く。</p>
+        <p>AIに絵を描かせ、その絵だけを次のAIに見せて描き写させた。伝言ゲームの絵版だ。これを3つのお題で、100回ずつくり返した。</p>
+        <p>100回目の絵を、何も知らない別のAIに見せた。3つとも、最初のお題を正しく言い当てた。</p>
+        <p>ただ、絵の中身は同じではなかった。猫のしっぽは腕になり、ベーコンは赤い線になり、窓の外の丘は緑の円になっていた。</p>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/cat-first-last.webp" alt="「自転車に乗る猫」の1回目と100回目。1回目は茶トラの猫が丸めたしっぽを立てて赤い自転車をこいでいる。100回目は濃い青紫の空の下、棒のような胴体の猫が片腕を横に伸ばしている" width="1036" height="384">
+        <figcaption><strong>自転車に乗る猫</strong>左が1回目、右が100回目。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>やり方</h2>
+          <p>最初のAIに、お題を言葉で渡して絵を描かせる。その絵を画像にして、次のAIに見せる。頼むのは「同じ絵を描き写して」だけ。お題も、これが伝言ゲームであることも伝えない。</p>
+          <p>描かれた絵をまた画像にして、その次のAIに見せる。これを100回目まで続ける。</p>
+          <ul class="article-list">
+            <li>1回ごとに新しい会話で描かせる。見せるのは直前の1枚だけで、それより前の絵は見せない</li>
+            <li>依頼文は毎回同じ</li>
+            <li>AIは、描いた絵を自分で画像にして確かめない</li>
+            <li>絵の出来を理由にした描き直しや手直しはしない</li>
+            <li>お題はごく一般的な言葉だけ。既存のキャラクターや作品は使わない</li>
+          </ul>
+          <p>お題は「自転車に乗る猫」「灯台のある海辺」「朝ごはんの食卓」の3つ。生き物と道具の組み合わせ、風景、小さな物がたくさんある場面、という違いをつけた。</p>
+          <p>絵はSVGという、図形を並べて描く形式で描かせている。写真のようにぼやけていく劣化は起きない。変わるとすれば、AIが前の絵をどう読み取ったか、によってだ。</p>
+        </section>
+
+        <section>
+          <h2>自転車に乗る猫</h2>
+          <p>最初の3回で、絵は大きく簡略化された。顔の模様、車輪の細い線、チェーンが消えた。図形の数は1回目の94個から、2回目で61個になっている。</p>
+          <p>そのあとは、ゆっくり変わった。</p>
+          <p>いちばん分かりやすいのはしっぽだ。1回目は、丸めて立てたしっぽだった。それが少しずつ形を変え、14回目あたりから「上げた腕」に見えるようになった。17回目を描いたAIは、自分の報告に「手を振る猫」と書いている。1回目を描いたAIは「両手でハンドルを握り」と書いていた。</p>
+          <p>一度腕になったしっぽは、しっぽに戻らなかった。次のAIにとっては、それが最初から腕だったからだ。100回目の猫は、片腕を横にまっすぐ伸ばしている。</p>
+          <p>ほかにも、青いマフラーは胸を横切る帯になり、ペダルは赤い箱を経て蛍光ピンクの四角になった。空は水色から濃い青紫へ、太陽は黄色からオレンジへ変わった。</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/cat-every10.webp" alt="「自転車に乗る猫」の1回目と、10回ごとの絵を100回目まで並べたもの。しっぽが腕の形になり、空の色が濃くなっていく" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>自転車に乗る猫</strong>1回目と、10回ごとの絵。左上の数字が回数。</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/cat-100.webp" alt="「自転車に乗る猫」の1回目から100回目までを順に切り替えて見せる動く画像" width="512" height="384" loading="lazy">
+        <figcaption><strong>100回を続けて見る</strong>1回目から100回目までを順に表示している。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>灯台のある海辺</h2>
+          <p>1回目は、落ち着いた色の夕暮れだった。10回目までに、空はピンクと紫に、海はエメラルド色になった。色はその後も、回を重ねるごとに濃くなっていった。</p>
+          <p>飛んでいた鳥は、波線や弧のような記号になった。雲の一つは、濃い紫の楕円になった。灯台の横の小屋は、ピンクの壁のような形になった。</p>
+          <p>岩には、光の当たる面を表す明るい三角形があった。それが70回目から80回目にかけて青くなった。光の当たり方を表していた形が、いつのまにか「青い三角形という物」として描かれるようになった。</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-first-last.webp" alt="「灯台のある海辺」の1回目と100回目。1回目は落ち着いた色の夕暮れ。100回目は空が濃いピンクと紫、海がエメラルド色で、岩の三角形が青くなっている" width="1036" height="384" loading="lazy">
+        <figcaption><strong>灯台のある海辺</strong>左が1回目、右が100回目。</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-every10.webp" alt="「灯台のある海辺」の1回目と、10回ごとの絵を100回目まで並べたもの。色が濃く鮮やかになっていく" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>灯台のある海辺</strong>1回目と、10回ごとの絵。</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/lighthouse-100.webp" alt="「灯台のある海辺」の1回目から100回目までを順に切り替えて見せる動く画像" width="512" height="384" loading="lazy">
+        <figcaption><strong>100回を続けて見る</strong></figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>朝ごはんの食卓</h2>
+          <p>小さな物が多いこのお題では、一つひとつが別の形になっていった。</p>
+          <p>波打っていたベーコンは、赤い線2本になった。オレンジジュースのグラスは、縦じまの筒を経て、細い棒の束のような形になった。トーストは黄色いひし形に、木目のテーブルは無地になった。コーヒーから立っていた湯気は、30回目までに消えた。</p>
+          <p>いちばん大きく変わったのは、窓の外だ。最初は窓の中におさまっていた丘が、回を重ねるごとに大きくなった。60回目から70回目のあいだに窓枠からはみ出し、100回目では、窓に重なる大きな緑の円2つになっている。</p>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure pair-figure">
+        <img src="/experiments/exp-004/assets/breakfast-first-last.webp" alt="「朝ごはんの食卓」の1回目と100回目。1回目は木目のテーブルに目玉焼き、ベーコン、トースト、ジュース、コーヒーが並ぶ。100回目は無地のテーブルで、ベーコンは赤い線、窓の外は大きな緑の円2つになっている" width="1036" height="384" loading="lazy">
+        <figcaption><strong>朝ごはんの食卓</strong>左が1回目、右が100回目。</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure grid-figure">
+        <img src="/experiments/exp-004/assets/breakfast-every10.webp" alt="「朝ごはんの食卓」の1回目と、10回ごとの絵を100回目まで並べたもの。窓の外の丘が大きくなり、窓枠からはみ出していく" width="1560" height="1572" loading="lazy">
+        <figcaption><strong>朝ごはんの食卓</strong>1回目と、10回ごとの絵。</figcaption>
+      </figure>
+
+      <figure class="article-wide-figure motion-figure">
+        <img src="/experiments/exp-004/assets/breakfast-100.webp" alt="「朝ごはんの食卓」の1回目から100回目までを順に切り替えて見せる動く画像" width="512" height="384" loading="lazy">
+        <figcaption><strong>100回を続けて見る</strong></figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <h2>別のAIに見せて、何の絵か聞いた</h2>
+          <p>1回目と10回ごとの絵を、1枚ずつ、何も知らない別のAIに見せた。尋ねたのは「何の絵か、一文で」だけだ。</p>
+          <p class="score-line"><span>100回目でお題が伝わった</span><strong>3 / 3</strong></p>
+          <p>100回目の絵への答えは、こうだった。</p>
+          <ul class="article-list">
+            <li>晴れた青空の下、オレンジ色の猫が赤い自転車に乗って道を走っている絵です。</li>
+            <li>夕日が沈む海辺に、光を放つピンクと白の縞模様の灯台と小舟、砂浜のヒトデが描かれたフラットなイラストです。</li>
+            <li>窓の外に太陽と緑の木々が見える食卓に、目玉焼きの皿やトースト、フォーク、ナイフ、青いマグカップ、ジャムの瓶が並んだ朝食の風景を描いたイラストです。</li>
+          </ul>
+          <p>お題そのものは3つとも残っている。一方で、答えを回の順に並べると、途中で消えたものや変わったものがある。</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>お題</th><th>答えから消えた・変わったもの</th></tr></thead><tbody>
+            <tr><td>自転車に乗る猫</td><td>「青いスカーフ」は20回目までの答えにあり、30回目以降の答えにはない</td></tr>
+            <tr><td>灯台のある海辺</td><td>「赤と白の縞」が、90回目から「ピンクと白の縞」になった</td></tr>
+            <tr><td>朝ごはんの食卓</td><td>「湯気」は10回目まで、「ベーコン」は50回目まで。窓の外は80回目から「緑の丘」ではなく「緑の木」と答えられた</td></tr>
+          </tbody></table></div>
+        </section>
+
+        <section>
+          <h2>3つに共通していたこと</h2>
+          <ul class="article-list">
+            <li>最初の10回ほどで大きく簡略化され、そのあとはゆっくり変わった</li>
+            <li>色が、回を重ねるごとに濃く鮮やかになった</li>
+            <li>一度起きた読み違いは元に戻らず、次の回からはそれが元の絵として引き継がれた</li>
+          </ul>
+          <p>「100回もくり返せば、絵は崩れて別物になるだろう」と考えて、描き写すものがなくなったら止める、という条件も決めていた。その条件は一度も使わなかった。3つとも100回目まで、絵として成り立ったまま進んだ。</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>骨組みは残り、細部が入れ替わった</h2>
+          <p>今回、Claude Code(Claude Opus 5.5)は、3つのお題をそれぞれ100回描き写した。何の絵かは、100回目でも別のAIに伝わった。</p>
+          <p>変わったのは細部だった。しかも、ぼやけて消えたのではない。しっぽは腕に、丘は緑の円に、岩の明るい面は青い三角形に。別の、はっきりした何かに置き換わっていった。</p>
+          <p>この結果から言えることには限りがある。お題は3つで、それぞれ1回ずつしか走らせていない。同じお題をもう一度やれば、違う変わり方をするはずだ。使ったAIは1種類で、絵を見て答えたのも同じ種類のAIだ。人が見れば、違う印象を持つかもしれない。</p>
+          <p>この記事にある絵の変化の説明は、AIが10回ごとの絵を並べて見てまとめたものだ。あいだの回を1枚ずつ確かめてはいない。絵そのものは上に載せてあるので、見比べてほしい。</p>
+          <p class="conclusion-line">100回の伝言ゲームで失われたのは、絵ではなく、絵の中の小さな事実だった。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>実験データ</h2>
+          <dl>
+            <div><dt>実験日</dt><dd>2026年10月9日(予行と本番)</dd></div>
+            <div><dt>実行環境</dt><dd>Claude Code(デスクトップアプリ)</dd></div>
+            <div><dt>絵を描いたモデル</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
+            <div><dt>回数</dt><dd>3つのお題 × 100回 = 300回。猫の1〜20回目は予行の結果で、21回目から本番として続けた</dd></div>
+            <div><dt>描かせ方</dt><dd>1回ごとに新しい会話(サブエージェント)を立て、直前の1枚の画像と同じ依頼文を渡した</dd></div>
+            <div><dt>画像への変換</dt><dd>毎回同じ方法で、絵の縦横比のまま長い辺を512ピクセルにした。全300枚が512×384</dd></div>
+            <div><dt>図形の数(1→50→100回目)</dt><dd>猫 94→59→39 / 灯台 65→53→52 / 朝ごはん 66→58→45</dd></div>
+            <div><dt>途中で止まったお題</dt><dd>なし。安全でない内容を含む絵は0件</dd></div>
+            <div><dt>描き直した回</dt><dd>2回。予行の2回目(画像への変換の不備で、絵の上下に白い帯が付いたため)と、朝ごはんの73回目(描いている途中で会話が切れたため)。絵の出来を理由にした描き直しはなし</dd></div>
+            <div><dt>裏方の作業</dt><dd>絵を画像に変換して次の回へ渡す作業は、決まった命令を実行するだけの別のAI(小型のモデル)に行わせた。猫の80回目だけ、同じ命令を手動で実行した</dd></div>
+            <div><dt>節目の確認</dt><dd>1回目と10回ごとの計33枚を、1枚ずつ別の新しい会話のAIに見せて答えさせた</dd></div>
+            <div><dt>役割</dt><dd>企画案・条件の下書き・実行・記録・この記事の下書きはClaude Code。企画の選択、条件の承認、公開の承認は人</dd></div>
+            <div><dt>追加費用</dt><dd>0円 / 今回のための新規契約・購入なし</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>実際に渡した依頼文</summary>
+            <blockquote>1回目:「{お題}」の絵をSVGで描いてください。外部の素材は使わず、SVGファイル1つで完結させてください。描いたSVGを画像に変換して確かめたりせず、書き上げたものをそのまま {保存先} に保存してください。ほかのファイルやフォルダは見ないでください。質問はせず、この1回の依頼で完成させてください。<br><br>2回目以降:{画像の場所} にある画像を見て、同じ絵をSVGで描き写してください。外部の素材は使わず、SVGファイル1つで完結させてください。描いたSVGを画像に変換して確かめたりせず、書き上げたものをそのまま {保存先} に保存してください。ほかのファイルやフォルダは見ないでください。質問はせず、この1回の依頼で完成させてください。</blockquote>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
