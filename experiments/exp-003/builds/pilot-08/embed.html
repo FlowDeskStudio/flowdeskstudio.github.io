@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DaoFlpQLN+LswtLRcTZYYTjTaXYLmpasFgzAsPdYCmQ='; script-src-attr 'none'; style-src 'sha256-XrhITLt9MrMLb5n6AW2LWEzeY0jPi8/6ikHUz/EnBis='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週間タスク</title>
+<style>
+:root {
+  --bg: #f5f2eb;
+  --surface: #fffdf8;
+  --surface-2: #efebe1;
+  --ink: #24221d;
+  --muted: #6a6558;
+  --line: #ded8ca;
+  --accent: #1d6b66;
+  --accent-ink: #ffffff;
+  --accent-soft: #e0efec;
+  --high: #b93f2a;
+  --mid: #a9720f;
+  --low: #55798a;
+  --sat: #2f5f9e;
+  --sun: #b4412f;
+  --shadow: 0 1px 2px rgba(40, 34, 20, .08);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161513;
+    --surface: #211f1c;
+    --surface-2: #2b2925;
+    --ink: #ece8de;
+    --muted: #a59f91;
+    --line: #3a3731;
+    --accent: #5fc0b7;
+    --accent-ink: #10201f;
+    --accent-soft: #1e3432;
+    --high: #f08a73;
+    --mid: #e0b055;
+    --low: #8fb6c8;
+    --sat: #8db4ea;
+    --sun: #f09482;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.wrap { max-width: 1500px; margin: 0 auto; padding: 20px 20px 80px; }
+
+/* ---------- ヘッダー ---------- */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 24px; }
+.top h1 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .12em; color: var(--muted); }
+.week-label { margin: 2px 0 0; font-size: 26px; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.week-label small { font-size: 13px; font-weight: 600; color: var(--accent); margin-left: 8px; white-space: nowrap; }
+.nav { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+
+.btn {
+  min-height: 38px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--ink);
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--high); }
+.btn.icon { width: 38px; padding: 0; font-size: 18px; line-height: 1; }
+
+.summary {
+  margin-top: 16px; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px;
+}
+.summary .nums { display: flex; flex-wrap: wrap; gap: 4px 18px; font-variant-numeric: tabular-nums; }
+.summary .nums b { font-size: 18px; }
+.summary .nums span { color: var(--muted); font-size: 13px; }
+.summary .nums .late b { color: var(--high); }
+.bar { flex: 1 1 200px; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .25s; }
+
+.tools { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; min-height: 36px; padding: 0 14px; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.search {
+  min-height: 38px; padding: 0 12px; width: 220px; max-width: 100%;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+}
+.tools .spacer { flex: 1; }
+.note-volatile { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* ---------- ボード ---------- */
+.board { margin-top: 16px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.day {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  border-top: 3px solid var(--line);
+  display: flex; flex-direction: column; min-height: 260px;
+}
+.day.today { border-top-color: var(--accent); }
+.day.over { outline: 2px dashed var(--accent); outline-offset: -2px; background: var(--accent-soft); }
+.day-head { padding: 10px 12px 8px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.day-head .dow { font-weight: 700; font-size: 14px; }
+.day-head .num { font-size: 22px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.day.sat .dow, .day.sat .num { color: var(--sat); }
+.day.sun .dow, .day.sun .num { color: var(--sun); }
+.badge-today { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.day-head .count { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.list { list-style: none; margin: 0; padding: 0 8px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.empty { padding: 10px 6px; font-size: 12.5px; color: var(--muted); }
+
+.card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px;
+  padding: 8px 8px 6px 10px;
+  background: var(--bg); border: 1px solid var(--line); border-left: 4px solid var(--mid);
+  border-radius: 8px; box-shadow: var(--shadow);
+}
+.card.p-high { border-left-color: var(--high); }
+.card.p-low { border-left-color: var(--low); }
+.card.dragging { opacity: .4; }
+.card input[type="checkbox"] { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); cursor: pointer; }
+.card-body { cursor: pointer; border-radius: 4px; min-width: 0; }
+.card-title { font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.card.done .card-title { text-decoration: line-through; color: var(--muted); }
+.card.done { border-left-color: var(--line); box-shadow: none; }
+.card-foot { grid-column: 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 26px; }
+.chip { font-size: 11.5px; line-height: 1.5; padding: 0 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip.high { color: var(--high); font-weight: 700; }
+.chip.low { color: var(--low); }
+.chip.late { color: var(--high); }
+.move { margin-left: auto; display: flex; gap: 2px; }
+.move button {
+  width: 26px; height: 26px; padding: 0; border: 0; border-radius: 6px;
+  background: none; color: var(--muted); font-size: 16px; line-height: 1;
+}
+.move button:hover { background: var(--surface-2); color: var(--ink); }
+
+.quick { padding: 8px; }
+.quick input {
+  width: 100%; min-height: 34px; padding: 0 10px; font-size: 13.5px;
+  border: 1px dashed var(--line); border-radius: 8px; background: transparent;
+}
+.quick input::placeholder { color: var(--muted); }
+.quick input:focus { border-style: solid; background: var(--bg); }
+
+/* ---------- ダイアログ ---------- */
+dialog {
+  width: min(480px, calc(100vw - 32px)); padding: 0;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+dialog::backdrop { background: rgba(20, 18, 14, .5); }
+dialog form, dialog .inner { padding: 20px; display: grid; gap: 14px; }
+dialog h2 { margin: 0; font-size: 18px; }
+.field { display: grid; gap: 4px; }
+.field > span { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.field input, .field select, .field textarea {
+  width: 100%; min-height: 40px; padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+}
+.field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+.row3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions .spacer { flex: 1; }
+#ioText { font-family: Consolas, "Courier New", monospace; font-size: 12.5px; min-height: 200px; }
+.help { margin: 0; font-size: 13px; color: var(--muted); }
+.err { margin: 0; font-size: 13px; color: var(--high); min-height: 1.2em; }
+
+/* ---------- トースト ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px 10px 16px; border-radius: 10px;
+  background: var(--ink); color: var(--bg); font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+}
+.toast[hidden] { display: none; }
+.toast button { border: 0; border-radius: 6px; padding: 4px 10px; background: transparent; color: inherit; font-weight: 700; text-decoration: underline; white-space: nowrap; }
+
+/* ---------- 狭い画面 ---------- */
+@media (max-width: 980px) {
+  .wrap { padding: 14px 14px 90px; }
+  .week-label { font-size: 21px; }
+  .week-label small { display: block; margin: 2px 0 0; }
+  .nav { margin-left: 0; width: 100%; }
+  .nav .btn.primary { margin-left: auto; }
+  .board { grid-template-columns: 1fr; }
+  .day { min-height: 0; }
+  .search { flex: 1 1 160px; width: auto; }
+  .tools .spacer { display: none; }
+  .move button { width: 34px; height: 34px; }
+  .card input[type="checkbox"] { width: 22px; height: 22px; margin-top: 1px; }
+  .quick input { min-height: 40px; font-size: 16px; }
+  .field input, .field select, .field textarea, .search { font-size: 16px; }
+  .row3 { grid-template-columns: 1fr 1fr; }
+  .row3 .field:first-child { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>週間タスク</h1>
+      <p class="week-label" id="weekLabel" aria-live="polite"></p>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn icon" id="prevWeek" aria-label="前の週">‹</button>
+      <button type="button" class="btn" id="thisWeek">今週</button>
+      <button type="button" class="btn icon" id="nextWeek" aria-label="次の週">›</button>
+      <button type="button" class="btn primary" id="newTask">＋ 新しいタスク</button>
+    </div>
+  </header>
+
+  <section class="summary" aria-label="この週の進み具合">
+    <div class="nums" id="nums"></div>
+    <div class="bar" id="bar" role="progressbar" aria-label="完了率" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+  </section>
+
+  <div class="tools">
+    <div class="seg" role="group" aria-label="表示の絞り込み">
+      <button type="button" data-filter="all" aria-pressed="true">すべて</button>
+      <button type="button" data-filter="todo" aria-pressed="false">未完了</button>
+      <button type="button" data-filter="done" aria-pressed="false">完了</button>
+    </div>
+    <input type="search" class="search" id="search" placeholder="タスクを検索" aria-label="タスクを検索">
+    <span class="spacer"></span>
+    <button type="button" class="btn" id="carry">未完了を翌週へ送る</button>
+    <button type="button" class="btn" id="io">書き出し・読み込み</button>
+  </div>
+  <p class="note-volatile">このアプリはデータを保存しません。ページを閉じるか再読み込みすると内容は消えます。残したいときは「書き出し・読み込み」でテキストを控えてください。</p>
+
+  <main class="board" id="board" aria-label="週間ボード"></main>
+</div>
+
+<dialog id="taskDlg" aria-labelledby="taskDlgTitle">
+  <form id="taskForm" novalidate>
+    <h2 id="taskDlgTitle">タスク</h2>
+    <label class="field"><span>タスク名</span>
+      <input type="text" id="fTitle" maxlength="120" required autocomplete="off">
+    </label>
+    <div class="row3">
+      <label class="field"><span>日付</span><input type="date" id="fDate" required></label>
+      <label class="field"><span>時刻(任意)</span><input type="time" id="fTime"></label>
+      <label class="field"><span>優先度</span>
+        <select id="fPri">
+          <option value="high">高</option>
+          <option value="mid">中</option>
+          <option value="low">低</option>
+        </select>
+      </label>
+    </div>
+    <label class="field"><span>メモ(任意)</span><textarea id="fNote" maxlength="1000"></textarea></label>
+    <p class="err" id="fErr" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn danger" id="fDelete">削除</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="fCancel">キャンセル</button>
+      <button type="submit" class="btn primary">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="ioDlg" aria-labelledby="ioDlgTitle">
+  <div class="inner">
+    <h2 id="ioDlgTitle">書き出し・読み込み</h2>
+    <p class="help">下のテキストが現在の全タスクです。コピーしてメモ帳などに控えておけば、次回ここに貼り付けて「読み込む」で復元できます。</p>
+    <label class="field"><span>タスクデータ</span><textarea id="ioText" spellcheck="false"></textarea></label>
+    <p class="err" id="ioErr" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="ioSelect">全選択</button>
+      <button type="button" class="btn danger" id="ioClear">全タスクを削除</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="ioClose">閉じる</button>
+      <button type="button" class="btn primary" id="ioLoad">読み込む</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span id="toastMsg"></span>
+  <button type="button" id="toastUndo">元に戻す</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var DOW = ['月', '火', '水', '木', '金', '土', '日'];
+  var PRI_LABEL = { high: '高', mid: '中', low: '低' };
+  var PRI_ORDER = { high: 0, mid: 1, low: 2 };
+
+  // ---------- 日付 ----------
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function fmt(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function startOfWeek(d) { return addDays(d, -((d.getDay() + 6) % 7)); }
+  function shift(s, n) { return fmt(addDays(parse(s), n)); }
+  function validDate(s) {
+    if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    return fmt(parse(s)) === s;
+  }
+
+  // ---------- 状態(メモリ上のみ) ----------
+  var tasks = [];
+  var seq = 1;
+  var weekStart = startOfWeek(new Date());
+  var filter = 'all';
+  var query = '';
+  var editingId = null;
+  var undoSnapshot = null;
+  var toastTimer = null;
+  var dragId = null;
+
+  function make(title, date, opt) {
+    opt = opt || {};
+    return {
+      id: 't' + (seq++),
+      title: title,
+      date: date,
+      time: opt.time || '',
+      priority: PRI_LABEL[opt.priority] ? opt.priority : 'mid',
+      note: opt.note || '',
+      done: !!opt.done
+    };
+  }
+
+  (function seed() {
+    var m = weekStart;
+    var d = function (n) { return fmt(addDays(m, n)); };
+    tasks = [
+      make('週の予定を確認する', d(0), { time: '09:00', priority: 'high', done: true }),
+      make('メールの返信', d(0), { priority: 'mid' }),
+      make('資料の下書きを作る', d(1), { priority: 'high', note: '見出しと構成まで' }),
+      make('定例ミーティング', d(2), { time: '14:00', priority: 'mid' }),
+      make('経費の精算', d(3), { priority: 'low' }),
+      make('資料を提出する', d(4), { time: '17:00', priority: 'high' }),
+      make('買い出し', d(5), { priority: 'low' }),
+      make('来週の計画を立てる', d(6), { priority: 'mid' })
+    ];
+  })();
+
+  // ---------- 要素 ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var board = $('board');
+  var taskDlg = $('taskDlg');
+  var ioDlg = $('ioDlg');
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function find(id) {
+    for (var i = 0; i < tasks.length; i++) if (tasks[i].id === id) return tasks[i];
+    return null;
+  }
+
+  function sortTasks(a, b) {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (!!a.time !== !!b.time) return a.time ? -1 : 1;
+    if (a.time !== b.time) return a.time < b.time ? -1 : 1;
+    if (a.priority !== b.priority) return PRI_ORDER[a.priority] - PRI_ORDER[b.priority];
+    return parseInt(a.id.slice(1), 10) - parseInt(b.id.slice(1), 10);
+  }
+
+  function visible(t) {
+    if (filter === 'todo' && t.done) return false;
+    if (filter === 'done' && !t.done) return false;
+    if (query) {
+      var q = query.toLowerCase();
+      if ((t.title + ' ' + t.note).toLowerCase().indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
+  // ---------- 描画 ----------
+  function render(focusKey) {
+    var today = fmt(new Date());
+    var days = [];
+    for (var i = 0; i < 7; i++) days.push(addDays(weekStart, i));
+    var first = days[0], last = days[6];
+    var keys = days.map(fmt);
+
+    // 週ラベル
+    var label = first.getFullYear() + '年' + (first.getMonth() + 1) + '月' + first.getDate() + '日 〜 ';
+    if (last.getFullYear() !== first.getFullYear()) label += last.getFullYear() + '年';
+    if (last.getMonth() !== first.getMonth() || last.getFullYear() !== first.getFullYear()) label += (last.getMonth() + 1) + '月';
+    label += last.getDate() + '日';
+    var wl = $('weekLabel');
+    wl.textContent = label;
+    var diff = Math.round((weekStart - startOfWeek(new Date())) / 864e5 / 7);
+    var rel = diff === 0 ? '今週' : diff === 1 ? '来週' : diff === -1 ? '先週' : diff > 0 ? diff + '週間後' : (-diff) + '週間前';
+    wl.appendChild(el('small', '', rel));
+
+    // 集計
+    var inWeek = tasks.filter(function (t) { return keys.indexOf(t.date) !== -1; });
+    var total = inWeek.length;
+    var done = inWeek.filter(function (t) { return t.done; }).length;
+    var late = inWeek.filter(function (t) { return !t.done && t.date < today; }).length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    var nums = $('nums');
+    nums.textContent = '';
+    [['完了', done + ' / ' + total, ''], ['残り', String(total - done), ''], ['完了率', pct + '%', '']]
+      .concat(late ? [['期日を過ぎた未完了', String(late), 'late']] : [])
+      .forEach(function (r) {
+        var d = el('div', r[2]);
+        d.appendChild(el('span', '', r[0] + ' '));
+        d.appendChild(el('b', '', r[1]));
+        nums.appendChild(d);
+      });
+    var bar = $('bar');
+    bar.setAttribute('aria-valuenow', pct);
+    bar.firstElementChild.style.width = pct + '%';
+
+    // 列
+    board.textContent = '';
+    days.forEach(function (d, i) {
+      var key = keys[i];
+      var dayLabel = (d.getMonth() + 1) + '月' + d.getDate() + '日(' + DOW[i] + ')';
+      var all = tasks.filter(function (t) { return t.date === key; }).sort(sortTasks);
+      var shown = all.filter(visible);
+      var nDone = all.filter(function (t) { return t.done; }).length;
+
+      var col = el('section', 'day' + (i === 5 ? ' sat' : i === 6 ? ' sun' : '') + (key === today ? ' today' : ''));
+      col.dataset.date = key;
+      col.setAttribute('aria-label', dayLabel);
+
+      var head = el('div', 'day-head');
+      head.appendChild(el('span', 'dow', DOW[i]));
+      head.appendChild(el('span', 'num', String(d.getDate())));
+      if (key === today) head.appendChild(el('span', 'badge-today', '今日'));
+      head.appendChild(el('span', 'count', all.length ? nDone + '/' + all.length + ' 完了' : ''));
+      col.appendChild(head);
+
+      var ul = el('ul', 'list');
+      if (!shown.length) {
+        ul.appendChild(el('li', 'empty', all.length ? '該当するタスクはありません' : 'タスクはありません'));
+      }
+      shown.forEach(function (t) { ul.appendChild(card(t, today)); });
+      col.appendChild(ul);
+
+      var form = el('form', 'quick');
+      var inp = el('input');
+      inp.type = 'text';
+      inp.maxLength = 120;
+      inp.placeholder = '＋ タスクを追加';
+      inp.autocomplete = 'off';
+      inp.enterKeyHint = 'done';
+      inp.setAttribute('aria-label', dayLabel + 'にタスクを追加');
+      inp.dataset.fk = 'add:' + key;
+      form.appendChild(inp);
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var v = inp.value.trim();
+        if (!v) return;
+        tasks.push(make(v, key));
+        render('add:' + key);
+      });
+      col.appendChild(form);
+
+      col.addEventListener('dragover', function (e) {
+        if (!dragId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        col.classList.add('over');
+      });
+      col.addEventListener('dragleave', function (e) {
+        if (!col.contains(e.relatedTarget)) col.classList.remove('over');
+      });
+      col.addEventListener('drop', function (e) {
+        e.preventDefault();
+        col.classList.remove('over');
+        var t = find(dragId);
+        dragId = null;
+        if (t && t.date !== key) { t.date = key; render(); }
+      });
+
+      board.appendChild(col);
+    });
+
+    if (focusKey) {
+      var nodes = board.querySelectorAll('[data-fk]');
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j].dataset.fk === focusKey) { nodes[j].focus(); break; }
+      }
+    }
+  }
+
+  function card(t, today) {
+    var li = el('li', 'card p-' + t.priority + (t.done ? ' done' : ''));
+    li.draggable = true;
+    li.addEventListener('dragstart', function (e) {
+      dragId = t.id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', t.title);
+      li.classList.add('dragging');
+    });
+    li.addEventListener('dragend', function () {
+      dragId = null;
+      li.classList.remove('dragging');
+      var o = board.querySelectorAll('.over');
+      for (var i = 0; i < o.length; i++) o[i].classList.remove('over');
+    });
+
+    var cb = el('input');
+    cb.type = 'checkbox';
+    cb.checked = t.done;
+    cb.setAttribute('aria-label', '「' + t.title + '」を完了にする');
+    cb.dataset.fk = 'cb:' + t.id;
+    cb.addEventListener('change', function () { t.done = cb.checked; render('cb:' + t.id); });
+    li.appendChild(cb);
+
+    var body = el('div', 'card-body');
+    body.tabIndex = 0;
+    body.setAttribute('role', 'button');
+    body.setAttribute('aria-label', '「' + t.title + '」を編集');
+    body.dataset.fk = 'body:' + t.id;
+    body.appendChild(el('div', 'card-title', t.title));
+    body.addEventListener('click', function () { openTask(t.id); });
+    body.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTask(t.id); }
+    });
+    li.appendChild(body);
+
+    var foot = el('div', 'card-foot');
+    if (t.time) foot.appendChild(el('span', 'chip', t.time));
+    if (t.priority !== 'mid') foot.appendChild(el('span', 'chip ' + t.priority, '優先度 ' + PRI_LABEL[t.priority]));
+    if (t.note) foot.appendChild(el('span', 'chip', 'メモ'));
+    if (!t.done && t.date < today) foot.appendChild(el('span', 'chip late', '期日超過'));
+
+    var mv = el('div', 'move');
+    [[-1, '‹', '前日へ移動', 'prev:'], [1, '›', '翌日へ移動', 'next:']].forEach(function (m) {
+      var b = el('button', '', m[1]);
+      b.type = 'button';
+      b.title = m[2];
+      b.setAttribute('aria-label', '「' + t.title + '」を' + m[2]);
+      b.dataset.fk = m[3] + t.id;
+      b.addEventListener('click', function () {
+        var snap = JSON.stringify(tasks);
+        t.date = shift(t.date, m[0]);
+        var ws = fmt(weekStart), we = shift(ws, 6);
+        if (t.date < ws) toast('前の週へ移動しました', snap);
+        else if (t.date > we) toast('次の週へ移動しました', snap);
+        render(m[3] + t.id);
+      });
+      mv.appendChild(b);
+    });
+    foot.appendChild(mv);
+    li.appendChild(foot);
+    return li;
+  }
+
+  // ---------- トースト(元に戻す) ----------
+  function toast(msg, snapshot) {
+    undoSnapshot = snapshot || null;
+    $('toastMsg').textContent = msg;
+    $('toastUndo').hidden = !snapshot;
+    $('toast').hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 7000);
+  }
+  function hideToast() { $('toast').hidden = true; undoSnapshot = null; }
+  $('toastUndo').addEventListener('click', function () {
+    if (undoSnapshot) { tasks = JSON.parse(undoSnapshot); render(); }
+    clearTimeout(toastTimer);
+    hideToast();
+  });
+
+  // ---------- タスク編集ダイアログ ----------
+  function openTask(id) {
+    editingId = id;
+    var t = id ? find(id) : null;
+    if (id && !t) return;
+    var today = fmt(new Date());
+    var ws = fmt(weekStart);
+    var def = (today >= ws && today <= shift(ws, 6)) ? today : ws;
+    $('taskDlgTitle').textContent = t ? 'タスクを編集' : '新しいタスク';
+    $('fTitle').value = t ? t.title : '';
+    $('fDate').value = t ? t.date : def;
+    $('fTime').value = t ? t.time : '';
+    $('fPri').value = t ? t.priority : 'mid';
+    $('fNote').value = t ? t.note : '';
+    $('fErr').textContent = '';
+    $('fDelete').hidden = !t;
+    taskDlg.showModal();
+    $('fTitle').focus();
+  }
+
+  $('taskForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = $('fTitle').value.trim();
+    var date = $('fDate').value;
+    if (!title) { $('fErr').textContent = 'タスク名を入力してください。'; $('fTitle').focus(); return; }
+    if (!validDate(date)) { $('fErr').textContent = '日付を選んでください。'; $('fDate').focus(); return; }
+    var data = { time: $('fTime').value, priority: $('fPri').value, note: $('fNote').value.trim() };
+    var t = editingId ? find(editingId) : null;
+    if (t) {
+      t.title = title; t.date = date; t.time = data.time; t.priority = data.priority; t.note = data.note;
+    } else {
+      t = make(title, date, data);
+      tasks.push(t);
+    }
+    taskDlg.close();
+    // 別の週の日付にした場合は、その週を表示する
+    weekStart = startOfWeek(parse(date));
+    render('body:' + t.id);
+  });
+  $('fCancel').addEventListener('click', function () { taskDlg.close(); });
+  $('fDelete').addEventListener('click', function () {
+    var t = find(editingId);
+    if (!t) return;
+    var snap = JSON.stringify(tasks);
+    tasks = tasks.filter(function (x) { return x !== t; });
+    taskDlg.close();
+    render();
+    toast('「' + (t.title.length > 16 ? t.title.slice(0, 16) + '…' : t.title) + '」を削除しました', snap);
+  });
+
+  // ---------- 書き出し・読み込み ----------
+  function exportText() {
+    return JSON.stringify(tasks.map(function (t) {
+      return { title: t.title, date: t.date, time: t.time, priority: t.priority, note: t.note, done: t.done };
+    }), null, 1);
+  }
+  $('io').addEventListener('click', function () {
+    $('ioText').value = exportText();
+    $('ioErr').textContent = '';
+    ioDlg.showModal();
+  });
+  $('ioClose').addEventListener('click', function () { ioDlg.close(); });
+  $('ioSelect').addEventListener('click', function () { $('ioText').focus(); $('ioText').select(); });
+  $('ioLoad').addEventListener('click', function () {
+    var arr;
+    try { arr = JSON.parse($('ioText').value); } catch (e) { arr = null; }
+    if (!Array.isArray(arr)) { $('ioErr').textContent = '読み込めませんでした。書き出したテキストをそのまま貼り付けてください。'; return; }
+    var next = [];
+    for (var i = 0; i < arr.length; i++) {
+      var r = arr[i];
+      if (!r || typeof r.title !== 'string' || !r.title.trim() || !validDate(r.date)) {
+        $('ioErr').textContent = (i + 1) + '件目のデータが正しくありません(タスク名と日付が必要です)。';
+        return;
+      }
+      next.push(make(r.title.trim().slice(0, 120), r.date, {
+        time: typeof r.time === 'string' && /^\d{2}:\d{2}$/.test(r.time) ? r.time : '',
+        priority: r.priority,
+        note: typeof r.note === 'string' ? r.note.slice(0, 1000) : '',
+        done: r.done === true
+      }));
+    }
+    var snap = JSON.stringify(tasks);
+    tasks = next;
+    ioDlg.close();
+    render();
+    toast(next.length + '件のタスクを読み込みました', snap);
+  });
+  $('ioClear').addEventListener('click', function () {
+    if (!tasks.length) { ioDlg.close(); return; }
+    var snap = JSON.stringify(tasks);
+    var n = tasks.length;
+    tasks = [];
+    ioDlg.close();
+    render();
+    toast(n + '件のタスクをすべて削除しました', snap);
+  });
+
+  // ---------- 操作 ----------
+  $('prevWeek').addEventListener('click', function () { weekStart = addDays(weekStart, -7); render(); });
+  $('nextWeek').addEventListener('click', function () { weekStart = addDays(weekStart, 7); render(); });
+  $('thisWeek').addEventListener('click', function () { weekStart = startOfWeek(new Date()); render(); });
+  $('newTask').addEventListener('click', function () { openTask(null); });
+
+  $('carry').addEventListener('click', function () {
+    var ws = fmt(weekStart), we = shift(ws, 6);
+    var targets = tasks.filter(function (t) { return !t.done && t.date >= ws && t.date <= we; });
+    if (!targets.length) { toast('この週に未完了のタスクはありません'); return; }
+    var snap = JSON.stringify(tasks);
+    targets.forEach(function (t) { t.date = shift(t.date, 7); });
+    render();
+    toast(targets.length + '件を翌週の同じ曜日へ送りました', snap);
+  });
+
+  var segBtns = document.querySelectorAll('.seg button');
+  Array.prototype.forEach.call(segBtns, function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.filter;
+      Array.prototype.forEach.call(segBtns, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      render();
+    });
+  });
+  $('search').addEventListener('input', function (e) { query = e.target.value.trim(); render(); });
+
+  // ダイアログの外側クリックで閉じる
+  [taskDlg, ioDlg].forEach(function (d) {
+    d.addEventListener('mousedown', function (e) { if (e.target === d) d.close(); });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

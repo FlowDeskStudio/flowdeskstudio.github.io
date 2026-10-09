@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2aUxNLzzrr7Pg5yWpRGm5GZ/6n1xCdkVgvIe2kgpbmg='; script-src-attr 'none'; style-src 'sha256-21RfQmSz0a2tikbObmNsXTtPqJ4/GAsTyR02QYsXes0='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>神経衰弱</title>
+<style>
+  :root {
+    --bg: #0f3d2e;
+    --bg-deep: #0a2a20;
+    --panel: rgba(255, 255, 255, 0.08);
+    --panel-line: rgba(255, 255, 255, 0.18);
+    --text: #f4f1e6;
+    --text-dim: #b9cdc2;
+    --accent: #f2c14e;
+    --accent-ink: #3a2a00;
+    --card-face: #fffdf5;
+    --card-back-a: #b3322f;
+    --card-back-b: #8f2421;
+    --match: #7bd389;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: "Yu Gothic UI", "Hiragino Kaku Gothic ProN", "Meiryo", system-ui, sans-serif;
+    color: var(--text);
+    background: radial-gradient(ellipse at 50% 20%, var(--bg) 0%, var(--bg-deep) 100%);
+    background-attachment: fixed;
+    line-height: 1.5;
+  }
+
+  .app {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 16px 28px;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+  }
+
+  .lead {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 14px;
+    margin-bottom: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  select, button {
+    font: inherit;
+  }
+
+  select {
+    min-height: 40px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-line);
+    background: #173f31;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    min-height: 40px;
+    padding: 6px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: translateY(1px); }
+
+  select:focus-visible,
+  .btn:focus-visible,
+  .card:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  .hud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .stat {
+    flex: 1 1 90px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    text-align: center;
+  }
+  .stat .label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+  .stat .value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat.is-turn {
+    border-color: var(--accent);
+    background: rgba(242, 193, 78, 0.2);
+    box-shadow: 0 0 0 2px rgba(242, 193, 78, 0.35);
+  }
+
+  .status {
+    min-height: 1.6em;
+    margin: 0 0 10px;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .board {
+    --cols: 4;
+    --rows: 4;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: 8px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: min(
+      calc(var(--cols) * 108px),
+      max(220px, calc((100vh - 270px) * var(--cols) / var(--rows)))
+    );
+  }
+
+  .card {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    perspective: 600px;
+    container-type: inline-size;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 10px;
+  }
+
+  .card-inner {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease;
+  }
+  .card.is-open .card-inner { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  }
+
+  .face.back {
+    border: 3px solid #fffdf5;
+    background:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.14) 0 6px, transparent 6px 12px),
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.14) 0 6px, transparent 6px 12px),
+      linear-gradient(135deg, var(--card-back-a), var(--card-back-b));
+  }
+
+  .face.front {
+    transform: rotateY(180deg);
+    background: var(--card-face);
+    font-size: 2rem;
+    font-size: 58cqw;
+    line-height: 1;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+    user-select: none;
+  }
+
+  .card:not(.is-open):hover .face.back { filter: brightness(1.12); }
+
+  .card.is-matched { cursor: default; }
+  .card.is-matched .face.front {
+    box-shadow: 0 0 0 3px var(--match), 0 2px 5px rgba(0, 0, 0, 0.4);
+    background: #eefbef;
+    animation: pop 0.45s ease;
+  }
+
+  @keyframes pop {
+    0% { scale: 1; }
+    50% { scale: 1.1; }
+    100% { scale: 1; }
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10;
+  }
+
+  .dialog {
+    width: 100%;
+    max-width: 360px;
+    padding: 24px 20px;
+    border-radius: 16px;
+    background: #fffdf5;
+    color: #23301f;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+  .dialog h2 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+  }
+  .dialog p {
+    margin: 0 0 6px;
+    overflow-wrap: anywhere;
+  }
+  .dialog .btn {
+    margin-top: 14px;
+    min-width: 160px;
+  }
+
+  @media (max-width: 480px) {
+    .board { gap: 6px; }
+    h1 { font-size: 1.35rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-inner { transition-duration: 0.01s; }
+    .card.is-matched .face.front { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>神経衰弱</h1>
+    <p class="lead">カードを2枚めくって、同じ絵をそろえましょう。</p>
+  </header>
+
+  <div class="controls">
+    <label class="field">
+      カードの枚数
+      <select id="sizeSelect">
+        <option value="s">12枚(やさしい)</option>
+        <option value="m" selected>16枚(ふつう)</option>
+        <option value="l">24枚(むずかしい)</option>
+        <option value="xl">36枚(とてもむずかしい)</option>
+      </select>
+    </label>
+    <label class="field">
+      あそぶ人数
+      <select id="modeSelect">
+        <option value="1" selected>1人</option>
+        <option value="2">2人で対戦</option>
+      </select>
+    </label>
+    <button type="button" class="btn" id="newGameBtn">最初からやり直す</button>
+  </div>
+
+  <div class="hud" id="hud"></div>
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+
+  <div class="board" id="board" role="group" aria-label="カード"></div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <h2 id="resultTitle"></h2>
+    <p id="resultBody"></p>
+    <p id="resultSub"></p>
+    <button type="button" class="btn" id="againBtn">もう一度あそぶ</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SYMBOLS = [
+    { ch: '🍎', name: 'りんご' },
+    { ch: '🍌', name: 'バナナ' },
+    { ch: '🍇', name: 'ぶどう' },
+    { ch: '🍓', name: 'いちご' },
+    { ch: '🍊', name: 'みかん' },
+    { ch: '🍑', name: 'もも' },
+    { ch: '🍒', name: 'さくらんぼ' },
+    { ch: '🍉', name: 'すいか' },
+    { ch: '🐶', name: 'いぬ' },
+    { ch: '🐱', name: 'ねこ' },
+    { ch: '🐰', name: 'うさぎ' },
+    { ch: '🐼', name: 'パンダ' },
+    { ch: '🐸', name: 'かえる' },
+    { ch: '🐧', name: 'ペンギン' },
+    { ch: '🌻', name: 'ひまわり' },
+    { ch: '⭐', name: 'ほし' },
+    { ch: '🌙', name: 'つき' },
+    { ch: '🚗', name: 'くるま' }
+  ];
+
+  var SIZES = {
+    s: { cols: 4, rows: 3 },
+    m: { cols: 4, rows: 4 },
+    l: { cols: 6, rows: 4 },
+    xl: { cols: 6, rows: 6 }
+  };
+
+  var MISMATCH_WAIT = 1000;
+
+  var boardEl = document.getElementById('board');
+  var hudEl = document.getElementById('hud');
+  var statusEl = document.getElementById('status');
+  var sizeSelect = document.getElementById('sizeSelect');
+  var modeSelect = document.getElementById('modeSelect');
+  var newGameBtn = document.getElementById('newGameBtn');
+  var overlayEl = document.getElementById('overlay');
+  var resultTitle = document.getElementById('resultTitle');
+  var resultBody = document.getElementById('resultBody');
+  var resultSub = document.getElementById('resultSub');
+  var againBtn = document.getElementById('againBtn');
+
+  // ページを開いている間だけ覚えておく最少手数(保存はしない)
+  var bestMoves = {};
+
+  var state = null;
+  var cardEls = [];
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i];
+      arr[i] = arr[j];
+      arr[j] = t;
+    }
+    return arr;
+  }
+
+  function formatTime(ms) {
+    var total = Math.floor(ms / 1000);
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function clearTimers() {
+    if (!state) return;
+    if (state.pendingTimer !== null) clearTimeout(state.pendingTimer);
+    if (state.tickTimer !== null) clearInterval(state.tickTimer);
+    if (state.finishTimer !== null) clearTimeout(state.finishTimer);
+    state.pendingTimer = null;
+    state.tickTimer = null;
+    state.finishTimer = null;
+  }
+
+  function newGame() {
+    clearTimers();
+    overlayEl.hidden = true;
+
+    var sizeKey = SIZES[sizeSelect.value] ? sizeSelect.value : 'm';
+    var size = SIZES[sizeKey];
+    var cols = size.cols;
+    var rows = size.rows;
+    // 画面がせまいときは縦長に並べる
+    if (window.innerWidth < 560 && cols > rows) {
+      cols = size.rows;
+      rows = size.cols;
+    }
+
+    var pairCount = (cols * rows) / 2;
+    var chosen = shuffle(SYMBOLS.slice()).slice(0, pairCount);
+    var deck = [];
+    for (var i = 0; i < chosen.length; i++) {
+      deck.push({ sym: chosen[i], open: false, matched: false });
+      deck.push({ sym: chosen[i], open: false, matched: false });
+    }
+    shuffle(deck);
+
+    state = {
+      sizeKey: sizeKey,
+      cols: cols,
+      rows: rows,
+      players: modeSelect.value === '2' ? 2 : 1,
+      cards: deck,
+      pairCount: pairCount,
+      found: 0,
+      moves: 0,
+      first: null,
+      pending: null,
+      pendingTimer: null,
+      tickTimer: null,
+      finishTimer: null,
+      startTime: null,
+      elapsed: 0,
+      current: 0,
+      scores: [0, 0],
+      finished: false
+    };
+
+    renderBoard();
+    renderHud();
+    setStatus(state.players === 2 ? 'プレイヤー1の番です。' : 'カードを選んでください。');
+  }
+
+  function renderBoard() {
+    boardEl.textContent = '';
+    boardEl.style.setProperty('--cols', String(state.cols));
+    boardEl.style.setProperty('--rows', String(state.rows));
+    cardEls = [];
+
+    for (var i = 0; i < state.cards.length; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'card';
+      btn.setAttribute('data-index', String(i));
+
+      var inner = document.createElement('span');
+      inner.className = 'card-inner';
+
+      var back = document.createElement('span');
+      back.className = 'face back';
+
+      var front = document.createElement('span');
+      front.className = 'face front';
+      front.setAttribute('aria-hidden', 'true');
+
+      inner.appendChild(back);
+      inner.appendChild(front);
+      btn.appendChild(inner);
+      boardEl.appendChild(btn);
+      cardEls.push(btn);
+      updateCard(i);
+    }
+  }
+
+  function updateCard(i) {
+    var card = state.cards[i];
+    var el = cardEls[i];
+    if (!el) return;
+    var shown = card.open || card.matched;
+    el.classList.toggle('is-open', shown);
+    el.classList.toggle('is-matched', card.matched);
+
+    // 裏向きのあいだは絵柄を画面にもコードにも出さない
+    var front = el.querySelector('.front');
+    front.textContent = shown ? card.sym.ch : '';
+
+    var row = Math.floor(i / state.cols) + 1;
+    var col = (i % state.cols) + 1;
+    var pos = row + '行目 ' + col + '列目';
+    var label;
+    if (card.matched) {
+      label = pos + '、' + card.sym.name + '、そろいました';
+      el.setAttribute('aria-disabled', 'true');
+    } else if (card.open) {
+      label = pos + '、' + card.sym.name;
+      el.removeAttribute('aria-disabled');
+    } else {
+      label = pos + '、裏向きのカード';
+      el.removeAttribute('aria-disabled');
+    }
+    el.setAttribute('aria-label', label);
+  }
+
+  function addStat(label, value, isTurn) {
+    var box = document.createElement('div');
+    box.className = 'stat' + (isTurn ? ' is-turn' : '');
+    var l = document.createElement('span');
+    l.className = 'label';
+    l.textContent = label;
+    var v = document.createElement('span');
+    v.className = 'value';
+    v.textContent = value;
+    box.appendChild(l);
+    box.appendChild(v);
+    hudEl.appendChild(box);
+    return v;
+  }
+
+  var timeValueEl = null;
+
+  function renderHud() {
+    hudEl.textContent = '';
+    if (state.players === 2) {
+      var active = state.finished ? -1 : state.current;
+      addStat('プレイヤー1' + (active === 0 ? '(番)' : ''), state.scores[0] + '組', active === 0);
+      addStat('プレイヤー2' + (active === 1 ? '(番)' : ''), state.scores[1] + '組', active === 1);
+      addStat('のこり', (state.pairCount - state.found) + '組', false);
+      timeValueEl = addStat('時間', formatTime(state.elapsed), false);
+    } else {
+      addStat('手数', String(state.moves), false);
+      addStat('そろった組', state.found + ' / ' + state.pairCount, false);
+      timeValueEl = addStat('時間', formatTime(state.elapsed), false);
+      var best = bestMoves[state.sizeKey];
+      addStat('今回の最少手数', best === undefined ? '-' : String(best), false);
+    }
+  }
+
+  function setStatus(text) {
+    statusEl.textContent = text;
+  }
+
+  function startClock() {
+    if (state.startTime !== null) return;
+    state.startTime = Date.now();
+    state.tickTimer = setInterval(function () {
+      if (!state || state.startTime === null || state.finished) return;
+      state.elapsed = Date.now() - state.startTime;
+      if (timeValueEl) timeValueEl.textContent = formatTime(state.elapsed);
+    }, 250);
+  }
+
+  function resolveMismatch() {
+    if (!state || !state.pending) return;
+    if (state.pendingTimer !== null) clearTimeout(state.pendingTimer);
+    state.pendingTimer = null;
+    var pair = state.pending;
+    state.pending = null;
+    for (var k = 0; k < pair.length; k++) {
+      state.cards[pair[k]].open = false;
+      updateCard(pair[k]);
+    }
+    if (state.players === 2) {
+      state.current = state.current === 0 ? 1 : 0;
+      setStatus('プレイヤー' + (state.current + 1) + 'の番です。');
+    }
+    renderHud();
+  }
+
+  function onCardChosen(i) {
+    if (!state || state.finished) return;
+    if (isNaN(i) || i < 0 || i >= state.cards.length) return;
+
+    // めくり戻しを待っている最中に次のカードを選んだら、すぐに戻して続ける
+    if (state.pending) resolveMismatch();
+
+    var card = state.cards[i];
+    if (card.matched || card.open) return;
+
+    startClock();
+    card.open = true;
+    updateCard(i);
+
+    if (state.first === null) {
+      state.first = i;
+      setStatus(card.sym.name + '。もう1枚選んでください。');
+      return;
+    }
+
+    var firstIndex = state.first;
+    var firstCard = state.cards[firstIndex];
+    state.first = null;
+    state.moves++;
+
+    if (firstCard.sym === card.sym) {
+      firstCard.matched = true;
+      card.matched = true;
+      firstCard.open = false;
+      card.open = false;
+      state.found++;
+      state.scores[state.current]++;
+      updateCard(firstIndex);
+      updateCard(i);
+
+      if (state.found === state.pairCount) {
+        finishGame();
+      } else {
+        setStatus(card.sym.name + 'がそろいました!' +
+          (state.players === 2 ? ' プレイヤー' + (state.current + 1) + 'がもう一度めくれます。' : ''));
+        renderHud();
+      }
+    } else {
+      state.pending = [firstIndex, i];
+      setStatus(firstCard.sym.name + 'と' + card.sym.name + '。ちがいました。');
+      renderHud();
+      state.pendingTimer = setTimeout(resolveMismatch, MISMATCH_WAIT);
+    }
+  }
+
+  function finishGame() {
+    state.finished = true;
+    if (state.startTime !== null) state.elapsed = Date.now() - state.startTime;
+    if (state.tickTimer !== null) clearInterval(state.tickTimer);
+    state.tickTimer = null;
+
+    var title;
+    var body;
+    var sub = '';
+    var timeText = formatTime(state.elapsed);
+
+    if (state.players === 2) {
+      var a = state.scores[0];
+      var b = state.scores[1];
+      if (a === b) {
+        title = '引き分け!';
+      } else {
+        title = 'プレイヤー' + (a > b ? 1 : 2) + 'の勝ち!';
+      }
+      body = 'プレイヤー1:' + a + '組 / プレイヤー2:' + b + '組';
+      sub = 'かかった時間 ' + timeText;
+    } else {
+      title = '全部そろいました!';
+      body = '手数 ' + state.moves + '回 / 時間 ' + timeText;
+      var prev = bestMoves[state.sizeKey];
+      if (prev === undefined) {
+        bestMoves[state.sizeKey] = state.moves;
+      } else if (state.moves < prev) {
+        bestMoves[state.sizeKey] = state.moves;
+        sub = '最少手数を更新しました(これまで ' + prev + '回)。';
+      } else {
+        sub = 'この枚数での最少手数は ' + prev + '回です。';
+      }
+    }
+
+    renderHud();
+    setStatus(title);
+
+    resultTitle.textContent = title;
+    resultBody.textContent = body;
+    resultSub.textContent = sub;
+    resultSub.hidden = sub === '';
+
+    var finishedState = state;
+    state.finishTimer = setTimeout(function () {
+      if (state !== finishedState) return;
+      state.finishTimer = null;
+      overlayEl.hidden = false;
+      againBtn.focus();
+    }, 700);
+  }
+
+  boardEl.addEventListener('click', function (e) {
+    var target = e.target;
+    if (!target || !target.closest) return;
+    var btn = target.closest('.card');
+    if (!btn || !boardEl.contains(btn)) return;
+    onCardChosen(parseInt(btn.getAttribute('data-index'), 10));
+  });
+
+  // 矢印キーでカード間を移動
+  boardEl.addEventListener('keydown', function (e) {
+    if (!state) return;
+    var target = e.target;
+    if (!target || !target.closest) return;
+    var btn = target.closest('.card');
+    if (!btn) return;
+    var i = parseInt(btn.getAttribute('data-index'), 10);
+    if (isNaN(i)) return;
+    var cols = state.cols;
+    var total = state.cards.length;
+    var next = i;
+    switch (e.key) {
+      case 'ArrowLeft':
+        if (i % cols !== 0) next = i - 1;
+        break;
+      case 'ArrowRight':
+        if (i % cols !== cols - 1 && i + 1 < total) next = i + 1;
+        break;
+      case 'ArrowUp':
+        if (i - cols >= 0) next = i - cols;
+        break;
+      case 'ArrowDown':
+        if (i + cols < total) next = i + cols;
+        break;
+      case 'Home':
+        next = i - (i % cols);
+        break;
+      case 'End':
+        next = Math.min(total - 1, i - (i % cols) + cols - 1);
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    if (next !== i && cardEls[next]) cardEls[next].focus();
+  });
+
+  function restartAndFocus() {
+    newGame();
+    if (cardEls[0]) cardEls[0].focus();
+  }
+
+  newGameBtn.addEventListener('click', newGame);
+  sizeSelect.addEventListener('change', newGame);
+  modeSelect.addEventListener('change', newGame);
+  againBtn.addEventListener('click', restartAndFocus);
+
+  document.addEventListener('keydown', function (e) {
+    if (overlayEl.hidden) return;
+    if (e.key === 'Escape') {
+      overlayEl.hidden = true;
+      newGameBtn.focus();
+    } else if (e.key === 'Tab') {
+      // ダイアログ内のボタンは1つだけなので、フォーカスを外に出さない
+      e.preventDefault();
+      againBtn.focus();
+    }
+  });
+
+  newGame();
+})();
+</script>
+</body>
+</html>

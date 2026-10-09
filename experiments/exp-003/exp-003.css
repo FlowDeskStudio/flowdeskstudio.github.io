@@ -51,3 +51,41 @@
 .result-table .held {
   color: var(--muted);
 }
+
+.build-list {
+  margin: 34px 0 42px;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+
+.build-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.build-list a {
+  font-weight: 900;
+}
+
+.build-tag,
+.build-note {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.build-tag {
+  min-width: 4.5em;
+  color: var(--muted);
+}
+
+.build-note {
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  background: var(--acid);
+}

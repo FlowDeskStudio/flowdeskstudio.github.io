@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0thVmkJU3XnPT923P6Go4GzbYYX16bFgQBGKT24j1dE='; script-src-attr 'none'; style-src 'sha256-205mqMpSAB6bAmtJpx2CedoEXQdhi6SZVFXs28lghQI='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nagi OS — ブラウザの中のデスクトップ</title>
+<style>
+:root{
+  --accent:#3d6bf0; --accent-fg:#fff;
+  --win:#f6f5f1; --win2:#ffffff; --title:#e9e7e0; --fg:#1d2330; --muted:#5d667a;
+  --line:#d5d2c9; --hover:rgba(20,30,60,.08); --press:rgba(20,30,60,.15);
+  --bar:rgba(246,245,241,.86); --danger:#c62f3a;
+  --shadow:0 18px 50px rgba(8,12,30,.35), 0 2px 8px rgba(8,12,30,.2);
+  --font:"Segoe UI","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --mono:"Cascadia Mono","Consolas","SFMono-Regular","Menlo","MS Gothic",monospace;
+}
+:root[data-theme="dark"]{
+  --win:#252831; --win2:#1b1d24; --title:#2e323d; --fg:#e9ebf1; --muted:#a2aabb;
+  --line:#3d4250; --hover:rgba(255,255,255,.09); --press:rgba(255,255,255,.17);
+  --bar:rgba(26,28,35,.86); --danger:#ff7b84;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--font); font-size:14px; line-height:1.5; color:var(--fg);
+  background:#10131c; overflow:hidden; display:grid; grid-template-rows:1fr 48px;
+  user-select:none; -webkit-user-select:none;
+}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+svg{display:block}
+
+/* ---------- デスクトップ ---------- */
+#desktop{position:relative;overflow:hidden;z-index:0;background-size:cover;background-position:center;transition:background .4s}
+#icons{position:absolute;inset:0;padding:14px 10px;display:flex;flex-direction:column;flex-wrap:wrap;align-content:flex-start;gap:6px 4px}
+.dicon{
+  width:88px;min-height:84px;padding:8px 4px 6px;border:1px solid transparent;border-radius:8px;background:none;
+  display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;
+}
+.dicon svg{width:40px;height:40px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.dicon span{
+  font-size:12.5px;line-height:1.3;text-align:center;overflow-wrap:anywhere;
+  text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.8);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.dicon:hover{background:rgba(255,255,255,.14)}
+.dicon.sel{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.5)}
+.dicon:focus-visible{outline-color:#fff}
+#windows{position:absolute;inset:0;pointer-events:none}
+#snap{position:absolute;border:2px solid rgba(255,255,255,.75);background:rgba(255,255,255,.2);border-radius:10px;pointer-events:none;opacity:0;transition:opacity .12s}
+#snap.show{opacity:1}
+
+/* ---------- ウィンドウ ---------- */
+.win{
+  position:absolute;display:flex;flex-direction:column;pointer-events:auto;
+  background:var(--win);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(8,12,30,.25);
+  animation:pop .16s ease-out;outline:none;
+}
+.win.active{box-shadow:var(--shadow)}
+.win.min{display:none}
+.win.max{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;border-width:0}
+.win.max .rh{display:none}
+.win.closing{opacity:0;transform:scale(.97);transition:opacity .12s,transform .12s}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+.titlebar{
+  height:38px;flex:none;display:flex;align-items:center;gap:8px;padding-left:10px;
+  background:var(--title);border-bottom:1px solid var(--line);border-radius:9px 9px 0 0;touch-action:none;
+}
+.win.max .titlebar{border-radius:0}
+.win:not(.active) .titlebar{opacity:.72}
+.ticon svg{width:18px;height:18px}
+.ttitle{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:600}
+.tbtns{display:flex;height:100%}
+.tb{width:42px;height:100%;border:0;background:none;display:grid;place-items:center;color:var(--fg)}
+.tb svg{width:11px;height:11px}
+.tb:hover{background:var(--hover)}
+.tb.close{border-radius:0 9px 0 0}
+.win.max .tb.close{border-radius:0}
+.tb.close:hover{background:#d93644;color:#fff}
+.wbody{flex:1;min-height:0;position:relative;overflow:auto;border-radius:0 0 9px 9px;display:flex;flex-direction:column}
+.rh{position:absolute;touch-action:none}
+.rh.n{top:-4px;left:10px;right:10px;height:8px;cursor:ns-resize}
+.rh.s{bottom:-4px;left:10px;right:10px;height:8px;cursor:ns-resize}
+.rh.e{right:-4px;top:10px;bottom:10px;width:8px;cursor:ew-resize}
+.rh.w{left:-4px;top:10px;bottom:10px;width:8px;cursor:ew-resize}
+.rh.ne,.rh.nw,.rh.se,.rh.sw{width:16px;height:16px}
+.rh.ne{top:-5px;right:-5px;cursor:nesw-resize}.rh.sw{bottom:-5px;left:-5px;cursor:nesw-resize}
+.rh.nw{top:-5px;left:-5px;cursor:nwse-resize}.rh.se{bottom:-5px;right:-5px;cursor:nwse-resize}
+
+/* ---------- 共通部品 ---------- */
+.toolbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--win)}
+.tbtn{border:1px solid transparent;background:none;border-radius:6px;padding:4px 10px;min-height:30px;white-space:nowrap}
+.tbtn:hover:not(:disabled){background:var(--hover)}
+.tbtn:active:not(:disabled){background:var(--press)}
+.tbtn:disabled{opacity:.4;cursor:default}
+.tbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.tsep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.statusbar{flex:none;padding:3px 10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);background:var(--win);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1px solid var(--line);background:var(--win2);border-radius:6px;padding:6px 16px;min-height:32px}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{background:#c62f3a;border-color:#c62f3a;color:#fff}
+.inp{width:100%;border:1px solid var(--line);background:var(--win2);border-radius:6px;padding:6px 9px;user-select:text;-webkit-user-select:text}
+.modal{position:absolute;inset:38px 0 0 0;background:rgba(10,14,28,.42);display:grid;place-items:center;padding:12px;z-index:5;border-radius:0 0 9px 9px}
+.modal.sys{position:fixed;inset:0;z-index:8;border-radius:0}
+.mbox{width:min(380px,100%);max-height:100%;overflow:auto;background:var(--win);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
+.mmsg{margin:0;overflow-wrap:anywhere}
+.mbtns{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.fd-path{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.fd-list{height:150px;overflow:auto;border:1px solid var(--line);border-radius:6px;background:var(--win2);padding:3px}
+.fd-row{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:4px 6px;border-radius:5px}
+.fd-row:hover{background:var(--hover)}
+.fd-row svg{width:18px;height:18px;flex:none}
+.fd-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fd-err{color:var(--danger);font-size:12.5px;min-height:1.2em}
+
+/* ---------- タスクバー ---------- */
+#taskbar{position:relative;z-index:2;display:flex;align-items:center;gap:6px;padding:0 8px;background:var(--bar);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+#start-btn{width:40px;height:38px;border:0;border-radius:8px;background:none;display:grid;place-items:center;flex:none}
+#start-btn svg{width:24px;height:24px}
+#start-btn:hover,#start-btn[aria-expanded="true"]{background:var(--hover)}
+#tasks{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.task{flex:0 1 170px;min-width:42px;height:36px;display:flex;align-items:center;gap:7px;padding:0 10px;border:0;border-radius:7px;background:none;position:relative}
+.task svg{width:18px;height:18px;flex:none}
+.task span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.task:hover{background:var(--hover)}
+.task.active{background:var(--press)}
+.task::after{content:"";position:absolute;left:50%;bottom:2px;width:14px;height:3px;border-radius:2px;background:var(--muted);transform:translateX(-50%);transition:width .15s}
+.task.active::after{width:26px;background:var(--accent)}
+.task.min{opacity:.7}
+#clock{flex:none;border:0;background:none;border-radius:7px;padding:2px 10px;height:38px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;line-height:1.25;font-size:12px;font-variant-numeric:tabular-nums}
+#clock:hover{background:var(--hover)}
+
+/* ---------- スタートメニュー / メニュー / 通知 ---------- */
+#start-menu{position:fixed;left:8px;bottom:56px;z-index:5;width:min(380px,calc(100vw - 16px));max-height:calc(100vh - 72px);display:flex;flex-direction:column;gap:12px;padding:14px;background:var(--bar);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);animation:pop .14s ease-out}
+#sm-apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:4px;overflow:auto}
+.sm-app{border:0;background:none;border-radius:8px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px}
+.sm-app svg{width:32px;height:32px}
+.sm-app:hover{background:var(--hover)}
+.sm-empty{grid-column:1/-1;color:var(--muted);padding:16px;text-align:center}
+#sm-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+#sm-foot .who{flex:1;font-weight:600;display:flex;align-items:center;gap:8px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-size:13px}
+#ctx{position:fixed;z-index:6;min-width:190px;padding:5px;background:var(--win);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow)}
+.mi{display:block;width:100%;text-align:left;border:0;background:none;border-radius:5px;padding:6px 12px}
+.mi:hover,.mi:focus-visible{background:var(--hover);outline:none}
+.mi.danger{color:var(--danger)}
+#ctx .sep{height:1px;background:var(--line);margin:4px 6px}
+#toasts{position:fixed;right:12px;bottom:60px;z-index:7;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{max-width:min(340px,calc(100vw - 24px));background:var(--win);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;box-shadow:var(--shadow);padding:9px 14px;animation:pop .16s ease-out;overflow-wrap:anywhere}
+#sleep{position:fixed;inset:0;z-index:10;background:#05070c;color:#dfe4f0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+#sleep .big{font-size:clamp(48px,12vw,112px);font-weight:200;font-variant-numeric:tabular-nums;line-height:1}
+#sleep .sub{color:#8d96aa}
+
+/* ---------- メモ帳 ---------- */
+.np-text{flex:1;min-height:0;width:100%;border:0;resize:none;padding:10px 12px;background:var(--win2);font-family:var(--mono);font-size:14px;line-height:1.6;user-select:text;-webkit-user-select:text;outline:none}
+
+/* ---------- ファイル ---------- */
+.fx{flex:1;min-height:0;display:flex}
+.fx-side{flex:none;width:132px;border-right:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.fx-side button{display:flex;align-items:center;gap:7px;border:0;background:none;border-radius:6px;padding:5px 7px;text-align:left}
+.fx-side button:hover{background:var(--hover)}
+.fx-side svg{width:17px;height:17px;flex:none}
+.fx-side span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-main{flex:1;min-width:0;overflow:auto;background:var(--win2);padding:4px}
+.fx-head,.fx-row{display:grid;grid-template-columns:minmax(0,1fr) 90px 80px;gap:8px;align-items:center;padding:4px 8px}
+.fx-head{font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.fx-row{width:100%;border:1px solid transparent;background:none;border-radius:6px;text-align:left}
+.fx-row:hover{background:var(--hover)}
+.fx-row.sel{background:var(--hover);border-color:var(--accent)}
+.fx-name{display:flex;align-items:center;gap:8px;min-width:0}
+.fx-name svg{width:20px;height:20px;flex:none}
+.fx-name span,.fx-row>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-row>span{font-size:12.5px;color:var(--muted)}
+.fx-empty{padding:28px 12px;text-align:center;color:var(--muted)}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;flex:1;min-width:120px}
+.crumbs button{border:0;background:none;border-radius:5px;padding:3px 6px}
+.crumbs button:hover{background:var(--hover)}
+.crumbs i{color:var(--muted);font-style:normal}
+@media (max-width:520px){.fx-side{display:none}.fx-head,.fx-row{grid-template-columns:minmax(0,1fr) 70px}.fx-head>:nth-child(2),.fx-row>:nth-child(2){display:none}}
+
+/* ---------- 電卓 ---------- */
+.calc{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px;min-height:0}
+.calc-disp{flex:none;background:var(--win2);border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-align:right;overflow:hidden}
+.calc-expr{min-height:1.4em;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.calc-val{font-size:30px;font-weight:600;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap;user-select:text;-webkit-user-select:text}
+.calc-val.sm{font-size:20px}
+.calc-keys{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px}
+.ck{border:1px solid var(--line);background:var(--win2);border-radius:8px;font-size:17px}
+.ck:hover{background:var(--hover)}
+.ck:active{background:var(--press)}
+.ck.op{background:var(--title);font-weight:600}
+.ck.eq{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:700}
+
+/* ---------- ペイント ---------- */
+.pt-area{flex:1;min-height:0;overflow:auto;background:#8e939f;padding:12px;display:flex;align-items:flex-start;justify-content:center}
+.pt-cv{max-width:100%;height:auto;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);touch-action:none;cursor:crosshair}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--win);box-shadow:0 0 0 1px var(--line);padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.pt-color{width:32px;height:28px;padding:0;border:1px solid var(--line);border-radius:5px;background:none}
+.pt-size{width:90px;accent-color:var(--accent)}
+.lbl{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+/* ---------- ターミナル ---------- */
+.tm{flex:1;min-height:0;overflow:auto;background:#141821;color:#dfe5f2;font-family:var(--mono);font-size:13.5px;line-height:1.5;padding:8px 10px;user-select:text;-webkit-user-select:text;cursor:text}
+.tm-l{white-space:pre-wrap;overflow-wrap:anywhere;min-height:1.5em}
+.tm-l.err{color:#ff8c93}.tm-l.cmd{color:#9fb4d9}.tm-l.ok{color:#83e0a6}
+.tm-line{display:flex;gap:8px}
+.tm-prompt{color:#83e0a6;white-space:nowrap}
+.tm-in{flex:1;min-width:0;border:0;background:none;color:inherit;font:inherit;outline:none;padding:0;caret-color:#83e0a6}
+
+/* ---------- マインスイーパー ---------- */
+.ms{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;overflow:auto}
+.ms-hud{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:100%}
+.ms-num{font-family:var(--mono);font-weight:700;background:#1c2230;color:#ff6b6b;border-radius:5px;padding:2px 8px;min-width:54px;text-align:center}
+.ms-state{font-weight:600;min-width:64px;text-align:center}
+.ms-board{display:grid;gap:2px;background:#8a93a6;padding:4px;border-radius:6px;flex:none}
+.ms-c{width:28px;height:28px;padding:0;border:0;border-radius:3px;background:#cfd6e4;color:#1d2330;font-weight:800;font-size:14px;line-height:28px;text-align:center;box-shadow:inset -2px -2px 0 rgba(0,0,0,.18),inset 2px 2px 0 rgba(255,255,255,.7)}
+.ms-c:hover{background:#dde3ee}
+.ms-c.open{background:#f3f5f9;box-shadow:none;cursor:default}
+.ms-c.flag{color:#d2303c}
+.ms-c.mine{background:#f3f5f9;color:#1d2330}
+.ms-c.boom{background:#f2616b;color:#1d2330}
+.ms-c.wrong{background:#f6d7a8;text-decoration:line-through}
+.ms-c[data-n="1"]{color:#2456d6}.ms-c[data-n="2"]{color:#1f7a3a}.ms-c[data-n="3"]{color:#cf2f3a}.ms-c[data-n="4"]{color:#4a2fb0}
+.ms-c[data-n="5"]{color:#8a2a1a}.ms-c[data-n="6"]{color:#0f7c86}.ms-c[data-n="7"]{color:#1d2330}.ms-c[data-n="8"]{color:#6b7280}
+.sel-in{border:1px solid var(--line);background:var(--win2);border-radius:6px;padding:4px 6px;min-height:30px}
+
+/* ---------- 設定 ---------- */
+.st{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:18px}
+.st h2{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+.st-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:var(--win2);padding:6px 16px;min-height:32px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.acc{width:30px;height:30px;border-radius:50%;border:3px solid var(--win);box-shadow:0 0 0 1px var(--line);padding:0}
+.acc[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.wp{width:92px;border:2px solid transparent;border-radius:9px;background:none;padding:3px;display:flex;flex-direction:column;gap:3px;align-items:center;font-size:12px}
+.wp i{display:block;width:100%;height:52px;border-radius:6px;border:1px solid var(--line)}
+.wp[aria-pressed="true"]{border-color:var(--accent)}
+.chk{display:flex;align-items:center;gap:8px;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--accent)}
+.st-about{color:var(--muted);font-size:12.5px;margin:0}
+
+/* ---------- カレンダー ---------- */
+.cal{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.cal-head{display:flex;align-items:center;gap:6px}
+.cal-title{flex:1;font-size:17px;font-weight:700;margin:0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-wd{text-align:center;font-size:12px;color:var(--muted);padding:2px 0}
+.cal-d{aspect-ratio:1/0.8;min-height:30px;border:1px solid transparent;background:none;border-radius:7px;position:relative;font-variant-numeric:tabular-nums}
+.cal-d:hover{background:var(--hover)}
+.cal-d.sun,.cal-wd.sun{color:var(--danger)}
+.cal-d.sat,.cal-wd.sat{color:var(--accent)}
+.cal-d.today{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.cal-d.sel{border-color:var(--fg)}
+.cal-d.has::after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:5px;border-radius:50%;background:currentColor;transform:translateX(-50%)}
+.cal-note{flex:1;min-height:70px;resize:none;border:1px solid var(--line);border-radius:7px;background:var(--win2);padding:8px;user-select:text;-webkit-user-select:text}
+.cal-lbl{font-size:12.5px;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="desktop" aria-label="デスクトップ">
+  <div id="icons"></div>
+  <div id="snap"></div>
+  <div id="windows"></div>
+</main>
+
+<div id="start-menu" role="dialog" aria-label="スタートメニュー" hidden>
+  <input id="sm-search" class="inp" type="text" placeholder="アプリを検索" aria-label="アプリを検索" autocomplete="off">
+  <div id="sm-apps"></div>
+  <div id="sm-foot">
+    <div class="who"><span class="avatar" aria-hidden="true">G</span>ゲスト</div>
+    <button class="btn" type="button" id="sm-closeall">すべて閉じる</button>
+    <button class="btn" type="button" id="sm-sleep">スリープ</button>
+  </div>
+</div>
+
+<footer id="taskbar">
+  <button id="start-btn" type="button" aria-label="スタート" title="スタート" aria-haspopup="dialog" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="var(--accent)"/><path d="M5 11c2.3-2.4 4.7-2.4 7 0s4.700 2.400 7 0M5 15c2.3-2.4 4.7-2.4 7 0s4.700 2.400 7 0" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <div id="tasks" role="toolbar" aria-label="開いているウィンドウ"></div>
+  <button id="clock" type="button" title="カレンダーを開く"><span id="clk-t"></span><span id="clk-d"></span></button>
+</footer>
+
+<div id="ctx" role="menu" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="sleep" hidden><div class="big" id="sleep-t"></div><div class="sub" id="sleep-d"></div><div class="sub">クリックまたはキー入力で復帰</div></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ===================== ユーティリティ ===================== */
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.min(Math.max(v, a), Math.max(a, b));
+const pad = n => String(n).padStart(2, '0');
+
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  if (props) for (const k of Object.keys(props)) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v;            // 内部で定義したアイコン文字列のみに使用
+    else if (k === 'value') n.value = v;
+    else if (k === 'checked') n.checked = !!v;
+    else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) {
+    if (c == null || c === false) continue;
+    n.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  return n;
+}
+
+const ICONS = {
+  notepad: '<rect x="5" y="3" width="14" height="18" rx="2" fill="#fff" stroke="#5b6b8c" stroke-width="1.2"/><rect x="5" y="3" width="14" height="4" rx="2" fill="#f0b03f"/><path d="M8 11h8M8 14h8M8 17h5" stroke="#5b6b8c" stroke-width="1.3" stroke-linecap="round"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#e39a2f"/><path d="M3 10h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#f7c65d"/>',
+  calc: '<rect x="5" y="2.5" width="14" height="19" rx="2.5" fill="#39425a"/><rect x="7.5" y="5" width="9" height="4" rx="1" fill="#b9e6c9"/><g fill="#fff"><circle cx="9" cy="12.5" r="1.2"/><circle cx="12" cy="12.5" r="1.2"/><circle cx="9" cy="16.5" r="1.2"/><circle cx="12" cy="16.5" r="1.2"/></g><rect x="14" y="11.3" width="2.4" height="6.4" rx="1.2" fill="#f08a4b"/>',
+  paint: '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2 0-1.600-1-1.800-1-3s1-2 2.500-2H18a3 3 0 0 0 3-3c0-4.400-4-8-9-8z" fill="#f3e3c7" stroke="#a9825a"/><circle cx="7.5" cy="11" r="1.5" fill="#e5484d"/><circle cx="10" cy="7" r="1.5" fill="#f0b03f"/><circle cx="14.5" cy="6.8" r="1.5" fill="#3d9a5f"/><circle cx="17.5" cy="10" r="1.5" fill="#3d6bf0"/>',
+  term: '<rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="#1c2230"/><path d="M6.5 9.5l3 2.500-3 2.500" fill="none" stroke="#7ee0a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 15h5" stroke="#e8eaf0" stroke-width="1.6" stroke-linecap="round"/>',
+  mines: '<path d="M12 4v3M5.500 13H3M21 13h-2.500M6.500 7.500L8.300 9.300M17.500 7.500l-1.800 1.800" stroke="#2b3040" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="13" r="6.5" fill="#2b3040"/><circle cx="9.8" cy="10.8" r="1.6" fill="#fff" opacity=".8"/><circle cx="12" cy="3.5" r="1.5" fill="#f08a4b"/>',
+  settings: '<circle cx="12" cy="12" r="8" fill="none" stroke="#6b7690" stroke-width="4" stroke-dasharray="3.14 3.14"/><circle cx="12" cy="12" r="6.5" fill="#6b7690"/><circle cx="12" cy="12" r="2.6" fill="#e8eaf0"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="#fff" stroke="#c9ccd6"/><path d="M3.500 7.500A2.500 2.500 0 0 1 6 5h12a2.500 2.500 0 0 1 2.500 2.500V10h-17z" fill="#e5484d"/><path d="M8 3.500v3M16 3.500v3" stroke="#7a1f22" stroke-width="1.5" stroke-linecap="round"/><g fill="#39425a"><rect x="7" y="12.3" width="2.5" height="2.5" rx=".6"/><rect x="10.8" y="12.3" width="2.5" height="2.5" rx=".6"/><rect x="14.6" y="12.3" width="2.5" height="2.5" rx=".6"/><rect x="7" y="16" width="2.5" height="2.5" rx=".6"/><rect x="10.8" y="16" width="2.5" height="2.5" rx=".6"/></g>',
+  text: '<path d="M6 3h8l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#fff" stroke="#7b869d" stroke-width="1.2"/><path d="M14 3v4h4" fill="#dfe3ec" stroke="#7b869d" stroke-width="1.2" stroke-linejoin="round"/><path d="M7.500 12h7M7.500 15h7M7.500 18h4" stroke="#7b869d" stroke-width="1.2" stroke-linecap="round"/>',
+  image: '<rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="#dff0ff" stroke="#5b86b8" stroke-width="1.2"/><circle cx="8.5" cy="9.5" r="1.8" fill="#f0b03f"/><path d="M4.500 17.500l4.500-4.500 3.500 3.500 2.500-2.500 4.500 4.500v.500a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z" fill="#3d9a5f"/>',
+  up: '<path d="M12 19V6M6 11.500l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+const icon = n => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (ICONS[n] || ICONS.text) + '</svg>';
+const TB_ICONS = {
+  min: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 5h8" stroke="currentColor" stroke-width="1.2"/></svg>',
+  max: '<svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="1" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+  restore: '<svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="3" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M3 3V1h6v6H7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+  close: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" stroke-width="1.3"/></svg>'
+};
+
+function toast(msg) {
+  const t = el('div', { class: 'toast', text: msg });
+  $('#toasts').append(t);
+  setTimeout(() => t.remove(), 3600);
+}
+
+/* クリックで選択、ダブルクリック / Enter / タップで開く */
+function bindOpen(node, select, open) {
+  let touch = false;
+  node.addEventListener('pointerdown', e => { touch = e.pointerType === 'touch'; });
+  node.addEventListener('click', e => { select(); if (e.detail === 0 || touch) open(); });
+  node.addEventListener('dblclick', () => { if (!touch) open(); });
+}
+
+/* ===================== 仮想ファイルシステム（メモリ上のみ） ===================== */
+const DESK = '/デスクトップ', DOCS = '/ドキュメント', PICS = '/ピクチャ';
+const fs = (() => {
+  const root = { type: 'dir', name: '', children: [] };
+  const subs = new Set();
+  const locked = new Set([DESK, DOCS, PICS]);
+  const emit = () => subs.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+  const norm = (p, cwd = '/') => {
+    const out = [];
+    for (const s of (p.startsWith('/') ? p : cwd + '/' + p).split('/')) {
+      if (!s || s === '.') continue;
+      if (s === '..') out.pop(); else out.push(s);
+    }
+    return '/' + out.join('/');
+  };
+  const get = p => {
+    let n = root;
+    for (const s of p.split('/').filter(Boolean)) {
+      if (n.type !== 'dir') return null;
+      n = n.children.find(c => c.name === s);
+      if (!n) return null;
+    }
+    return n;
+  };
+  const dirname = p => { const i = p.lastIndexOf('/'); return i <= 0 ? '/' : p.slice(0, i); };
+  const basename = p => p.slice(p.lastIndexOf('/') + 1);
+  const join = (d, n) => (d === '/' ? '/' + n : d + '/' + n);
+  const validName = n => !!n && !/[\/\\]/.test(n) && n !== '.' && n !== '..' && n.length <= 60;
+  const parentOf = p => {
+    const d = get(dirname(p));
+    if (!d || d.type !== 'dir') throw new Error('フォルダーが見つかりません: ' + dirname(p));
+    return d;
+  };
+  const checkName = n => { if (!validName(n)) throw new Error('この名前は使用できません。'); };
+  return {
+    norm, get, dirname, basename, join, validName,
+    on(f) { subs.add(f); return () => subs.delete(f); },
+    list(p) {
+      const d = get(p);
+      if (!d || d.type !== 'dir') return [];
+      return d.children.slice().sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name, 'ja') : (a.type === 'dir' ? -1 : 1));
+    },
+    mkdir(p) {
+      const d = parentOf(p), name = basename(p);
+      checkName(name);
+      if (d.children.some(c => c.name === name)) throw new Error('同じ名前の項目が既にあります: ' + name);
+      d.children.push({ type: 'dir', name, children: [] });
+      emit();
+    },
+    write(p, content, kind) {
+      const d = parentOf(p), name = basename(p);
+      checkName(name);
+      const ex = d.children.find(c => c.name === name);
+      if (ex) {
+        if (ex.type === 'dir') throw new Error('同じ名前のフォルダーがあります: ' + name);
+        ex.content = content; if (kind) ex.kind = kind;
+      } else d.children.push({ type: 'file', name, kind: kind || 'text', content });
+      emit();
+    },
+    remove(p) {
+      if (p === '/' || locked.has(p)) throw new Error('このフォルダーは削除できません。');
+      const d = parentOf(p), i = d.children.findIndex(c => c.name === basename(p));
+      if (i < 0) throw new Error('見つかりません: ' + p);
+      d.children.splice(i, 1);
+      emit();
+    },
+    rename(p, name) {
+      if (p === '/' || locked.has(p)) throw new Error('このフォルダーの名前は変更できません。');
+      checkName(name);
+      const d = parentOf(p), n = d.children.find(c => c.name === basename(p));
+      if (!n) throw new Error('見つかりません: ' + p);
+      if (n.name === name) return p;
+      if (d.children.some(c => c.name === name)) throw new Error('同じ名前の項目が既にあります: ' + name);
+      n.name = name;
+      emit();
+      return join(dirname(p), name);
+    },
+    unique(dir, base, ext = '') {
+      let n = base + ext, i = 2;
+      while (get(join(dir, n))) n = base + ' (' + (i++) + ')' + ext;
+      return n;
+    }
+  };
+})();
+const kindIcon = n => n.type === 'dir' ? 'folder' : (n.kind === 'image' ? 'image' : 'text');
+const kindLabel = n => n.type === 'dir' ? 'フォルダー' : (n.kind === 'image' ? '画像' : 'テキスト');
+const sizeLabel = n => {
+  if (n.type === 'dir') return n.children.length + ' 項目';
+  if (n.kind === 'image') return Math.max(1, Math.round(n.content.length * 0.75 / 1024)) + ' KB';
+  return Array.from(n.content).length + ' 文字';
+};
+
+/* ===================== ウィンドウマネージャー ===================== */
+const layer = $('#windows'), tasksEl = $('#tasks'), snapEl = $('#snap');
+const WM = { list: [], z: 10, active: null, seq: 0, cascade: 0 };
+const apps = {};
+
+function applyGeom(w) {
+  const s = w.el.style;
+  s.left = w.x + 'px'; s.top = w.y + 'px'; s.width = w.w + 'px'; s.height = w.h + 'px';
+}
+function syncActive() {
+  for (const w of WM.list) {
+    const a = w === WM.active;
+    w.el.classList.toggle('active', a);
+    w.task.classList.toggle('active', a);
+    w.task.classList.toggle('min', w.min);
+    w.task.setAttribute('aria-pressed', a ? 'true' : 'false');
+  }
+}
+function focusWin(w) {
+  if (w.closed) return;
+  if (w.min) { w.min = false; w.el.classList.remove('min'); }
+  if (WM.active !== w || w.z !== WM.z) { w.z = ++WM.z; w.el.style.zIndex = w.z; }
+  WM.active = w;
+  syncActive();
+  if (!w.el.contains(document.activeElement)) w.el.focus({ preventScroll: true });
+}
+function activateTop() {
+  const c = WM.list.filter(w => !w.min).sort((a, b) => b.z - a.z)[0];
+  if (c) focusWin(c); else { WM.active = null; syncActive(); }
+}
+function minimize(w) {
+  w.min = true; w.el.classList.add('min');
+  if (WM.active === w) { WM.active = null; activateTop(); } else syncActive();
+}
+function setMax(w, on) {
+  w.max = on;
+  w.el.classList.toggle('max', on);
+  w.btnMax.innerHTML = on ? TB_ICONS.restore : TB_ICONS.max;
+  const lbl = on ? '元に戻す' : '最大化';
+  w.btnMax.setAttribute('aria-label', lbl); w.btnMax.title = lbl;
+}
+function showSnap(kind) {
+  if (!kind) { snapEl.classList.remove('show'); return; }
+  const a = layer.getBoundingClientRect(), half = Math.floor(a.width / 2), s = snapEl.style;
+  s.top = '6px'; s.height = (a.height - 12) + 'px';
+  s.left = (kind === 'right' ? half + 6 : 6) + 'px';
+  s.width = ((kind === 'max' ? a.width : half) - 12) + 'px';
+  snapEl.classList.add('show');
+}
+function applySnap(w, kind) {
+  if (kind === 'max') { setMax(w, true); return; }
+  const a = layer.getBoundingClientRect();
+  w.restore = { w: w.w, h: w.h };
+  w.w = Math.floor(a.width / 2); w.h = a.height; w.y = 0;
+  w.x = kind === 'left' ? 0 : a.width - w.w;
+  applyGeom(w);
+}
+async function closeWin(w, force) {
+  if (w.closed || w.closing) return;
+  if (!force && w.beforeClose) {
+    w.closing = true;
+    let ok = false;
+    try { ok = await w.beforeClose(); } catch (e) { console.error(e); ok = true; }
+    w.closing = false;
+    if (!ok) return;
+  }
+  w.closed = true;
+  try { if (w.onClose) w.onClose(); } catch (e) { console.error(e); }
+  WM.list.splice(WM.list.indexOf(w), 1);
+  w.task.remove();
+  w.el.classList.add('closing');
+  setTimeout(() => w.el.remove(), 130);
+  if (WM.active === w) { WM.active = null; activateTop(); }
+}
+
+function createWindow(o) {
+  const area = layer.getBoundingClientRect();
+  const w = {
+    id: ++WM.seq, app: o.app, title: o.title, icon: o.icon || (apps[o.app] ? apps[o.app].icon : 'text'),
+    minW: o.minW || 240, minH: o.minH || 160, max: false, min: false, restore: null, z: 0,
+    beforeClose: null, onClose: null, closed: false, closing: false
+  };
+  w.w = Math.min(o.w || 520, Math.max(220, area.width - 16));
+  w.h = Math.min(o.h || 380, Math.max(160, area.height - 16));
+  const off = (WM.cascade++ % 7) * 30;
+  w.x = Math.max(8, Math.min(area.width - w.w - 8, 110 + off));
+  w.y = Math.max(8, Math.min(area.height - w.h - 8, 22 + off));
+
+  const titleEl = el('span', { class: 'ttitle', text: o.title });
+  const btnMin = el('button', { class: 'tb', type: 'button', 'aria-label': '最小化', title: '最小化', html: TB_ICONS.min, onclick: () => minimize(w) });
+  w.btnMax = el('button', { class: 'tb', type: 'button', 'aria-label': '最大化', title: '最大化', html: TB_ICONS.max, onclick: () => { setMax(w, !w.max); } });
+  const btnClose = el('button', { class: 'tb close', type: 'button', 'aria-label': '閉じる', title: '閉じる', html: TB_ICONS.close, onclick: () => closeWin(w) });
+  const bar = el('header', { class: 'titlebar' }, el('span', { class: 'ticon', html: icon(w.icon) }), titleEl, el('div', { class: 'tbtns' }, btnMin, w.btnMax, btnClose));
+  w.body = el('div', { class: 'wbody' }, o.body || []);
+  w.el = el('section', { class: 'win', role: 'dialog', 'aria-label': o.title, tabindex: '-1' }, bar, w.body);
+
+  const taskLabel = el('span', { text: o.title });
+  w.task = el('button', {
+    class: 'task', type: 'button', title: o.title,
+    onclick: () => { if (WM.active === w && !w.min) minimize(w); else focusWin(w); }
+  }, el('i', { html: icon(w.icon), style: 'display:contents' }), taskLabel);
+  w.setTitle = t => { w.title = t; titleEl.textContent = t; taskLabel.textContent = t; w.task.title = t; w.el.setAttribute('aria-label', t); };
+
+  w.el.addEventListener('pointerdown', () => focusWin(w), true);
+
+  /* 移動 */
+  bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) setMax(w, !w.max); });
+  bar.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('button')) return;
+    const a = layer.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    let ox = w.x, oy = w.y, moved = false, snap = null;
+    try { bar.setPointerCapture(e.pointerId); } catch (_) {}
+    const move = ev => {
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (!moved) {
+        if (Math.abs(dx) + Math.abs(dy) < 5) return;
+        moved = true;
+        if (w.max || w.restore) {
+          const r = w.el.getBoundingClientRect();
+          const ratio = (sx - r.left) / r.width;
+          const rs = w.restore || { w: w.w, h: w.h };
+          setMax(w, false);
+          w.w = rs.w; w.h = rs.h; w.restore = null;
+          ox = sx - a.left - ratio * w.w; oy = r.top - a.top;
+        }
+      }
+      w.x = clamp(ox + dx, 90 - w.w, a.width - 90);
+      w.y = clamp(oy + dy, 0, a.height - 38);
+      applyGeom(w);
+      snap = ev.clientY - a.top < 8 ? 'max' : ev.clientX - a.left < 8 ? 'left' : a.right - ev.clientX < 8 ? 'right' : null;
+      showSnap(snap);
+    };
+    const up = () => {
+      bar.removeEventListener('pointermove', move);
+      bar.removeEventListener('pointerup', up);
+      bar.removeEventListener('pointercancel', up);
+      showSnap(null);
+      if (moved && snap) applySnap(w, snap);
+    };
+    bar.addEventListener('pointermove', move);
+    bar.addEventListener('pointerup', up);
+    bar.addEventListener('pointercancel', up);
+  });
+
+  /* サイズ変更 */
+  for (const dir of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']) {
+    const h = el('div', { class: 'rh ' + dir });
+    h.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || w.max) return;
+      e.preventDefault();
+      const sx = e.clientX, sy = e.clientY, o0 = { x: w.x, y: w.y, w: w.w, h: w.h };
+      w.restore = null;
+      try { h.setPointerCapture(e.pointerId); } catch (_) {}
+      const move = ev => {
+        const dx = ev.clientX - sx, dy = ev.clientY - sy;
+        let x = o0.x, y = o0.y, ww = o0.w, hh = o0.h;
+        if (dir.includes('e')) ww = Math.max(w.minW, o0.w + dx);
+        if (dir.includes('s')) hh = Math.max(w.minH, o0.h + dy);
+        if (dir.includes('w')) { ww = Math.max(w.minW, o0.w - dx); x = o0.x + o0.w - ww; }
+        if (dir.includes('n')) {
+          hh = Math.max(w.minH, o0.h - dy); y = o0.y + o0.h - hh;
+          if (y < 0) { hh = Math.max(w.minH, hh + y); y = 0; }
+        }
+        w.x = x; w.y = y; w.w = ww; w.h = hh;
+        applyGeom(w);
+      };
+      const up = () => {
+        h.removeEventListener('pointermove', move);
+        h.removeEventListener('pointerup', up);
+        h.removeEventListener('pointercancel', up);
+      };
+      h.addEventListener('pointermove', move);
+      h.addEventListener('pointerup', up);
+      h.addEventListener('pointercancel', up);
+    });
+    w.el.append(h);
+  }
+
+  applyGeom(w);
+  if (area.width < 640) setMax(w, true);
+  layer.append(w.el);
+  tasksEl.append(w.task);
+  WM.list.push(w);
+  focusWin(w);
+  return w;
+}
+
+window.addEventListener('resize', () => {
+  const a = layer.getBoundingClientRect();
+  for (const w of WM.list) {
+    w.x = clamp(w.x, 90 - w.w, a.width - 90);
+    w.y = clamp(w.y, 0, a.height - 38);
+    applyGeom(w);
+  }
+  hideMenu();
+});
+
+/* ===================== ダイアログ ===================== */
+function modal(win, build) {
+  return new Promise(resolve => {
+    const prev = document.activeElement;
+    const ov = el('div', { class: 'modal' + (win ? '' : ' sys') });
+    const done = v => {
+      ov.remove();
+      if (prev && prev.isConnected && prev.focus) prev.focus();
+      resolve(v);
+    };
+    const box = el('div', { class: 'mbox', role: 'alertdialog', 'aria-modal': 'true' }, build(done));
+    ov.append(box);
+    ov.addEventListener('keydown', e => {
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); done(null); }
+    });
+    ov.addEventListener('contextmenu', e => e.stopPropagation());
+    (win ? win.el : document.body).append(ov);
+    if (win) focusWin(win);
+    const f = box.querySelector('[data-autofocus]') || box.querySelector('input,button');
+    if (f) { f.focus(); if (f.select) f.select(); }
+  });
+}
+function askChoice(win, msg, buttons) {
+  return modal(win, done => [
+    el('p', { class: 'mmsg', text: msg }),
+    el('div', { class: 'mbtns' }, buttons.map(b => el('button', {
+      class: 'btn' + (b.primary ? ' primary' : '') + (b.danger ? ' danger' : ''), type: 'button', text: b.label,
+      'data-autofocus': b.primary || b.danger ? '' : null, onclick: () => done(b.value)
+    })))
+  ]);
+}
+function askText(win, msg, def) {
+  return modal(win, done => {
+    const inp = el('input', { class: 'inp', type: 'text', value: def || '', 'aria-label': msg, 'data-autofocus': '', maxlength: '60' });
+    const ok = () => { const v = inp.value.trim(); if (v) done(v); };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+    return [
+      el('p', { class: 'mmsg', text: msg }), inp,
+      el('div', { class: 'mbtns' },
+        el('button', { class: 'btn', type: 'button', text: 'キャンセル', onclick: () => done(null) }),
+        el('button', { class: 'btn primary', type: 'button', text: 'OK', onclick: ok }))
+    ];
+  });
+}
+function pickFile(win, o) {
+  return modal(win, done => {
+    let dir = o.dir && fs.get(o.dir) && fs.get(o.dir).type === 'dir' ? o.dir : '/';
+    const pathEl = el('div', { class: 'fd-path' });
+    const listEl = el('div', { class: 'fd-list' });
+    const nameEl = el('input', { class: 'inp', type: 'text', value: o.name || '', 'aria-label': 'ファイル名', placeholder: 'ファイル名', 'data-autofocus': '', maxlength: '60' });
+    const errEl = el('div', { class: 'fd-err', role: 'alert' });
+    const row = (ic, label, onClick, onDbl) => {
+      const b = el('button', { class: 'fd-row', type: 'button', html: icon(ic) });
+      b.append(el('span', { text: label }));
+      b.addEventListener('click', onClick);
+      if (onDbl) b.addEventListener('dblclick', onDbl);
+      return b;
+    };
+    const submit = async () => {
+      let name = nameEl.value.trim();
+      errEl.textContent = '';
+      if (!name) { errEl.textContent = 'ファイル名を入力してください。'; return; }
+      if (!fs.validName(name)) { errEl.textContent = 'この名前は使用できません。'; return; }
+      if (o.mode === 'save' && o.ext && !/\.[^.]+$/.test(name)) name += o.ext;
+      const p = fs.join(dir, name), node = fs.get(p);
+      if (o.mode === 'open') {
+        if (!node || node.type !== 'file' || (o.kind && node.kind !== o.kind)) { errEl.textContent = '開けるファイルが見つかりません。'; return; }
+        done(p);
+      } else {
+        if (node && node.type === 'dir') { errEl.textContent = '同じ名前のフォルダーがあります。'; return; }
+        if (node) {
+          const ok = await askChoice(win, '「' + name + '」は既にあります。上書きしますか？', [
+            { label: 'キャンセル', value: false }, { label: '上書き', value: true, primary: true }]);
+          if (!ok) return;
+        }
+        done(p);
+      }
+    };
+    const render = () => {
+      pathEl.textContent = '場所: ' + dir;
+      listEl.textContent = '';
+      if (dir !== '/') listEl.append(row('up', '上のフォルダーへ', () => { dir = fs.dirname(dir); render(); }));
+      let count = 0;
+      for (const n of fs.list(dir)) {
+        if (n.type === 'dir') { listEl.append(row('folder', n.name, () => { dir = fs.join(dir, n.name); render(); })); count++; }
+        else if (!o.kind || n.kind === o.kind) { listEl.append(row(kindIcon(n), n.name, () => { nameEl.value = n.name; }, submit)); count++; }
+      }
+      if (!count) listEl.append(el('div', { class: 'fx-empty', text: '項目はありません' }));
+    };
+    nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+    render();
+    return [
+      el('strong', { text: o.mode === 'open' ? 'ファイルを開く' : '名前を付けて保存' }),
+      pathEl, listEl, nameEl, errEl,
+      el('div', { class: 'mbtns' },
+        el('button', { class: 'btn', type: 'button', text: 'キャンセル', onclick: () => done(null) }),
+        el('button', { class: 'btn primary', type: 'button', text: o.mode === 'open' ? '開く' : '保存', onclick: submit }))
+    ];
+  });
+}
+
+/* ===================== ファイル操作の共通処理 ===================== */
+function launch(id, args) {
+  try { apps[id].open(args || {}); }
+  catch (e) { console.error(e); toast(apps[id].name + ' を起動できませんでした。'); }
+}
+function openPath(p) {
+  const n = fs.get(p);
+  if (!n) { toast('見つかりません: ' + p); return; }
+  if (n.type === 'dir') launch('files', { path: p });
+  else if (n.kind === 'image') launch('paint', { path: p });
+  else launch('notepad', { path: p });
+}
+async function renameItem(win, p) {
+  const name = await askText(win, '新しい名前', fs.basename(p));
+  if (!name) return;
+  try { fs.rename(p, name); } catch (e) { toast(e.message); }
+}
+async function deleteItem(win, p) {
+  const ok = await askChoice(win, '「' + fs.basename(p) + '」を削除しますか？', [
+    { label: 'キャンセル', value: false }, { label: '削除', value: true, danger: true }]);
+  if (!ok) return;
+  try { fs.remove(p); } catch (e) { toast(e.message); }
+}
+function newItem(dir, type) {
+  try {
+    if (type === 'dir') fs.mkdir(fs.join(dir, fs.unique(dir, '新しいフォルダー')));
+    else fs.write(fs.join(dir, fs.unique(dir, '新しいテキスト', '.txt')), '', 'text');
+  } catch (e) { toast(e.message); }
+}
+
+/* ===================== 設定 ===================== */
+const WALLS = [
+  { name: '夕凪', css: 'radial-gradient(circle at 78% 82%,rgba(255,196,120,.55),transparent 45%),linear-gradient(160deg,#18244a 0%,#473c8c 42%,#cf5f7c 78%,#f3a968 100%)' },
+  { name: '深海', css: 'radial-gradient(circle at 22% 18%,rgba(50,150,190,.6),transparent 50%),linear-gradient(180deg,#081a2e,#0d3b55 60%,#0f6a6f)' },
+  { name: '若葉', css: 'radial-gradient(circle at 80% 15%,rgba(240,250,170,.55),transparent 45%),linear-gradient(135deg,#0d4f3d,#3f965d 60%,#bcd879)' },
+  { name: '朝焼け', css: 'linear-gradient(180deg,#f3bd96,#e98383 48%,#7a66ae)' },
+  { name: '墨', css: 'radial-gradient(circle at 30% 30%,#3d414d,transparent 60%),linear-gradient(135deg,#15161a,#2c2f38)' },
+  { name: '霧', css: 'linear-gradient(135deg,#9aa9b8,#c9bfae)' }
+];
+const ACCENTS = [['ブルー', '#3d6bf0'], ['ティール', '#0f8275'], ['オレンジ', '#c2470d'], ['マゼンタ', '#b4256f'], ['バイオレット', '#6d4bd8'], ['グリーン', '#3a7a1f']];
+const S = {
+  theme: (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light',
+  accent: ACCENTS[0][1], wall: 0, sec: false, h24: true
+};
+function applySettings() {
+  document.documentElement.dataset.theme = S.theme;
+  document.documentElement.style.setProperty('--accent', S.accent);
+  $('#desktop').style.background = WALLS[S.wall].css;
+  tick();
+}
+const WD = ['日', '月', '火', '水', '木', '金', '土'];
+function fmtTime(d, sec) {
+  let h = d.getHours(), pre = '';
+  if (!S.h24) { pre = h < 12 ? '午前 ' : '午後 '; h = h % 12 || 12; }
+  return pre + (S.h24 ? pad(h) : h) + ':' + pad(d.getMinutes()) + (sec ? ':' + pad(d.getSeconds()) : '');
+}
+const fmtDate = d => d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' (' + WD[d.getDay()] + ')';
+function tick() {
+  const d = new Date();
+  $('#clk-t').textContent = fmtTime(d, S.sec);
+  $('#clk-d').textContent = fmtDate(d);
+  if (!$('#sleep').hidden) { $('#sleep-t').textContent = fmtTime(d, false); $('#sleep-d').textContent = fmtDate(d); }
+}
+
+/* ===================== アプリ: メモ帳 ===================== */
+apps.notepad = {
+  name: 'メモ帳', icon: 'notepad',
+  open({ path }) {
+    let cur = null, saved = '', wrap = true;
+    const ta = el('textarea', { class: 'np-text', spellcheck: 'false', 'aria-label': '本文' });
+    const status = el('div', { class: 'statusbar' });
+    const wrapBtn = el('button', { class: 'tbtn', type: 'button', text: '折り返し', 'aria-pressed': 'true' });
+    const mk = (t, f) => el('button', { class: 'tbtn', type: 'button', text: t, onclick: f });
+    const dirty = () => ta.value !== saved;
+    const refresh = () => {
+      win.setTitle((dirty() ? '● ' : '') + (cur ? fs.basename(cur) : '無題') + ' - メモ帳');
+      status.textContent = ta.value.split('\n').length + ' 行 ・ ' + Array.from(ta.value).length + ' 文字 ・ ' + (cur || '未保存');
+    };
+    const save = async as => {
+      let p = cur;
+      if (!p || as) {
+        p = await pickFile(win, { mode: 'save', kind: 'text', ext: '.txt', name: cur ? fs.basename(cur) : '無題.txt', dir: cur ? fs.dirname(cur) : DOCS });
+        if (!p) return false;
+      }
+      try { fs.write(p, ta.value, 'text'); } catch (e) { toast(e.message); return false; }
+      cur = p; saved = ta.value; refresh();
+      toast('保存しました: ' + fs.basename(p));
+      return true;
+    };
+    const guard = async () => {
+      if (!dirty()) return true;
+      const r = await askChoice(win, '変更内容を保存しますか？', [
+        { label: 'キャンセル', value: 'cancel' }, { label: '保存しない', value: 'no' }, { label: '保存', value: 'save', primary: true }]);
+      if (r === 'save') return save(false);
+      return r === 'no';
+    };
+    const load = p => {
+      const n = fs.get(p);
+      if (!n || n.type !== 'file' || n.kind !== 'text') { toast('テキストファイルを開けません。'); return; }
+      cur = p; ta.value = saved = n.content; refresh();
+    };
+    const win = createWindow({
+      app: 'notepad', title: '無題 - メモ帳', w: 560, h: 420,
+      body: [el('div', { class: 'toolbar' },
+        mk('新規', async () => { if (await guard()) { cur = null; ta.value = saved = ''; refresh(); ta.focus(); } }),
+        mk('開く', async () => {
+          if (!(await guard())) return;
+          const p = await pickFile(win, { mode: 'open', kind: 'text', dir: cur ? fs.dirname(cur) : DOCS });
+          if (p) load(p);
+        }),
+        mk('保存', () => save(false)), mk('名前を付けて保存', () => save(true)),
+        el('span', { class: 'tsep' }), wrapBtn), ta, status]
+    });
+    wrapBtn.addEventListener('click', () => {
+      wrap = !wrap;
+      wrapBtn.setAttribute('aria-pressed', String(wrap));
+      ta.style.whiteSpace = wrap ? 'pre-wrap' : 'pre';
+      ta.style.overflowX = wrap ? 'hidden' : 'auto';
+    });
+    ta.addEventListener('input', refresh);
+    ta.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(e.shiftKey); }
+    });
+    win.beforeClose = guard;
+    if (path) load(path); else refresh();
+    ta.focus();
+  }
+};
+
+/* ===================== アプリ: ファイル ===================== */
+apps.files = {
+  name: 'ファイル', icon: 'folder',
+  open({ path }) {
+    let cwd = path && fs.get(path) && fs.get(path).type === 'dir' ? path : '/';
+    let sel = null;
+    const crumbs = el('div', { class: 'crumbs', role: 'navigation', 'aria-label': '現在の場所' });
+    const main = el('div', { class: 'fx-main' });
+    const status = el('div', { class: 'statusbar' });
+    const mk = (t, f) => el('button', { class: 'tbtn', type: 'button', text: t, onclick: f });
+    const upBtn = mk('上へ', () => go(fs.dirname(cwd)));
+    const renBtn = mk('名前の変更', () => sel && renameItem(win, fs.join(cwd, sel)));
+    const delBtn = mk('削除', () => sel && deleteItem(win, fs.join(cwd, sel)));
+    const setSel = name => {
+      sel = name;
+      for (const r of main.querySelectorAll('.fx-row')) {
+        const on = r.dataset.name === name;
+        r.classList.toggle('sel', on); r.setAttribute('aria-selected', String(on));
+      }
+      renBtn.disabled = delBtn.disabled = !sel;
+    };
+    const go = p => { cwd = p; sel = null; render(); };
+    const render = () => {
+      if (win.closed) return;
+      if (!fs.get(cwd) || fs.get(cwd).type !== 'dir') cwd = '/';
+      win.setTitle((cwd === '/' ? 'ホーム' : fs.basename(cwd)) + ' - ファイル');
+      crumbs.textContent = '';
+      crumbs.append(el('button', { type: 'button', text: 'ホーム', onclick: () => go('/') }));
+      let acc = '';
+      for (const seg of cwd.split('/').filter(Boolean)) {
+        acc += '/' + seg;
+        const target = acc;
+        crumbs.append(el('i', { text: '›', 'aria-hidden': 'true' }), el('button', { type: 'button', text: seg, onclick: () => go(target) }));
+      }
+      upBtn.disabled = cwd === '/';
+      const items = fs.list(cwd);
+      main.textContent = '';
+      main.append(el('div', { class: 'fx-head' }, el('span', { text: '名前' }), el('span', { text: '種類' }), el('span', { text: 'サイズ' })));
+      if (!items.length) main.append(el('div', { class: 'fx-empty', text: 'このフォルダーは空です' }));
+      for (const n of items) {
+        const p = fs.join(cwd, n.name);
+        const row = el('button', { class: 'fx-row', type: 'button', 'data-name': n.name, 'aria-selected': 'false' },
+          el('span', { class: 'fx-name', html: icon(kindIcon(n)) }), el('span', { text: kindLabel(n) }), el('span', { text: sizeLabel(n) }));
+        row.firstChild.append(el('span', { text: n.name }));
+        row.firstChild.style.color = 'inherit'; row.firstChild.style.fontSize = '14px';
+        bindOpen(row, () => setSel(n.name), () => { if (n.type === 'dir') go(p); else openPath(p); });
+        row.addEventListener('contextmenu', e => {
+          e.preventDefault(); e.stopPropagation(); setSel(n.name);
+          showMenu(e.clientX, e.clientY, [
+            { label: '開く', action: () => { if (n.type === 'dir') go(p); else openPath(p); } },
+            { label: '名前の変更', action: () => renameItem(win, p) }, '-',
+            { label: '削除', danger: true, action: () => deleteItem(win, p) }]);
+        });
+        main.append(row);
+      }
+      if (sel && !items.some(n => n.name === sel)) sel = null;
+      setSel(sel);
+      status.textContent = items.length + ' 個の項目 ・ ' + cwd;
+    };
+    const place = (label, p, ic) => {
+      const b = el('button', { type: 'button', html: icon(ic), onclick: () => go(p) });
+      b.append(el('span', { text: label }));
+      return b;
+    };
+    const win = createWindow({
+      app: 'files', title: 'ファイル', w: 620, h: 420, minW: 300,
+      body: [
+        el('div', { class: 'toolbar' }, upBtn, crumbs, mk('新しいフォルダー', () => newItem(cwd, 'dir')), mk('新しいテキスト', () => newItem(cwd, 'file')), renBtn, delBtn),
+        el('div', { class: 'fx' },
+          el('nav', { class: 'fx-side', 'aria-label': '場所' }, place('ホーム', '/', 'folder'), place('デスクトップ', DESK, 'folder'), place('ドキュメント', DOCS, 'folder'), place('ピクチャ', PICS, 'folder')),
+          main),
+        status]
+    });
+    win.onClose = fs.on(render);
+    render();
+  }
+};
+
+/* ===================== アプリ: 電卓 ===================== */
+apps.calc = {
+  name: '電卓', icon: 'calc',
+  open() {
+    let cur = '0', prev = null, op = null, fresh = true, expr = '';
+    const SYM = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    const calc = (a, b, o) => o === '+' ? a + b : o === '-' ? a - b : o === '*' ? a * b : (b === 0 ? NaN : a / b);
+    const fmt = n => { if (!isFinite(n)) return 'エラー'; const v = parseFloat(n.toPrecision(12)); return String(v === 0 ? 0 : v); };
+    const exprEl = el('div', { class: 'calc-expr' });
+    const valEl = el('div', { class: 'calc-val', role: 'status', 'aria-live': 'polite' });
+    const show = () => {
+      exprEl.textContent = expr; valEl.textContent = cur;
+      valEl.classList.toggle('sm', cur.length > 12);
+    };
+    const reset = () => { cur = '0'; prev = null; op = null; fresh = true; expr = ''; };
+    const press = k => {
+      if (cur === 'エラー') { reset(); if (!/^[0-9.]$/.test(k)) { show(); return; } }
+      if (/^[0-9.]$/.test(k)) {
+        if (fresh) { cur = k === '.' ? '0.' : k; fresh = false; if (!op) expr = ''; }
+        else if (k === '.') { if (!cur.includes('.')) cur += '.'; }
+        else if (cur.replace(/[-.]/g, '').length < 14) cur = cur === '0' ? k : cur + k;
+      } else if (k === 'C') reset();
+      else if (k === 'N') { if (parseFloat(cur) !== 0) cur = cur.startsWith('-') ? cur.slice(1) : '-' + cur; }
+      else if (k === '%') cur = fmt(parseFloat(cur) / 100);
+      else if (k === 'B') { if (!fresh) { cur = cur.slice(0, -1); if (cur === '' || cur === '-') cur = '0'; } }
+      else if (k === '=') {
+        if (op) {
+          const a = prev, b = parseFloat(cur);
+          expr = fmt(a) + ' ' + SYM[op] + ' ' + fmt(b) + ' =';
+          cur = fmt(calc(a, b, op)); op = null; prev = null; fresh = true;
+        }
+      } else {
+        if (op && !fresh) {
+          cur = fmt(calc(prev, parseFloat(cur), op));
+          if (cur === 'エラー') { op = null; prev = null; fresh = true; expr = ''; show(); return; }
+        }
+        prev = parseFloat(cur); op = k; fresh = true; expr = fmt(prev) + ' ' + SYM[k];
+      }
+      show();
+    };
+    const KEYS = [['C', 'C', 'op', 'クリア'], ['±', 'N', 'op', '符号反転'], ['%', '%', 'op', 'パーセント'], ['÷', '/', 'op', '割る'],
+      ['7', '7'], ['8', '8'], ['9', '9'], ['×', '*', 'op', '掛ける'],
+      ['4', '4'], ['5', '5'], ['6', '6'], ['−', '-', 'op', '引く'],
+      ['1', '1'], ['2', '2'], ['3', '3'], ['+', '+', 'op', '足す'],
+      ['0', '0'], ['.', '.', '', '小数点'], ['⌫', 'B', 'op', '1文字削除'], ['=', '=', 'eq', 'イコール']];
+    const win = createWindow({
+      app: 'calc', title: '電卓', w: 300, h: 420, minW: 240, minH: 340,
+      body: el('div', { class: 'calc' },
+        el('div', { class: 'calc-disp' }, exprEl, valEl),
+        el('div', { class: 'calc-keys' }, KEYS.map(([t, k, c, a]) =>
+          el('button', { class: 'ck ' + (c || ''), type: 'button', text: t, 'aria-label': a || null, onclick: () => press(k) }))))
+    });
+    win.el.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      let k = null;
+      if (/^[0-9.]$/.test(e.key) || '+-*/%'.includes(e.key) && e.key.length === 1) k = e.key;
+      else if (e.key === 'Enter' || e.key === '=') k = '=';
+      else if (e.key === 'Backspace') k = 'B';
+      else if (e.key === 'Escape' || e.key === 'Delete' || e.key.toLowerCase() === 'c') k = 'C';
+      if (k) { e.preventDefault(); press(k); }
+    });
+    show();
+  }
+};
+
+/* ===================== アプリ: ペイント ===================== */
+apps.paint = {
+  name: 'ペイント', icon: 'paint',
+  open({ path }) {
+    const W = 720, H = 460;
+    const cv = el('canvas', { class: 'pt-cv', width: String(W), height: String(H), 'aria-label': 'キャンバス' });
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    let tool = 'pen', color = '#1d2330', size = 4, cur = null;
+    let drawing = false, sx = 0, sy = 0, lx = 0, ly = 0, base = null;
+    const undo = [], redo = [];
+    const mk = (t, f) => el('button', { class: 'tbtn', type: 'button', text: t, onclick: f });
+    const undoBtn = mk('元に戻す', () => {
+      if (!undo.length) return;
+      redo.push(ctx.getImageData(0, 0, W, H)); ctx.putImageData(undo.pop(), 0, 0); sync();
+    });
+    const redoBtn = mk('やり直す', () => {
+      if (!redo.length) return;
+      undo.push(ctx.getImageData(0, 0, W, H)); ctx.putImageData(redo.pop(), 0, 0); sync();
+    });
+    const TOOLS = [['pen', 'ペン'], ['eraser', '消しゴム'], ['line', '直線'], ['rect', '四角'], ['ellipse', '楕円'], ['fill', '塗りつぶし']];
+    const toolBtns = TOOLS.map(([id, label]) => el('button', { class: 'tbtn', type: 'button', text: label, 'data-tool': id, onclick: () => { tool = id; sync(); } }));
+    const COLORS = ['#1d2330', '#ffffff', '#e5484d', '#f08a4b', '#f0b03f', '#3d9a5f', '#12a5a5', '#3d6bf0', '#7b55d9', '#d6409f', '#8b5a2b', '#8b93a5'];
+    const swBtns = COLORS.map(c => el('button', { class: 'sw', type: 'button', style: 'background:' + c, 'aria-label': '色 ' + c, 'data-c': c, onclick: () => { color = c; colorIn.value = c; sync(); } }));
+    const colorIn = el('input', { class: 'pt-color', type: 'color', value: color, 'aria-label': '色を選択' });
+    colorIn.addEventListener('input', () => { color = colorIn.value; sync(); });
+    const sizeIn = el('input', { class: 'pt-size', type: 'range', min: '1', max: '40', value: String(size), 'aria-label': '太さ' });
+    const sizeLbl = el('span', { text: size + 'px' });
+    sizeIn.addEventListener('input', () => { size = +sizeIn.value; sizeLbl.textContent = size + 'px'; });
+    function sync() {
+      for (const b of toolBtns) b.setAttribute('aria-pressed', String(b.dataset.tool === tool));
+      for (const b of swBtns) b.setAttribute('aria-pressed', String(b.dataset.c === color));
+      undoBtn.disabled = !undo.length; redoBtn.disabled = !redo.length;
+    }
+    const snapshot = () => {
+      undo.push(ctx.getImageData(0, 0, W, H));
+      if (undo.length > 25) undo.shift();
+      redo.length = 0; sync();
+    };
+    const pos = e => {
+      const r = cv.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+    };
+    const style = () => {
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = size;
+      ctx.strokeStyle = ctx.fillStyle = tool === 'eraser' ? '#ffffff' : color;
+    };
+    const flood = (fx, fy) => {
+      const x0 = Math.floor(fx), y0 = Math.floor(fy);
+      if (x0 < 0 || y0 < 0 || x0 >= W || y0 >= H) return;
+      const img = ctx.getImageData(0, 0, W, H), d = img.data;
+      const fr = parseInt(color.slice(1, 3), 16), fg = parseInt(color.slice(3, 5), 16), fb = parseInt(color.slice(5, 7), 16);
+      const s = (y0 * W + x0) * 4, tr = d[s], tg = d[s + 1], tb = d[s + 2], T = 48;
+      const seen = new Uint8Array(W * H), stack = [y0 * W + x0];
+      while (stack.length) {
+        const i = stack.pop();
+        if (seen[i]) continue;
+        const p = i * 4;
+        if (Math.abs(d[p] - tr) > T || Math.abs(d[p + 1] - tg) > T || Math.abs(d[p + 2] - tb) > T) continue;
+        seen[i] = 1;
+        d[p] = fr; d[p + 1] = fg; d[p + 2] = fb; d[p + 3] = 255;
+        const px = i % W;
+        if (px > 0) stack.push(i - 1);
+        if (px < W - 1) stack.push(i + 1);
+        if (i >= W) stack.push(i - W);
+        if (i < W * (H - 1)) stack.push(i + W);
+      }
+      ctx.putImageData(img, 0, 0);
+    };
+    cv.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const p = pos(e);
+      snapshot();
+      if (tool === 'fill') { flood(p.x, p.y); return; }
+      drawing = true; sx = lx = p.x; sy = ly = p.y;
+      try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+      style();
+      if (tool === 'pen' || tool === 'eraser') { ctx.beginPath(); ctx.arc(p.x, p.y, size / 2, 0, Math.PI * 2); ctx.fill(); }
+      else base = undo[undo.length - 1];
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!drawing) return;
+      const p = pos(e);
+      style();
+      if (tool === 'pen' || tool === 'eraser') {
+        ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(p.x, p.y); ctx.stroke();
+        lx = p.x; ly = p.y;
+        return;
+      }
+      ctx.putImageData(base, 0, 0);
+      ctx.beginPath();
+      if (tool === 'line') { ctx.moveTo(sx, sy); ctx.lineTo(p.x, p.y); }
+      else if (tool === 'rect') ctx.rect(Math.min(sx, p.x), Math.min(sy, p.y), Math.abs(p.x - sx), Math.abs(p.y - sy));
+      else ctx.ellipse((sx + p.x) / 2, (sy + p.y) / 2, Math.abs(p.x - sx) / 2, Math.abs(p.y - sy) / 2, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+    const end = () => { drawing = false; base = null; };
+    cv.addEventListener('pointerup', end);
+    cv.addEventListener('pointercancel', end);
+
+    const setCur = p => { cur = p; win.setTitle((cur ? fs.basename(cur) : '無題') + ' - ペイント'); };
+    const load = p => {
+      const n = fs.get(p);
+      if (!n || n.type !== 'file' || n.kind !== 'image') { toast('画像ファイルを開けません。'); return; }
+      const im = new Image();
+      im.onload = () => {
+        if (win.closed) return;
+        snapshot();
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(im, 0, 0, W, H);
+        setCur(p);
+      };
+      im.onerror = () => toast('画像を読み込めませんでした。');
+      im.src = n.content;
+    };
+    const win = createWindow({
+      app: 'paint', title: '無題 - ペイント', w: 780, h: 590, minW: 320, minH: 260,
+      body: [
+        el('div', { class: 'toolbar', role: 'toolbar', 'aria-label': '描画ツール' }, toolBtns, el('span', { class: 'tsep' }), swBtns, colorIn,
+          el('label', { class: 'lbl' }, '太さ', sizeIn, sizeLbl)),
+        el('div', { class: 'toolbar' }, undoBtn, redoBtn,
+          mk('クリア', () => { snapshot(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); }),
+          el('span', { class: 'tsep' }),
+          mk('開く', async () => { const p = await pickFile(win, { mode: 'open', kind: 'image', dir: cur ? fs.dirname(cur) : PICS }); if (p) load(p); }),
+          mk('保存', async () => {
+            const p = await pickFile(win, { mode: 'save', kind: 'image', ext: '.png', name: cur ? fs.basename(cur) : '無題.png', dir: cur ? fs.dirname(cur) : PICS });
+            if (!p) return;
+            try { fs.write(p, cv.toDataURL('image/png'), 'image'); setCur(p); toast('保存しました: ' + fs.basename(p)); }
+            catch (e) { toast(e.message); }
+          })),
+        el('div', { class: 'pt-area' }, cv)]
+    });
+    sync();
+    if (path) load(path);
+  }
+};
+
+/* ===================== アプリ: ターミナル ===================== */
+apps.term = {
+  name: 'ターミナル', icon: 'term',
+  open() {
+    let cwd = '/', hi = 0;
+    const hist = [];
+    const out = el('div', { role: 'log', 'aria-live': 'polite' });
+    const prompt = el('span', { class: 'tm-prompt' });
+    const inp = el('input', { class: 'tm-in', type: 'text', spellcheck: 'false', autocomplete: 'off', autocapitalize: 'off', 'aria-label': 'コマンド入力' });
+    const box = el('div', { class: 'tm' }, out, el('div', { class: 'tm-line' }, prompt, inp));
+    const print = (t, cls) => out.append(el('div', { class: 'tm-l' + (cls ? ' ' + cls : ''), text: t }));
+    const ps = () => 'guest@nagi:' + cwd + '$';
+    const need = (a, n, usage) => { if (a.length < n) throw new Error('使い方: ' + usage); };
+    const HELP = [
+      'help            このヘルプを表示', 'ls [パス]       一覧を表示', 'cd [パス]       フォルダーを移動', 'pwd             現在の場所',
+      'cat <ファイル>  テキストを表示', 'echo <文字> [> ファイル]  表示 / 書き込み（>> で追記）', 'mkdir <名前>    フォルダーを作成',
+      'touch <名前>    空のファイルを作成', 'rm [-r] <パス>  削除', 'mv <パス> <新しい名前>  名前の変更', 'open <アプリ|パス>  アプリやファイルを開く',
+      'apps            アプリ一覧', 'date / whoami / history / neofetch / clear / exit'];
+    const cmds = {
+      help() { HELP.forEach(l => print(l)); },
+      pwd() { print(cwd); },
+      ls(a) {
+        const p = fs.norm(a[0] || '.', cwd), n = fs.get(p);
+        if (!n) throw new Error('見つかりません: ' + p);
+        if (n.type !== 'dir') { print(n.name); return; }
+        const items = fs.list(p);
+        print(items.length ? items.map(i => i.name + (i.type === 'dir' ? '/' : '')).join('   ') : '（空）');
+      },
+      cd(a) {
+        const p = fs.norm(a[0] || '/', cwd), n = fs.get(p);
+        if (!n || n.type !== 'dir') throw new Error('フォルダーではありません: ' + p);
+        cwd = p;
+      },
+      cat(a) {
+        need(a, 1, 'cat <ファイル>');
+        const n = fs.get(fs.norm(a[0], cwd));
+        if (!n || n.type !== 'file') throw new Error('ファイルが見つかりません: ' + a[0]);
+        print(n.kind === 'image' ? '[画像データ ' + sizeLabel(n) + ']' : n.content);
+      },
+      echo(a) {
+        const i = a.findIndex(t => t === '>' || t === '>>');
+        if (i < 0) { print(a.join(' ')); return; }
+        if (!a[i + 1]) throw new Error('出力先のファイル名がありません。');
+        const p = fs.norm(a[i + 1], cwd), n = fs.get(p), text = a.slice(0, i).join(' ');
+        if (n && n.type === 'file' && n.kind !== 'text') throw new Error('テキストファイルではありません。');
+        fs.write(p, a[i] === '>>' && n && n.type === 'file' ? n.content + '\n' + text : text, 'text');
+      },
+      mkdir(a) { need(a, 1, 'mkdir <名前>'); fs.mkdir(fs.norm(a[0], cwd)); },
+      touch(a) {
+        need(a, 1, 'touch <名前>');
+        const p = fs.norm(a[0], cwd);
+        if (!fs.get(p)) fs.write(p, '', 'text');
+      },
+      rm(a) {
+        const r = a.includes('-r'), t = a.filter(x => x !== '-r');
+        need(t, 1, 'rm [-r] <パス>');
+        const p = fs.norm(t[0], cwd), n = fs.get(p);
+        if (!n) throw new Error('見つかりません: ' + t[0]);
+        if (n.type === 'dir' && n.children.length && !r) throw new Error('フォルダーが空ではありません（-r を付けてください）。');
+        if (cwd === p || cwd.startsWith(p + '/')) throw new Error('現在いるフォルダーは削除できません。');
+        fs.remove(p);
+      },
+      mv(a) { need(a, 2, 'mv <パス> <新しい名前>'); fs.rename(fs.norm(a[0], cwd), a[1]); },
+      open(a) {
+        need(a, 1, 'open <アプリ|パス>');
+        const id = Object.keys(apps).find(k => k === a[0] || apps[k].name === a[0]);
+        if (id) { launch(id); return; }
+        const p = fs.norm(a[0], cwd);
+        if (!fs.get(p)) throw new Error('アプリもファイルも見つかりません: ' + a[0]);
+        openPath(p);
+      },
+      apps() { Object.keys(apps).forEach(k => print(k.padEnd(10) + apps[k].name)); },
+      date() { print(fmtDate(new Date()) + ' ' + fmtTime(new Date(), true)); },
+      whoami() { print('guest'); },
+      history() { hist.forEach((h, i) => print(String(i + 1).padStart(3) + '  ' + h)); },
+      neofetch() {
+        ['   ~~~~~      guest@nagi', '  ~~~~~~~     OS: Nagi OS 1.0', ' ~~~~~~~~~    画面: ' + innerWidth + ' x ' + innerHeight,
+          '  ~~~~~~~     ウィンドウ: ' + WM.list.length, '   ~~~~~      テーマ: ' + (S.theme === 'dark' ? 'ダーク' : 'ライト') + ' / ' + WALLS[S.wall].name].forEach(l => print(l, 'ok'));
+      },
+      clear() { out.textContent = ''; },
+      exit() { closeWin(win, true); }
+    };
+    const run = line => {
+      print(ps() + ' ' + line, 'cmd');
+      const toks = [];
+      line.replace(/"([^"]*)"|'([^']*)'|(\S+)/g, (m, a, b, c) => { toks.push(a != null ? a : b != null ? b : c); return ''; });
+      if (!toks.length) return;
+      hist.push(line); hi = hist.length;
+      const f = cmds[toks[0]];
+      if (!Object.prototype.hasOwnProperty.call(cmds, toks[0]) || !f) { print('コマンドが見つかりません: ' + toks[0] + '（help で一覧）', 'err'); return; }
+      try { f(toks.slice(1)); } catch (e) { print(e.message, 'err'); }
+    };
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const v = inp.value; inp.value = '';
+        run(v.trim());
+        prompt.textContent = ps();
+        box.scrollTop = box.scrollHeight;
+      } else if (e.key === 'ArrowUp') { e.preventDefault(); if (hi > 0) inp.value = hist[--hi]; }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (hi < hist.length - 1) inp.value = hist[++hi]; else { hi = hist.length; inp.value = ''; } }
+      else if (e.key.toLowerCase() === 'l' && e.ctrlKey) { e.preventDefault(); out.textContent = ''; }
+    });
+    box.addEventListener('click', () => { if (!String(window.getSelection())) inp.focus(); });
+    const win = createWindow({ app: 'term', title: 'ターミナル', w: 580, h: 360, body: box });
+    print('Nagi OS ターミナル — help でコマンド一覧を表示します。', 'ok');
+    prompt.textContent = ps();
+    inp.focus();
+  }
+};
+
+/* ===================== アプリ: マインスイーパー ===================== */
+apps.mines = {
+  name: 'マインスイーパー', icon: 'mines',
+  open() {
+    const LV = { easy: [9, 9, 10, 300, 430], mid: [16, 16, 40, 520, 640] };
+    let R, C, M, cells, btns, started, over, flags, opened, hit, secs, timer = null, flagMode = false;
+    const board = el('div', { class: 'ms-board', role: 'grid', 'aria-label': '盤面' });
+    const mineEl = el('span', { class: 'ms-num', title: '残りの地雷' });
+    const timeEl = el('span', { class: 'ms-num', title: '経過秒数' });
+    const stateEl = el('span', { class: 'ms-state', role: 'status' });
+    const lvSel = el('select', { class: 'sel-in', 'aria-label': '難易度' }, el('option', { value: 'easy', text: '初級 9×9' }), el('option', { value: 'mid', text: '中級 16×16' }));
+    const flagBtn = el('button', { class: 'tbtn', type: 'button', text: '旗モード', 'aria-pressed': 'false', title: 'オンにするとクリックで旗を立てます（右クリック / Shift+クリックでも可）' });
+    flagBtn.addEventListener('click', () => { flagMode = !flagMode; flagBtn.setAttribute('aria-pressed', String(flagMode)); });
+    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+    const hud = () => { mineEl.textContent = String(M - flags).padStart(3, '0'); timeEl.textContent = String(Math.min(secs, 999)).padStart(3, '0'); };
+    const nb = i => {
+      const r = Math.floor(i / C), c = i % C, a = [];
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const rr = r + dr, cc = c + dc;
+        if ((dr || dc) && rr >= 0 && rr < R && cc >= 0 && cc < C) a.push(rr * C + cc);
+      }
+      return a;
+    };
+    const draw = (i, extra) => {
+      const c = cells[i], b = btns[i];
+      b.className = 'ms-c' + (c.open ? ' open' : '') + (c.flag && !c.open ? ' flag' : '') + (extra ? ' ' + extra : '');
+      b.removeAttribute('data-n');
+      let t = '';
+      if (c.open || extra === 'mine') { if (c.mine) t = '●'; else if (c.n) { t = String(c.n); b.dataset.n = c.n; } }
+      else if (c.flag) t = '▲';
+      b.textContent = t;
+      const pos = (Math.floor(i / C) + 1) + '行' + (i % C + 1) + '列 ';
+      b.setAttribute('aria-label', pos + (c.open ? (c.mine ? '地雷' : (c.n ? c.n : '空白')) : (c.flag ? '旗' : '未開封')));
+    };
+    const place = safe => {
+      const ban = new Set([safe, ...nb(safe)]);
+      let left = M;
+      while (left > 0) {
+        const i = Math.floor(Math.random() * R * C);
+        if (ban.has(i) || cells[i].mine) continue;
+        cells[i].mine = true; left--;
+      }
+      cells.forEach((c, i) => { c.n = nb(i).filter(j => cells[j].mine).length; });
+    };
+    const reveal = i => {
+      const stack = [i];
+      while (stack.length) {
+        const j = stack.pop(), c = cells[j];
+        if (c.open || c.flag) continue;
+        c.open = true; opened++;
+        draw(j);
+        if (c.mine) { hit = j; continue; }
+        if (c.n === 0) stack.push(...nb(j));
+      }
+    };
+    const check = () => {
+      if (hit >= 0) {
+        over = true; stop(); stateEl.textContent = '失敗…';
+        cells.forEach((c, i) => {
+          if (c.mine && !c.flag) draw(i, i === hit ? 'mine boom' : 'mine');
+          else if (!c.mine && c.flag) draw(i, 'wrong');
+        });
+        if (hit >= 0) { btns[hit].className = 'ms-c open boom'; btns[hit].textContent = '●'; }
+      } else if (opened === R * C - M) {
+        over = true; stop(); stateEl.textContent = 'クリア！';
+        cells.forEach((c, i) => { if (c.mine && !c.flag) { c.flag = true; draw(i); } });
+        flags = M; hud();
+      }
+    };
+    const act = (i, flag) => {
+      if (over) return;
+      const c = cells[i];
+      if (flag) {
+        if (c.open) return;
+        c.flag = !c.flag; flags += c.flag ? 1 : -1;
+        draw(i); hud(); return;
+      }
+      if (c.flag) return;
+      if (c.open) {
+        if (!c.n) return;
+        const ns = nb(i);
+        if (ns.filter(j => cells[j].flag).length !== c.n) return;
+        ns.forEach(j => reveal(j));
+        check(); return;
+      }
+      if (!started) {
+        place(i); started = true; stateEl.textContent = 'プレイ中';
+        timer = setInterval(() => { secs++; hud(); }, 1000);
+      }
+      reveal(i); check();
+    };
+    const reset = () => {
+      const L = LV[lvSel.value];
+      R = L[0]; C = L[1]; M = L[2];
+      stop();
+      started = false; over = false; flags = 0; opened = 0; hit = -1; secs = 0;
+      cells = Array.from({ length: R * C }, () => ({ mine: false, open: false, flag: false, n: 0 }));
+      board.style.gridTemplateColumns = 'repeat(' + C + ',28px)';
+      board.textContent = '';
+      btns = cells.map((_, i) => {
+        const b = el('button', { class: 'ms-c', type: 'button' });
+        b.addEventListener('click', e => act(i, flagMode || e.shiftKey));
+        b.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); act(i, true); });
+        return b;
+      });
+      board.append(...btns);
+      cells.forEach((_, i) => draw(i));
+      stateEl.textContent = '準備OK';
+      hud();
+    };
+    const win = createWindow({
+      app: 'mines', title: 'マインスイーパー', w: 300, h: 430, minW: 260, minH: 260,
+      body: el('div', { class: 'ms' },
+        el('div', { class: 'ms-hud' }, mineEl, stateEl, timeEl),
+        el('div', { class: 'ms-hud' }, lvSel, flagBtn, el('button', { class: 'tbtn', type: 'button', text: '新しいゲーム', onclick: () => reset() })),
+        board)
+    });
+    lvSel.addEventListener('change', () => {
+      reset();
+      if (!win.max) {
+        const a = layer.getBoundingClientRect(), L = LV[lvSel.value];
+        win.restore = null;
+        win.w = Math.min(L[3], a.width - 8); win.h = Math.min(L[4], a.height - 8);
+        win.x = clamp(win.x, 0, a.width - win.w); win.y = clamp(win.y, 0, a.height - win.h);
+        applyGeom(win);
+      }
+    });
+    win.onClose = stop;
+    reset();
+  }
+};
+
+/* ===================== アプリ: カレンダー ===================== */
+const calNotes = new Map();
+apps.calendar = {
+  name: 'カレンダー', icon: 'calendar',
+  open() {
+    const ex = WM.list.find(w => w.app === 'calendar');
+    if (ex) { focusWin(ex); return; }
+    const now = new Date();
+    let y = now.getFullYear(), m = now.getMonth(), sel = new Date(y, m, now.getDate());
+    const key = d => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    const title = el('h2', { class: 'cal-title', 'aria-live': 'polite' });
+    const grid = el('div', { class: 'cal-grid' });
+    const lbl = el('label', { class: 'cal-lbl', for: 'cal-note' });
+    const note = el('textarea', { class: 'cal-note', id: 'cal-note', placeholder: 'この日のメモ（閉じるまで保持されます）' });
+    let dayBtns = new Map();
+    const pickDay = d => {
+      sel = d;
+      for (const [k, b] of dayBtns) b.classList.toggle('sel', k === key(sel));
+      lbl.textContent = (sel.getMonth() + 1) + '月' + sel.getDate() + '日 (' + WD[sel.getDay()] + ') のメモ';
+      note.value = calNotes.get(key(sel)) || '';
+    };
+    const render = () => {
+      title.textContent = y + '年 ' + (m + 1) + '月';
+      grid.textContent = ''; dayBtns = new Map();
+      WD.forEach((w, i) => grid.append(el('div', { class: 'cal-wd' + (i === 0 ? ' sun' : i === 6 ? ' sat' : ''), text: w })));
+      const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate(), today = key(new Date());
+      for (let i = 0; i < first; i++) grid.append(el('div'));
+      for (let d = 1; d <= days; d++) {
+        const dt = new Date(y, m, d), k = key(dt), wd = dt.getDay();
+        const b = el('button', {
+          class: 'cal-d' + (wd === 0 ? ' sun' : wd === 6 ? ' sat' : '') + (k === today ? ' today' : '') + (calNotes.has(k) ? ' has' : ''),
+          type: 'button', text: String(d), 'aria-label': (m + 1) + '月' + d + '日' + (k === today ? '（今日）' : ''), onclick: () => pickDay(dt)
+        });
+        dayBtns.set(k, b); grid.append(b);
+      }
+      pickDay(sel);
+    };
+    const shift = n => { m += n; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; } render(); };
+    note.addEventListener('input', () => {
+      const k = key(sel), v = note.value;
+      if (v.trim()) calNotes.set(k, v); else calNotes.delete(k);
+      const b = dayBtns.get(k); if (b) b.classList.toggle('has', calNotes.has(k));
+    });
+    createWindow({
+      app: 'calendar', title: 'カレンダー', w: 360, h: 480, minW: 280, minH: 360,
+      body: el('div', { class: 'cal' },
+        el('div', { class: 'cal-head' }, title,
+          el('button', { class: 'tbtn', type: 'button', text: '‹', 'aria-label': '前の月', onclick: () => shift(-1) }),
+          el('button', { class: 'tbtn', type: 'button', text: '今日', onclick: () => { const t = new Date(); y = t.getFullYear(); m = t.getMonth(); sel = new Date(y, m, t.getDate()); render(); } }),
+          el('button', { class: 'tbtn', type: 'button', text: '›', 'aria-label': '次の月', onclick: () => shift(1) })),
+        grid, lbl, note)
+    });
+    render();
+  }
+};
+
+/* ===================== アプリ: 設定 ===================== */
+apps.settings = {
+  name: '設定', icon: 'settings',
+  open() {
+    const ex = WM.list.find(w => w.app === 'settings');
+    if (ex) { focusWin(ex); return; }
+    const themeBtns = [['light', 'ライト'], ['dark', 'ダーク']].map(([v, t]) => el('button', { type: 'button', text: t, 'data-v': v, onclick: () => { S.theme = v; sync(); } }));
+    const accBtns = ACCENTS.map(([n, c]) => el('button', { class: 'acc', type: 'button', style: 'background:' + c, 'aria-label': n, title: n, 'data-v': c, onclick: () => { S.accent = c; sync(); } }));
+    const wpBtns = WALLS.map((w, i) => {
+      const b = el('button', { class: 'wp', type: 'button', 'data-v': String(i), onclick: () => { S.wall = i; sync(); } }, el('i'), w.name);
+      b.firstChild.style.background = w.css;
+      return b;
+    });
+    const secChk = el('input', { type: 'checkbox', checked: S.sec });
+    const h24Chk = el('input', { type: 'checkbox', checked: S.h24 });
+    secChk.addEventListener('change', () => { S.sec = secChk.checked; sync(); });
+    h24Chk.addEventListener('change', () => { S.h24 = h24Chk.checked; sync(); });
+    function sync() {
+      applySettings();
+      themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.theme)));
+      accBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.accent)));
+      wpBtns.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === S.wall)));
+    }
+    const sec = (t, ...c) => el('section', null, el('h2', { text: t }), c);
+    createWindow({
+      app: 'settings', title: '設定', w: 460, h: 500, minW: 280,
+      body: el('div', { class: 'st' },
+        sec('テーマ', el('div', { class: 'seg' }, themeBtns)),
+        sec('アクセントカラー', el('div', { class: 'st-row' }, accBtns)),
+        sec('壁紙', el('div', { class: 'st-row' }, wpBtns)),
+        sec('時計', el('div', { class: 'st-row' }, el('label', { class: 'chk' }, h24Chk, '24時間表示'), el('label', { class: 'chk' }, secChk, '秒を表示'))),
+        sec('このシステムについて', el('p', { class: 'st-about', text: 'Nagi OS 1.0 — 1つのHTMLファイルだけで動くデスクトップ環境です。ファイルや設定はメモリ上にのみ保持され、ページを閉じると消えます。' })))
+    });
+    sync();
+  }
+};
+
+/* ===================== デスクトップ / メニュー ===================== */
+const iconsEl = $('#icons'), ctxEl = $('#ctx');
+function hideMenu() { ctxEl.hidden = true; }
+function showMenu(x, y, items) {
+  ctxEl.textContent = '';
+  for (const it of items) {
+    if (it === '-') ctxEl.append(el('div', { class: 'sep', role: 'separator' }));
+    else ctxEl.append(el('button', { class: 'mi' + (it.danger ? ' danger' : ''), type: 'button', role: 'menuitem', text: it.label, onclick: () => { hideMenu(); it.action(); } }));
+  }
+  ctxEl.hidden = false;
+  const r = ctxEl.getBoundingClientRect();
+  ctxEl.style.left = clamp(x, 4, innerWidth - r.width - 4) + 'px';
+  ctxEl.style.top = clamp(y, 4, innerHeight - r.height - 4) + 'px';
+  const f = ctxEl.querySelector('.mi');
+  if (f) f.focus();
+}
+ctxEl.addEventListener('keydown', e => {
+  const items = [...ctxEl.querySelectorAll('.mi')], i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+});
+ctxEl.addEventListener('contextmenu', e => e.preventDefault());
+
+function renderDesktop() {
+  iconsEl.textContent = '';
+  const add = (ic, label, open, path) => {
+    const b = el('button', { class: 'dicon', type: 'button', title: label, html: icon(ic) });
+    b.append(el('span', { text: label }));
+    const select = () => { for (const o of iconsEl.children) o.classList.toggle('sel', o === b); };
+    bindOpen(b, select, open);
+    b.addEventListener('contextmenu', e => {
+      e.preventDefault(); e.stopPropagation(); select();
+      const items = [{ label: '開く', action: open }];
+      if (path) items.push({ label: '名前の変更', action: () => renameItem(null, path) }, '-', { label: '削除', danger: true, action: () => deleteItem(null, path) });
+      showMenu(e.clientX, e.clientY, items);
+    });
+    iconsEl.append(b);
+  };
+  for (const id of Object.keys(apps)) add(apps[id].icon, apps[id].name, () => launch(id));
+  for (const n of fs.list(DESK)) { const p = fs.join(DESK, n.name); add(kindIcon(n), n.name, () => openPath(p), p); }
+}
+$('#desktop').addEventListener('pointerdown', e => {
+  if (e.target === iconsEl || e.target === $('#desktop')) for (const o of iconsEl.children) o.classList.remove('sel');
+});
+$('#desktop').addEventListener('contextmenu', e => {
+  if (e.target.closest('.win')) return;
+  e.preventDefault();
+  showMenu(e.clientX, e.clientY, [
+    { label: '新しいテキストファイル', action: () => newItem(DESK, 'file') },
+    { label: '新しいフォルダー', action: () => newItem(DESK, 'dir') }, '-',
+    { label: '壁紙を切り替え', action: () => { S.wall = (S.wall + 1) % WALLS.length; applySettings(); toast('壁紙: ' + WALLS[S.wall].name); } },
+    { label: 'すべて最小化', action: () => WM.list.slice().forEach(w => { if (!w.min) minimize(w); }) }, '-',
+    { label: '設定を開く', action: () => launch('settings') }]);
+});
+
+/* ===================== スタートメニュー / タスクバー ===================== */
+const startBtn = $('#start-btn'), startMenu = $('#start-menu'), smSearch = $('#sm-search'), smApps = $('#sm-apps');
+function renderStart() {
+  const q = smSearch.value.trim().toLowerCase();
+  smApps.textContent = '';
+  const ids = Object.keys(apps).filter(id => !q || id.includes(q) || apps[id].name.toLowerCase().includes(q));
+  for (const id of ids) {
+    const b = el('button', { class: 'sm-app', type: 'button', 'data-id': id, html: icon(apps[id].icon), onclick: () => { closeStart(); launch(id); } });
+    b.append(el('span', { text: apps[id].name }));
+    smApps.append(b);
+  }
+  if (!ids.length) smApps.append(el('div', { class: 'sm-empty', text: '一致するアプリはありません' }));
+}
+function openStart() { startMenu.hidden = false; startBtn.setAttribute('aria-expanded', 'true'); smSearch.value = ''; renderStart(); smSearch.focus(); }
+function closeStart() { if (startMenu.hidden) return; startMenu.hidden = true; startBtn.setAttribute('aria-expanded', 'false'); }
+startBtn.addEventListener('click', () => { if (startMenu.hidden) openStart(); else closeStart(); });
+smSearch.addEventListener('input', renderStart);
+smSearch.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const f = smApps.querySelector('.sm-app'); if (f) f.click(); }
+});
+$('#sm-closeall').addEventListener('click', () => { closeStart(); WM.list.slice().forEach(w => closeWin(w)); });
+$('#sm-sleep').addEventListener('click', () => { closeStart(); $('#sleep').hidden = false; tick(); });
+$('#sleep').addEventListener('click', () => { $('#sleep').hidden = true; });
+$('#clock').addEventListener('click', () => launch('calendar'));
+
+document.addEventListener('pointerdown', e => {
+  if (!ctxEl.hidden && !ctxEl.contains(e.target)) hideMenu();
+  if (!startMenu.hidden && !startMenu.contains(e.target) && !startBtn.contains(e.target)) closeStart();
+}, true);
+document.addEventListener('keydown', e => {
+  if (!$('#sleep').hidden) { e.preventDefault(); e.stopPropagation(); $('#sleep').hidden = true; return; }
+  if (e.key === 'Escape') {
+    if (!ctxEl.hidden) hideMenu();
+    else if (!startMenu.hidden) { closeStart(); startBtn.focus(); }
+  }
+}, true);
+window.addEventListener('blur', hideMenu);
+
+/* ===================== 初期データと起動 ===================== */
+function seed() {
+  fs.mkdir(DESK); fs.mkdir(DOCS); fs.mkdir(PICS);
+  fs.write(DESK + '/はじめに.txt', [
+    'Nagi OS へようこそ',
+    '==================',
+    '',
+    'ブラウザの中で動く小さなデスクトップ環境です。',
+    '',
+    '■ ウィンドウ',
+    '・タイトルバーをドラッグして移動、端や角をドラッグしてサイズ変更',
+    '・画面の上端へドラッグで最大化、左右の端へドラッグで半分に整列',
+    '・タイトルバーのダブルクリックでも最大化できます',
+    '',
+    '■ デスクトップ',
+    '・アイコンはダブルクリック（タッチならタップ）で開きます',
+    '・何もない場所を右クリックするとメニューが出ます',
+    '・左下のボタンからスタートメニューを開けます',
+    '',
+    '■ アプリ',
+    'メモ帳 / ファイル / 電卓 / ペイント / ターミナル /',
+    'マインスイーパー / カレンダー / 設定',
+    '',
+    '■ ファイル',
+    'メモ帳やペイントで保存したものは「ファイル」アプリから開けます。',
+    'データはこのページのメモリ上にだけあり、ページを閉じると消えます。',
+    ''].join('\n'), 'text');
+  fs.write(DOCS + '/買い物リスト.txt', '・牛乳\n・たまご\n・食パン\n・コーヒー豆\n', 'text');
+  fs.write(DOCS + '/ターミナルのヒント.txt', 'ターミナルで試せるコマンド:\n\n  ls /ドキュメント\n  cat /ドキュメント/買い物リスト.txt\n  echo こんにちは > memo.txt\n  open ペイント\n  neofetch\n', 'text');
+  try {
+    const c = document.createElement('canvas'); c.width = 720; c.height = 460;
+    const g = c.getContext('2d');
+    const sky = g.createLinearGradient(0, 0, 0, 460);
+    sky.addColorStop(0, '#22306b'); sky.addColorStop(0.55, '#d9627a'); sky.addColorStop(1, '#f6b06a');
+    g.fillStyle = sky; g.fillRect(0, 0, 720, 460);
+    g.fillStyle = '#ffe9b0'; g.beginPath(); g.arc(500, 290, 54, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#3a2f66'; g.beginPath(); g.moveTo(0, 340);
+    g.quadraticCurveTo(160, 240, 330, 330); g.quadraticCurveTo(520, 420, 720, 300); g.lineTo(720, 460); g.lineTo(0, 460); g.fill();
+    g.fillStyle = '#231c45'; g.beginPath(); g.moveTo(0, 400);
+    g.quadraticCurveTo(240, 330, 430, 410); g.quadraticCurveTo(600, 470, 720, 390); g.lineTo(720, 460); g.lineTo(0, 460); g.fill();
+    fs.write(PICS + '/夕凪.png', c.toDataURL('image/png'), 'image');
+  } catch (e) { console.error(e); }
+}
+
+seed();
+applySettings();
+renderDesktop();
+fs.on(renderDesktop);
+setInterval(tick, 1000);
+launch('notepad', { path: DESK + '/はじめに.txt' });
+})();
+</script>
+</body>
+</html>

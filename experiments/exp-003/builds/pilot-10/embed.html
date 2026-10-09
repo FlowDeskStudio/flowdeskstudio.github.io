@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-rJVqBz6jdYgfmZTJKyOta/3/eochntSte2kxDDr/xqU='; script-src-attr 'none'; style-src 'sha256-BL/gR1vRHdbr5xqXKwvXtJUWosEWFFtJ6de2yB+APJE='; style-src-attr 'unsafe-inline'; img-src 'none'; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>糠蔵(ぬかぐら)— 冷蔵庫のドアポケットに立つ、ぬか漬け容器</title>
+<meta name="description" content="糠蔵は、冷蔵庫のドアポケットに立てておける磁器のぬか漬け容器です。熟成ぬか1kg付き。">
+<style>
+:root {
+  --paper: #eef0e7;
+  --paper-2: #e2e6d7;
+  --ink: #261c33;
+  --ink-soft: #564b62;
+  --nasu: #33234a;
+  --nuka: #c9973f;
+  --nuka-deep: #76510c;
+  --nuka-tint: #ead9b0;
+  --leaf: #4c7a3b;
+  --terracotta: #c47f58;
+  --wood: #b98a52;
+  --line: rgba(38, 28, 51, .2);
+  --focus: var(--ink);
+
+  --glaze: #f8f6ef;
+  --glaze-shade: #dedacd;
+  --glaze-ink: #33234a;
+
+  --serif: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "BIZ UDPMincho", "Noto Serif JP", serif;
+  --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "Yu Gothic", YuGothic, Meiryo, sans-serif;
+}
+:root:has(#g-nasu:checked) { --glaze: #3d2b58; --glaze-shade: #2b1d40; --glaze-ink: #eadff5; }
+:root:has(#g-hai:checked)  { --glaze: #aab7a1; --glaze-shade: #8c9a84; --glaze-ink: #261c33; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.85;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+h1, h2, h3, p, dl, dd, ol, ul, figure, fieldset { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+fieldset { border: 0; min-width: 0; }
+svg { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+button, input { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.4; }
+h2 {
+  font-size: clamp(1.6rem, 1.1rem + 2vw, 2.5rem);
+  letter-spacing: .04em;
+  word-break: auto-phrase;
+  text-wrap: balance;
+}
+p { word-break: auto-phrase; text-wrap: pretty; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+[id] { scroll-margin-top: 1.5rem; }
+
+.wrap { width: min(100% - 2rem, 70rem); margin-inline: auto; }
+.vh {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 3rem; padding: .5rem 1.6rem;
+  border: 1.5px solid var(--ink); border-radius: 4px;
+  background: var(--ink); color: var(--paper);
+  font-weight: 700; letter-spacing: .08em; text-decoration: none; white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .15s, color .15s, transform .1s;
+}
+.btn:hover { background: var(--nuka-deep); border-color: var(--nuka-deep); }
+.btn:active { transform: translateY(1px); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.small { min-height: 2.75rem; padding-inline: 1.1rem; font-size: .9rem; }
+
+/* ---------- header ---------- */
+.site-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-block: 1rem;
+}
+.logo {
+  display: inline-flex; align-items: baseline; gap: .6rem;
+  font-family: var(--serif); font-size: 1.5rem; font-weight: 600; letter-spacing: .12em;
+  text-decoration: none; min-height: 2.75rem; align-items: center;
+}
+.logo small { font-family: var(--sans); font-size: .68rem; letter-spacing: .22em; color: var(--ink-soft); }
+.site-nav { display: flex; align-items: center; gap: 1.6rem; font-size: .9rem; }
+.site-nav a:not(.btn) { text-decoration: none; padding-block: .6rem; border-bottom: 1.5px solid transparent; }
+.site-nav a:not(.btn):hover { border-bottom-color: var(--ink); }
+@media (max-width: 47.5em) {
+  .site-nav a:not(.btn) { display: none; }
+}
+
+/* ---------- hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "fig title" "copy copy";
+  gap: 1.5rem 1rem;
+  padding-block: 1rem clamp(3rem, 8vw, 6rem);
+  align-items: center;
+}
+.hero h1 {
+  grid-area: title;
+  align-self: start;
+  writing-mode: vertical-rl;
+  font-size: clamp(2.1rem, 1.2rem + 3.6vw, 4rem);
+  line-height: 1.3;
+  letter-spacing: .08em;
+}
+.hero h1 span { display: block; white-space: nowrap; }
+.hero h1 span + span { padding-top: 1.2em; }
+.hero-fig { grid-area: fig; justify-self: center; width: 100%; max-width: 25rem; }
+.hero-fig svg { width: 100%; }
+.hero-copy { grid-area: copy; max-width: 30rem; }
+.hero-copy .lead { font-size: 1.05rem; }
+.hero-copy .lead ruby rt { font-size: .5em; }
+.cta-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.75rem; }
+.facts {
+  display: grid; grid-template-columns: repeat(3, auto); justify-content: start;
+  gap: .25rem 1.75rem; margin-top: 2.25rem; padding-top: 1.25rem;
+  border-top: 1.5px solid var(--line);
+}
+.facts div { display: flex; flex-direction: column-reverse; }
+.facts dt { font-size: .78rem; color: var(--ink-soft); letter-spacing: .06em; }
+.facts dd { font-family: var(--serif); font-size: 1.3rem; font-weight: 600; white-space: nowrap; line-height: 1.5; }
+.facts dd small { font-family: var(--sans); font-size: .72rem; font-weight: 500; }
+@media (max-width: 26em) {
+  .facts { grid-template-columns: repeat(2, auto); }
+}
+@media (min-width: 56em) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 25rem) auto;
+    grid-template-areas: "copy fig title";
+    gap: 2.5rem;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .lid { animation: settle .9s .35s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes settle {
+    from { transform: translateY(-30px); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+}
+
+/* ---------- anatomy (dark) ---------- */
+.anatomy {
+  --focus: var(--nuka);
+  background: var(--nasu); color: #f2edf6;
+  padding-block: clamp(3.5rem, 9vw, 7rem);
+}
+.anatomy h2 { max-width: 22em; }
+.anatomy-grid {
+  display: grid; gap: 2.5rem; margin-top: clamp(2rem, 5vw, 3.5rem); align-items: center;
+}
+.anatomy figure { max-width: 26rem; width: 100%; justify-self: center; }
+.anatomy figure svg { width: 100%; }
+.anatomy figcaption { margin-top: .75rem; font-size: .8rem; color: #cdc1da; text-align: center; }
+.points { display: grid; gap: 2rem; }
+.points li { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); gap: 1rem; }
+.points .num {
+  display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+  background: var(--nuka); color: var(--ink); font-weight: 700; line-height: 1;
+}
+.points h3 { font-size: 1.3rem; letter-spacing: .04em; word-break: auto-phrase; }
+.points p { margin-top: .5rem; color: #dcd3e6; font-size: .95rem; }
+@media (min-width: 52em) {
+  .anatomy-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 4rem; }
+}
+
+/* ---------- timer ---------- */
+.timer { padding-block: clamp(3.5rem, 9vw, 7rem); }
+.timer .intro { margin-top: 1rem; max-width: 36rem; color: var(--ink-soft); }
+.timer-grid { display: grid; gap: 2rem; margin-top: 2.5rem; align-items: start; }
+.controls { display: grid; gap: 1.75rem; }
+legend { padding: 0; margin-bottom: .6rem; font-size: .85rem; font-weight: 700; letter-spacing: .1em; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip { position: relative; display: inline-flex; cursor: pointer; }
+.chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.chip span {
+  display: inline-flex; align-items: center; gap: .5em;
+  min-height: 2.75rem; padding: .3rem 1.05rem;
+  border: 1.5px solid var(--line); border-radius: 999px;
+  background: transparent; white-space: nowrap;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.chip:hover span { border-color: var(--ink); }
+.chip input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.chip input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; }
+.dot { width: .7em; height: .7em; border-radius: 50%; flex: none; border: 1px solid rgba(38, 28, 51, .35); }
+.chip input:checked + span .dot { border-color: rgba(255, 255, 255, .6); }
+
+.result {
+  background: var(--nuka-tint); border-radius: 6px;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 6px solid var(--nuka);
+}
+.result .what { font-size: .9rem; font-weight: 700; letter-spacing: .08em; }
+.result .hours { font-family: var(--serif); font-weight: 600; line-height: 1.1; margin-top: .5rem; white-space: nowrap; }
+.result .hours b { font-size: clamp(4rem, 2.5rem + 8vw, 6.5rem); font-weight: 600; font-variant-numeric: tabular-nums; }
+.result .hours span { font-size: 1.4rem; margin-inline: .2em; }
+.result .when { margin-top: 1rem; padding-top: 1rem; border-top: 1.5px solid rgba(38, 28, 51, .22); font-size: 1.1rem; }
+.result .when strong { font-family: var(--serif); font-size: 1.3rem; }
+.result .tip { margin-top: .75rem; font-size: .9rem; color: #4a3f55; }
+.result .note { margin-top: 1rem; font-size: .78rem; color: #4a3f55; }
+@media (min-width: 52em) {
+  .timer-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 4rem; }
+  .result { position: sticky; top: 1.5rem; }
+}
+
+/* ---------- order ---------- */
+.order { background: var(--paper-2); padding-block: clamp(3.5rem, 9vw, 7rem); }
+.order-grid { display: grid; gap: 2.5rem; margin-top: 2.5rem; align-items: start; }
+.order-fig { max-width: 21rem; width: 100%; justify-self: center; }
+.order-fig svg { width: 100%; }
+.panel { display: grid; gap: 1.5rem; }
+.price { font-family: var(--serif); font-size: 2.4rem; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+.price small { font-family: var(--sans); font-size: .8rem; font-weight: 500; margin-left: .4em; }
+.price-sub { font-size: .9rem; color: var(--ink-soft); margin-top: .25rem; }
+.swatch { width: 1.15em; height: 1.15em; border-radius: 50%; flex: none; border: 1px solid rgba(38, 28, 51, .45); }
+.chip input:checked + span .swatch { border-color: rgba(255, 255, 255, .7); }
+.qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 4px; background: var(--paper); }
+.qty button {
+  width: 2.75rem; height: 2.75rem; border: 0; background: transparent; cursor: pointer;
+  font-size: 1.25rem; line-height: 1; border-radius: 3px;
+}
+.qty button:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.qty button:disabled { opacity: .35; cursor: default; }
+.qty output { min-width: 2.5rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sum { display: grid; gap: .35rem; padding-top: 1.25rem; border-top: 1.5px solid var(--line); }
+.sum div { display: flex; justify-content: space-between; gap: 1rem; font-variant-numeric: tabular-nums; }
+.sum dt { color: var(--ink-soft); }
+.sum .total { margin-top: .4rem; align-items: baseline; }
+.sum .total dt { color: var(--ink); font-weight: 700; }
+.sum .total dd { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; white-space: nowrap; }
+.panel .btn { width: 100%; min-height: 3.5rem; font-size: 1.05rem; }
+.status {
+  padding: 1rem 1.15rem; border-left: 4px solid var(--leaf); background: var(--paper);
+  font-size: .92rem; border-radius: 0 4px 4px 0;
+}
+.status[hidden] { display: none; }
+.status strong { display: block; }
+.spec { margin-top: clamp(2.5rem, 6vw, 4rem); border-top: 1.5px solid var(--ink); }
+.spec div {
+  display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 1rem;
+  padding-block: .85rem; border-bottom: 1px solid var(--line);
+}
+.spec dt { font-weight: 700; font-size: .9rem; letter-spacing: .06em; }
+.spec dd { font-size: .95rem; }
+@media (min-width: 52em) {
+  .order-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 4rem; }
+  .spec { display: grid; grid-template-columns: 1fr 1fr; column-gap: 4rem; }
+}
+
+/* ---------- faq ---------- */
+.faq { padding-block: clamp(3.5rem, 9vw, 7rem); }
+.faq-grid { display: grid; gap: 2rem; }
+.faq-list { border-top: 1.5px solid var(--ink); }
+details { border-bottom: 1px solid var(--line); }
+summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-block: 1.15rem; min-height: 3rem; cursor: pointer; list-style: none;
+  font-family: var(--serif); font-size: 1.12rem; font-weight: 600; line-height: 1.6;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: ""; flex: none; width: .65rem; height: .65rem; margin-right: .3rem;
+  border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+  transform: translateY(-25%) rotate(45deg); transition: transform .2s;
+}
+details[open] summary::after { transform: translateY(25%) rotate(-135deg); }
+summary:hover { color: var(--nuka-deep); }
+details p { padding-bottom: 1.35rem; max-width: 40rem; color: var(--ink-soft); }
+@media (min-width: 52em) {
+  .faq-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 4rem; }
+}
+
+/* ---------- closing / footer ---------- */
+.closing { --focus: var(--nuka); background: var(--nasu); color: #f2edf6; padding-block: clamp(3rem, 8vw, 5.5rem); }
+.closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem 3rem; }
+.closing h2 { font-size: clamp(1.4rem, 1rem + 1.8vw, 2.1rem); }
+.closing .btn { background: var(--nuka); border-color: var(--nuka); color: var(--ink); }
+.closing .btn:hover { background: #e0b25c; border-color: #e0b25c; }
+.site-foot { background: var(--nasu); color: #cdc1da; font-size: .8rem; padding-block: 1.5rem 2.5rem; --focus: var(--nuka); }
+.site-foot .wrap { border-top: 1px solid rgba(255, 255, 255, .2); padding-top: 1.5rem; display: grid; gap: .4rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- 共有イラスト(本体と蓋) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="crock-body" viewBox="0 0 360 420">
+    <path d="M85 170H275V352a28 28 0 0 1-28 28H113a28 28 0 0 1-28-28Z" style="fill:var(--glaze)" stroke="#261c33" stroke-opacity=".3" stroke-width="1.5"/>
+    <path d="M250 171H274V352a27 27 0 0 1-27 27h-8q11-8 11-27Z" style="fill:var(--glaze-shade)"/>
+    <rect x="100" y="188" width="9" height="140" rx="4.5" fill="#fff" fill-opacity=".35"/>
+    <circle cx="176" cy="276" r="27" fill="none" stroke-width="2" style="stroke:var(--glaze-ink)"/>
+    <text x="176" y="278" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="600"
+          style="fill:var(--glaze-ink);font-family:'Hiragino Mincho ProN','Yu Mincho',YuMincho,serif">糠</text>
+  </symbol>
+  <symbol id="crock-lid" viewBox="0 0 360 420">
+    <rect x="150" y="126" width="60" height="24" rx="8" fill="#b98a52" stroke="#261c33" stroke-opacity=".3" stroke-width="1.5"/>
+    <rect x="77" y="146" width="206" height="28" rx="10" style="fill:var(--glaze)" stroke="#261c33" stroke-opacity=".3" stroke-width="1.5"/>
+    <path d="M258 147h15a9 9 0 0 1 9 9v8a9 9 0 0 1-9 9h-15Z" style="fill:var(--glaze-shade)"/>
+  </symbol>
+</svg>
+
+<header class="wrap site-head">
+  <a class="logo" href="#top" aria-label="糠蔵 トップへ">糠蔵<small>NUKAGURA</small></a>
+  <nav class="site-nav" aria-label="ページ内">
+    <a href="#shikumi">しくみ</a>
+    <a href="#jikan">漬け時間</a>
+    <a href="#shiyou">仕様と価格</a>
+    <a href="#faq">質問</a>
+    <a class="btn small" href="#yoyaku">予約する</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="wrap hero">
+    <h1><span>ぬか床を、</span><span>冷蔵庫のドアへ。</span></h1>
+
+    <figure class="hero-fig">
+      <svg viewBox="0 0 360 420" role="img" aria-label="木のつまみが付いた蓋つきの磁器容器、糠蔵。足もとにきゅうりとなす。">
+        <path d="M36 404V176a144 144 0 0 1 288 0V404Z" fill="#ead9b0"/>
+        <ellipse cx="180" cy="386" rx="128" ry="10" fill="#261c33" fill-opacity=".14"/>
+        <use href="#crock-body" width="360" height="420"/>
+        <use class="lid" href="#crock-lid" width="360" height="420"/>
+        <g transform="rotate(-7 66 384)">
+          <rect x="20" y="373" width="94" height="21" rx="10.5" fill="#4c7a3b"/>
+          <rect x="30" y="378" width="70" height="3" rx="1.5" fill="#8fb87a"/>
+        </g>
+        <g transform="rotate(10 300 378)">
+          <ellipse cx="298" cy="380" rx="36" ry="17" fill="#3d2b58"/>
+          <ellipse cx="290" cy="374" rx="16" ry="4" fill="#fff" fill-opacity=".18"/>
+          <path d="M328 368l14-6 4 9-6 4 5 8-12 3Z" fill="#4c7a3b"/>
+        </g>
+      </svg>
+    </figure>
+
+    <div class="hero-copy">
+      <p class="lead"><ruby>糠蔵<rp>(</rp><rt>ぬかぐら</rt><rp>)</rp></ruby>は、ドアポケットに立てておける磁器のぬか漬け容器です。熟成ずみのぬかが1kg付いてくるので、届いた日の夜に漬けて、翌朝から食べられます。</p>
+      <div class="cta-row">
+        <a class="btn" href="#yoyaku">予約する</a>
+        <a class="btn ghost" href="#jikan">漬け時間を調べる</a>
+      </div>
+      <dl class="facts">
+        <div><dt>熟成ぬか1kg付き</dt><dd>9,800円<small>(税込)</small></dd></div>
+        <div><dt>容量</dt><dd>1.8L</dd></div>
+        <div><dt>発送開始</dt><dd>11月下旬</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="anatomy" id="shikumi">
+    <div class="wrap">
+      <h2>続かない理由は、水と、置き場所と、においでした。</h2>
+      <div class="anatomy-grid">
+        <figure>
+          <svg viewBox="24 36 330 346" role="img" aria-label="糠蔵の断面図。1 素焼きの中蓋、2 幅9.5センチの本体、3 パッキン付きの外蓋。">
+            <!-- 本体 -->
+            <path d="M60 90V314a26 26 0 0 0 26 26H274a26 26 0 0 0 26-26V90Z" fill="#f2edf6"/>
+            <path d="M74 88V312a14 14 0 0 0 14 14H272a14 14 0 0 0 14-14V88Z" fill="#33234a"/>
+            <!-- ぬか -->
+            <path d="M74 158V312a14 14 0 0 0 14 14H272a14 14 0 0 0 14-14V158Z" fill="#c9973f"/>
+            <g fill="#8a6220">
+              <circle cx="96" cy="182" r="2"/><circle cx="140" cy="176" r="1.6"/><circle cx="250" cy="190" r="2"/>
+              <circle cx="266" cy="250" r="1.6"/><circle cx="92" cy="262" r="1.8"/><circle cx="180" cy="308" r="2"/>
+              <circle cx="232" cy="300" r="1.6"/><circle cx="118" cy="304" r="1.8"/><circle cx="206" cy="182" r="1.6"/>
+            </g>
+            <!-- 野菜 -->
+            <g transform="rotate(-14 150 232)">
+              <rect x="96" y="220" width="108" height="24" rx="12" fill="#4c7a3b"/>
+              <rect x="108" y="226" width="80" height="3" rx="1.5" fill="#8fb87a"/>
+            </g>
+            <g transform="rotate(12 222 268)">
+              <ellipse cx="222" cy="268" rx="40" ry="19" fill="#3d2b58"/>
+              <path d="M256 256l12-5 4 9-6 3 4 7-11 3Z" fill="#4c7a3b"/>
+            </g>
+            <path d="M104 284l44 8-2 12-44-8a6 6 0 0 1 2-12Z" fill="#d9772e"/>
+            <!-- 水滴 -->
+            <g fill="#bfe0ea">
+              <path d="M120 150q5 7 0 10q-5-3 0-10Z"/><path d="M180 149q5 7 0 10q-5-3 0-10Z"/><path d="M240 150q5 7 0 10q-5-3 0-10Z"/>
+            </g>
+            <!-- 中蓋 -->
+            <rect x="165" y="128" width="30" height="14" rx="4" fill="#c47f58"/>
+            <rect x="78" y="138" width="204" height="18" rx="4" fill="#c47f58"/>
+            <!-- 外蓋 -->
+            <rect x="150" y="48" width="60" height="22" rx="7" fill="#b98a52"/>
+            <rect x="52" y="66" width="256" height="26" rx="10" fill="#f2edf6"/>
+            <rect x="60" y="90" width="14" height="4" fill="#4c7a3b"/><rect x="286" y="90" width="14" height="4" fill="#4c7a3b"/>
+            <!-- 引き出し線と番号 -->
+            <g stroke="#c9973f" stroke-width="1.5" fill="none">
+              <path d="M284 147H318"/><path d="M310 79H318"/>
+              <path d="M60 362H300M60 355v14M300 355v14"/>
+            </g>
+            <g font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central"
+               style="font-family:'Hiragino Sans','Yu Gothic',Meiryo,sans-serif">
+              <circle cx="331" cy="147" r="13" fill="#c9973f"/><text x="331" y="148" fill="#261c33">1</text>
+              <circle cx="180" cy="362" r="13" fill="#c9973f"/><text x="180" y="363" fill="#261c33">2</text>
+              <circle cx="331" cy="79" r="13" fill="#c9973f"/><text x="331" y="80" fill="#261c33">3</text>
+            </g>
+          </svg>
+          <figcaption>断面図(正面から)</figcaption>
+        </figure>
+
+        <ol class="points">
+          <li>
+            <span class="num" aria-hidden="true">1</span>
+            <div>
+              <h3>素焼きの中蓋が、水を引き受ける</h3>
+              <p>ぬか床は野菜から出る水分で少しずつゆるみます。糠蔵の中蓋は釉薬をかけていない素焼き。表面に上がってきた水を吸うので、布巾やスポンジで水を取る作業がいりません。週に一度、外して乾かすだけです。</p>
+            </div>
+          </li>
+          <li>
+            <span class="num" aria-hidden="true">2</span>
+            <div>
+              <h3>幅9.5cm。ドアポケットに立つ</h3>
+              <p>2Lのペットボトルとほぼ同じ幅です。野菜室の奥にしまい込まないから、牛乳を取るたびに目に入ります。冷蔵庫の中は発酵がゆっくり進むので、かき混ぜるのは週に一度で足ります。</p>
+            </div>
+          </li>
+          <li>
+            <span class="num" aria-hidden="true">3</span>
+            <div>
+              <h3>二重の蓋で、においを外に出さない</h3>
+              <p>外蓋のふちにはシリコーンのパッキン。中蓋と合わせて二重に閉じるので、隣に置いた卵やバターににおいが移りません。</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="timer" id="jikan">
+    <div class="wrap">
+      <h2>いま漬けたら、いつ食べられる?</h2>
+      <p class="intro">野菜と置き場所を選ぶと、食べごろの目安が出ます。ぬかの状態や野菜の大きさで前後するので、最初は少し早めに味見してみてください。</p>
+
+      <div class="timer-grid">
+        <form class="controls" id="timer-form">
+          <fieldset>
+            <legend>漬けるもの</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="veg" value="kyuri" checked><span><i class="dot" style="background:#4c7a3b"></i>きゅうり</span></label>
+              <label class="chip"><input type="radio" name="veg" value="nasu"><span><i class="dot" style="background:#3d2b58"></i>なす</span></label>
+              <label class="chip"><input type="radio" name="veg" value="daikon"><span><i class="dot" style="background:#f8f6ef"></i>大根</span></label>
+              <label class="chip"><input type="radio" name="veg" value="ninjin"><span><i class="dot" style="background:#d9772e"></i>にんじん</span></label>
+              <label class="chip"><input type="radio" name="veg" value="kabu"><span><i class="dot" style="background:#efe6ee"></i>かぶ</span></label>
+              <label class="chip"><input type="radio" name="veg" value="myoga"><span><i class="dot" style="background:#c9788f"></i>みょうが</span></label>
+              <label class="chip"><input type="radio" name="veg" value="tamago"><span><i class="dot" style="background:#f0d98a"></i>ゆで卵</span></label>
+              <label class="chip"><input type="radio" name="veg" value="avocado"><span><i class="dot" style="background:#a9b85c"></i>アボカド</span></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>置き場所</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="place" value="fridge" checked><span>冷蔵庫(約5℃)</span></label>
+              <label class="chip"><input type="radio" name="place" value="room"><span>常温(20〜25℃)</span></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>漬かり具合</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="taste" value="light"><span>浅め</span></label>
+              <label class="chip"><input type="radio" name="taste" value="normal" checked><span>ふつう</span></label>
+              <label class="chip"><input type="radio" name="taste" value="deep"><span>しっかり</span></label>
+            </div>
+          </fieldset>
+        </form>
+
+        <div class="result" aria-live="polite" aria-atomic="true">
+          <p class="what" id="r-what">きゅうり・冷蔵庫・ふつう</p>
+          <p class="hours"><span>約</span><b id="r-hours">12</b><span>時間</span></p>
+          <p class="when" id="r-when">夜に漬ければ、<strong>翌朝</strong>が食べごろ。</p>
+          <p class="tip" id="r-tip">下ごしらえ:両端を落とし、塩ひとつまみで板ずりしてから。</p>
+          <p class="note">※ 時間は目安です。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="order" id="shiyou">
+    <div class="wrap">
+      <h2>色は三つ。値段はひとつ。</h2>
+      <div class="order-grid">
+        <figure class="order-fig">
+          <svg viewBox="0 0 360 420" role="img" aria-label="選択中の色の糠蔵">
+            <path d="M36 404V176a144 144 0 0 1 288 0V404Z" fill="#eef0e7"/>
+            <ellipse cx="180" cy="386" rx="118" ry="10" fill="#261c33" fill-opacity=".14"/>
+            <use href="#crock-body" width="360" height="420"/>
+            <use href="#crock-lid" width="360" height="420"/>
+          </svg>
+        </figure>
+
+        <form class="panel" id="yoyaku" novalidate>
+          <div>
+            <p class="price">9,800円<small>(税込)</small></p>
+            <p class="price-sub">熟成ぬか1kg・はじめての手引き付き</p>
+          </div>
+
+          <fieldset>
+            <legend>色</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="glaze" id="g-hakuji" value="白磁" checked><span><i class="swatch" style="background:#f8f6ef"></i>白磁</span></label>
+              <label class="chip"><input type="radio" name="glaze" id="g-nasu" value="茄子紺"><span><i class="swatch" style="background:#3d2b58"></i>茄子紺</span></label>
+              <label class="chip"><input type="radio" name="glaze" id="g-hai" value="灰釉"><span><i class="swatch" style="background:#aab7a1"></i>灰釉</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>数量</legend>
+            <div class="qty">
+              <button type="button" id="q-minus" aria-label="数量を1減らす" disabled>−</button>
+              <output id="q-val" aria-live="polite">1</output>
+              <button type="button" id="q-plus" aria-label="数量を1増やす">+</button>
+            </div>
+          </fieldset>
+
+          <dl class="sum">
+            <div><dt>小計</dt><dd id="s-sub">9,800円</dd></div>
+            <div><dt>送料(2点以上で無料)</dt><dd id="s-ship">770円</dd></div>
+            <div class="total"><dt>合計</dt><dd id="s-total">10,570円</dd></div>
+          </dl>
+
+          <button class="btn" type="submit">この内容で予約する</button>
+          <p class="status" id="status" role="status" hidden></p>
+        </form>
+      </div>
+
+      <dl class="spec">
+        <div><dt>サイズ</dt><dd>幅9.5 × 奥行19 × 高さ19.5cm(つまみを含む)</dd></div>
+        <div><dt>容量</dt><dd>1.8L(ぬか約1kgと野菜が入ります)</dd></div>
+        <div><dt>重さ</dt><dd>本体 約1.3kg/ぬかを入れて 約2.4kg</dd></div>
+        <div><dt>素材</dt><dd>磁器(本体・外蓋)、素焼き陶器(中蓋)、シリコーン(パッキン)、ナラ材(つまみ)</dd></div>
+        <div><dt>付属品</dt><dd>熟成ぬか1kg、はじめての手引き</dd></div>
+        <div><dt>別売り</dt><dd>たしぬか 500g 880円(税込)</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="wrap faq-grid">
+      <h2>よくある質問</h2>
+      <div class="faq-list">
+        <details>
+          <summary>ぬか漬けは初めてです。届いてすぐ使えますか?</summary>
+          <p>使えます。乳酸菌が育った状態の熟成ぬかを1kg同梱しています。容器に移して野菜を埋めるだけで、ぬかを育てるための「捨て漬け」は必要ありません。</p>
+        </details>
+        <details>
+          <summary>本当に毎日混ぜなくていいのですか?</summary>
+          <p>冷蔵庫に置く場合は、週に一度、底から大きく返せば十分です。常温に置く場合は発酵が速く進むので、1日1回かき混ぜてください。</p>
+        </details>
+        <details>
+          <summary>ドアポケットに置くには重すぎませんか?</summary>
+          <p>ぬかを入れた状態で約2.4kg、2Lのペットボトル1本と少しの重さです。ドアポケットの耐荷重は機種によって違うので、お使いの冷蔵庫の説明書をご確認ください。</p>
+        </details>
+        <details>
+          <summary>食洗機で洗えますか?</summary>
+          <p>本体と外蓋は、パッキンを外せば食洗機で洗えます。素焼きの中蓋は洗剤を吸ってしまうため、水洗いのあと陰干ししてください。</p>
+        </details>
+        <details>
+          <summary>ぬかが減ってきたら、どうすればいいですか?</summary>
+          <p>別売りのたしぬか(500g・880円)を足してください。週に3〜4回漬ける場合で、2〜3か月に一度が目安です。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <h2>今夜漬けて、あしたの朝ごはんに。</h2>
+      <a class="btn" href="#yoyaku">予約する</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <p>糠蔵は架空の商品です。このページは紹介ページの見本として作られたもので、実際の予約・販売は行っていません。</p>
+    <p>入力した内容はどこにも送信・保存されません。</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var yen = function (n) { return n.toLocaleString('ja-JP') + '円'; };
+
+  /* ---- 漬け時間 ---- */
+  var VEG = {
+    kyuri:   { name: 'きゅうり', h: 12, tip: '両端を落とし、塩ひとつまみで板ずりしてから。' },
+    nasu:    { name: 'なす',     h: 24, tip: '縦半分に切り、切り口に塩をすりこむと色よく漬かります。' },
+    daikon:  { name: '大根',     h: 24, tip: '皮つきのまま、縦四つ割りに。' },
+    ninjin:  { name: 'にんじん', h: 36, tip: '皮をむいて縦半分に。かたいので長めに漬けます。' },
+    kabu:    { name: 'かぶ',     h: 18, tip: '皮つきで半分に。葉もいっしょに漬けられます。' },
+    myoga:   { name: 'みょうが', h: 12, tip: '洗って水気をふき、丸ごと。' },
+    tamago:  { name: 'ゆで卵',   h: 24, tip: '固ゆでにして殻をむき、水気をふいてから。' },
+    avocado: { name: 'アボカド', h: 12, tip: 'かための実を半分に割り、皮と種を除いて。' }
+  };
+  var PLACE = { fridge: { name: '冷蔵庫', f: 1 }, room: { name: '常温', f: 0.4 } };
+  var TASTE = { light: { name: '浅め', f: 0.7 }, normal: { name: 'ふつう', f: 1 }, deep: { name: 'しっかり', f: 1.5 } };
+
+  var tf = document.getElementById('timer-form');
+  var rWhat = document.getElementById('r-what');
+  var rHours = document.getElementById('r-hours');
+  var rWhen = document.getElementById('r-when');
+  var rTip = document.getElementById('r-tip');
+
+  function whenText(hours) {
+    var now = new Date();
+    var t = new Date(now.getTime() + hours * 3600000);
+    if (t.getMinutes() >= 30) { t.setHours(t.getHours() + 1); }
+    var d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var d1 = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+    var days = Math.round((d1 - d0) / 86400000);
+    var day = days === 0 ? '今日' : days === 1 ? 'あす' : days === 2 ? 'あさって' : days + '日後';
+    var h = t.getHours();
+    var part, hh;
+    if (h < 4)       { part = '深夜'; hh = h; }
+    else if (h < 10) { part = '朝';   hh = h; }
+    else if (h < 12) { part = '午前'; hh = h; }
+    else if (h < 15) { part = '昼';   hh = h === 12 ? 12 : h - 12; }
+    else if (h < 18) { part = '夕方'; hh = h - 12; }
+    else             { part = '夜';   hh = h - 12; }
+    return day + 'の' + part + hh + '時ごろ';
+  }
+
+  function updateTimer() {
+    var v = VEG[tf.elements.veg.value];
+    var p = PLACE[tf.elements.place.value];
+    var t = TASTE[tf.elements.taste.value];
+    var hours = Math.max(2, Math.round(v.h * p.f * t.f));
+    rWhat.textContent = v.name + '・' + p.name + '・' + t.name;
+    rHours.textContent = hours;
+    rWhen.textContent = '';
+    rWhen.append('いま漬けると、');
+    var s = document.createElement('strong');
+    s.textContent = whenText(hours);
+    rWhen.append(s, 'が食べごろ。');
+    rTip.textContent = '下ごしらえ:' + v.tip +
+      (tf.elements.place.value === 'room' ? ' 常温では1日1回かき混ぜてください。' : '');
+  }
+  tf.addEventListener('change', updateTimer);
+  tf.addEventListener('submit', function (e) { e.preventDefault(); });
+  updateTimer();
+
+  /* ---- 予約 ---- */
+  var PRICE = 9800, SHIP = 770, MAX = 5;
+  var qty = 1;
+  var of = document.getElementById('yoyaku');
+  var qVal = document.getElementById('q-val');
+  var qMinus = document.getElementById('q-minus');
+  var qPlus = document.getElementById('q-plus');
+  var status = document.getElementById('status');
+
+  function totals() {
+    var sub = PRICE * qty;
+    var ship = qty >= 2 ? 0 : SHIP;
+    return { sub: sub, ship: ship, total: sub + ship };
+  }
+  function updateOrder() {
+    var t = totals();
+    qVal.textContent = qty;
+    qMinus.disabled = qty <= 1;
+    qPlus.disabled = qty >= MAX;
+    document.getElementById('s-sub').textContent = yen(t.sub);
+    document.getElementById('s-ship').textContent = t.ship ? yen(t.ship) : '無料';
+    document.getElementById('s-total').textContent = yen(t.total);
+    status.hidden = true;
+  }
+  qMinus.addEventListener('click', function () { if (qty > 1) { qty--; updateOrder(); } });
+  qPlus.addEventListener('click', function () { if (qty < MAX) { qty++; updateOrder(); } });
+  of.addEventListener('change', function () { status.hidden = true; });
+  of.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var t = totals();
+    status.textContent = '';
+    var s = document.createElement('strong');
+    s.textContent = of.elements.glaze.value + '・' + qty + '点・合計' + yen(t.total);
+    status.append(s, '糠蔵は架空の商品のため、実際の予約は行われません。この内容はどこにも送信・保存されていません。');
+    status.hidden = false;
+  });
+  updateOrder();
+})();
+</script>
+</body>
+</html>
