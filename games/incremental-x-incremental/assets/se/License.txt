@@ -1,0 +1,6 @@
+効果音はすべて Kenney (www.kenney.nl) の素材。ライセンスは Creative Commons Zero (CC0 1.0)。
+http://creativecommons.org/publicdomain/zero/1.0/
+商用利用可。表記は義務ではない。
+
+使ったパック：Impact Sounds、Interface Sounds、RPG Audio、Casino Audio。
+元のファイルとの対応は tools の記録（README「素材」）と web/js/core/assets.js を参照。ファイル名は用途に合わせて付け替えてある。
