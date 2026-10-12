@@ -168,6 +168,8 @@ const game = {
     }
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention: (s) => (!hasAuto(s) && s.m >= cap(s) ? 'full' : null),
   rate: (s, ctx) => valMult(s, ctx).mul(income(s.m)),
 
   // 手で 1 本植える

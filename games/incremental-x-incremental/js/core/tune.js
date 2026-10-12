@@ -6,9 +6,10 @@ export const TUNE = {
   // 選べる基本ゲームの解放。k 本目（0 始まり）の費用（クリッカーの資源）と、要る星の累計
   // 後半の 2 本は、新世界へ行って星を集めないと開かない（世界をまたぐとクリッカーの資源は上下するので、星で区切る）
   unlockCost: [7e7, 5e24, 2e45, 1e50, 1e60],
-  unlockStars: [0, 0, 0, v('ST3', 8), v('ST4', 30)],
+  // 2026-10-12（通しで遊んだ感想「中盤の待ちが長い」）：新しいゲームの間隔が開きすぎないよう、後ろの門を前へ寄せた
+  unlockStars: [0, 0, 0, v('ST3', 6), v('ST4', 22)],
   // 2・3 本目は、これまでに稼いだコインの累計も要る（総転生を重ねた先で開く）
-  unlockCoins: [0, v('UC1', 300), v('UC2', 3000), 0, 0],
+  unlockCoins: [0, v('UC1', 80), v('UC2', 700), 0, 0],
   // 本部が開く成長度と、最初のコインが得られる成長度
   openAt: v('OPEN', 45),
   firstAt: v('FIRST', 60),
@@ -18,10 +19,11 @@ export const TUNE = {
   coinPow: v('CPOW', 2.5),
   boostPow: v('BPOW', 2.5),
   // 星＝starBase ×（ひとつの世界で稼いだコイン ÷ worldAt）の starPow 乗
-  starBase: v('SBASE', 6),
+  starBase: v('SBASE', 3),
   starPow: v('SPOW', 1),
   // 本部の「全体増産」1 段の倍率
   boost: v('BOOST', 2),
   // 新世界が見えてくるコイン
-  worldAt: v('WAT', 8000),
+  // 新世界は、半分のコインで見えてくる（そのぶん最初の星も半分。コインあたりの星は変えていない）
+  worldAt: v('WAT', 4000),
 };

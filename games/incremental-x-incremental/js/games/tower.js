@@ -98,7 +98,7 @@ const game = {
   id: 'tower',
   kind: 'fusion',
   parents: ['breakout', 'maze'],
-  stars: 200,
+  stars: 100,
   icon: '🗼',
   ppPer,
   keep: ['at'],
@@ -178,6 +178,8 @@ const game = {
     }
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention: (s) => (hasAuto(s) ? null : s.floor >= 1 && risk(s, s.floor + 1) >= 0.3 ? 'risk' : 'manual'),
   rate(s, ctx) {
     if (!hasAuto(s)) return ZERO;
     const pl = plan(s, target(s));

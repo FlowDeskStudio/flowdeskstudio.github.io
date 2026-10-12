@@ -162,6 +162,8 @@ const game = {
     }
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention: (s) => (!hasAuto(s) && s.x > 0.88 ? 'full' : null),
   rate: (s, ctx) => capacity(s).mul(valMult(s, ctx)).mul(pull(s) * s.x * autoYield(s)),
 
   // 手で 3 割を採る

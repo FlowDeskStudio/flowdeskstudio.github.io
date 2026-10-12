@@ -50,3 +50,4 @@
 | `img/market/` | Coin stack icon (3D Game UI Icons) | [game-ui-icon-library-coin-stack-1418ba7f](https://3dassets.dev/assets/game-ui-icon-library-coin-stack-1418ba7f) | CC0 1.0 Universal | Claude Fable 5.1 |
 | `img/tower/` | Climber ascending a fixed rope (Mountaineering and Summit Expedition) | [mountaineering-and-summit-expedition-climber-ascending-f44953c3](https://3dassets.dev/assets/mountaineering-and-summit-expedition-climber-ascending-f44953c3) | CC0 1.0 Universal | Claude Fable 5.1 |
 | `img/tower/` | Loot Sack (Medieval MMO Starter Realm) | [medieval-mmo-starter-realm-loot-sack-c9b0f199](https://3dassets.dev/assets/medieval-mmo-starter-realm-loot-sack-c9b0f199) | CC0 1.0 Universal | Claude Fable 5.1 |
+| `img/visitor/` | hummingbird (Birds and Flying Creatures) | [birds-and-flying-creatures-hummingbird-d1e7a4e3](https://3dassets.dev/assets/birds-and-flying-creatures-hummingbird-d1e7a4e3) | CC0 1.0 Universal | Claude Fable 5.1 |

@@ -87,7 +87,7 @@ const game = {
   id: 'market',
   kind: 'fusion',
   parents: ['factory', 'drop'],
-  stars: 80,
+  stars: 45,
   icon: '🏪',
   ppPer,
   keep: ['at'],
@@ -173,6 +173,8 @@ const game = {
     }
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention: (s) => (!hasAuto(s) && s.stock >= cap(s) * 0.9 ? 'full' : !hasAuto(s) ? 'manual' : null),
   rate: (s, ctx) => (hasAuto(s) ? valMult(s, ctx).mul(cycleTake(s, target(s)) / PERIOD) : ZERO),
 
   // 倉庫の品物を、いまの値段で全部売る

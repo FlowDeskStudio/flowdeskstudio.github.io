@@ -15,10 +15,12 @@ const rnd = (i, k = 1) => {
   return x - Math.floor(x);
 };
 
+// アイコンの HTML（SVG か、画像のタグ）を、キャンバスに描ける画像にする
 function svgImage(html) {
-  if (!html || !html.startsWith('<svg')) return null;
+  if (!html) return null;
   const im = new Image();
-  im.src = 'data:image/svg+xml,' + encodeURIComponent(html);
+  if (html.startsWith('<svg')) im.src = 'data:image/svg+xml,' + encodeURIComponent(html);
+  else im.src = /src="([^"]+)"/.exec(html)?.[1] || '';
   return im;
 }
 

@@ -175,6 +175,8 @@ const game = {
     earn(s, valMult(s, ctx).mul(((before + flow(s)) / 2) * dt));
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention: (s) => (!hasAuto(s) && idle(s) > 0 ? 'idle' : null),
   rate: (s, ctx) => valMult(s, ctx).mul(flow(s)),
 
   // 配車係がいれば、台数や路線が変わるたびに組み直す

@@ -3,7 +3,7 @@ import { t, getLang, LANGS, upName, upDesc } from '../core/i18n.js';
 import { fmt, fmtMult, fmtTime } from '../core/format.js';
 import { ASSETS, imgOr } from '../core/assets.js';
 import { se, setVolume } from '../core/audio.js';
-import { lvl, prestige, prestigeGain, ppMult, gameCost, gameAfford, gameBuy, upShown, treeLvl, treeCost, treeState, buyTree, achCount, ACH_BONUS } from '../core/engine.js';
+import { MILESTONES as MILESTONES_OWN, earn, lvl, prestige, prestigeGain, ppMult, gameCost, gameAfford, gameBuy, upShown, treeLvl, treeCost, treeState, buyTree, achCount, ACH_BONUS } from '../core/engine.js';
 import { ORDER, GAMES, BASES, RECIPES, pairKey } from '../core/registry.js';
 import { autoGames, autoSlots, toggleAuto, drainAch, drainBorn, getMult, lockedOptions, unlockInfo, unlockReady, canUnlock, unlockGame, linkMult, offlineCap, totalRate, copyRate, copySlots, copyCost, copyState, makeCopy, bulkBuy, bulkPrestige, bulkCopy } from '../core/world.js';
 import * as lab from '../core/lab.js';
@@ -11,6 +11,8 @@ import * as meta from '../core/meta.js';
 import { STEPS, currentStep, advance } from '../core/guide.js';
 import { MILESTONES, checkMilestones } from '../core/milestones.js';
 import { ceremony } from './ceremony.js';
+import { nearGoal } from '../core/guide.js';
+import { renderHub, attentionOf, prestigeRipe } from './hub.js';
 import { store, wipe, exportString, importString } from '../core/save.js';
 import { h, setText } from './dom.js';
 import { gameIcon, plainIcon } from './icons.js';
@@ -19,6 +21,8 @@ const icon = (g) => gameIcon(g.id);
 // 融合ゲームの親を小さく並べる（何と何から生まれたか）
 const parentIcons = (g) => h('span', { class: 'parents' }, g.parents.map((p) => h('i', { html: gameIcon(p) })));
 const gname = (id) => t(`g.${id}`);
+// Num でも数値でも、ふつうの数にする（進み具合の棒に使う。大きすぎる数は Infinity にならないよう桁で頭打ち）
+const fmtRaw = (x) => (typeof x === 'number' ? x : x.e > 300 ? 1e300 : x.toNumber());
 // 実績の名前は種類ごとのひな形から作る
 const achName = (id, a) => t(`ach.${a.type}`, { v: fmt(a.v), r: t(`res.${id}`) });
 
@@ -40,6 +44,17 @@ export function createApp(save) {
     void btn.offsetWidth;
     btn.classList.add('bought');
   };
+
+  // 買い物で稼ぎが跳ねた瞬間：絵の上に倍率が弾け、光の輪が広がる。跳ね方が大きいほど、大きく長く
+  function boom(host, ratio, special) {
+    const big = ratio >= 10;
+    se(big ? 'grand' : special ? 'born' : 'coins');
+    if (!(ratio > 1.01)) return;
+    const el = h('div', { class: `boom${big ? ' big' : ''}${ratio >= 100 ? ' huge' : ''}` }, h('i'), h('b', null, fmtMult(ratio)), h('small', null, t('c.perSecUp')));
+    host.querySelector('.playbox')?.append(el) || host.append(el);
+    setTimeout(() => el.remove(), big ? 1700 : 1200);
+    if (big) burst();
+  }
 
   // ---- 通知と確認 ----
   function toast(text, img) {
@@ -94,12 +109,13 @@ export function createApp(save) {
       if (!save.games[g.id]) continue;
       const amt = h('b');
       const rate = h('small');
+      const dot = h('i', { class: 'cdot' });
       const fusion = g.kind === 'fusion';
       const card = h('button', { class: fusion ? 'card fusion' : 'card', onclick: () => select(g.id) },
         h('span', { class: 'gicon', html: icon(g) }),
-        h('span', { class: 'ctext' }, h('span', { class: 'cname' }, gname(g.id), fusion ? parentIcons(g) : null), amt, rate));
+        h('span', { class: 'ctext' }, h('span', { class: 'cname' }, gname(g.id), fusion ? parentIcons(g) : null), amt, rate), dot);
       (fusion ? fusionList : list).append(card);
-      cards.push({ id: g.id, card, amt, rate });
+      cards.push({ id: g.id, card, amt, rate, dot });
     }
     const fusionHead = h('div', { class: 'sect' }, t('c.fusion'));
     fusionHead.hidden = !fusionList.children.length;
@@ -133,13 +149,14 @@ export function createApp(save) {
     }
 
     const navBtn = (id, iconHtml, label) => h('button', { class: 'nav', title: label, onclick: () => select(id) }, h('span', { class: 'gicon', html: iconHtml }), h('span', null, label));
+    const hubBtn = navBtn('hub', plainIcon('city'), t('nav.hub'));
     const labBtn = navBtn('lab', imgOr('cut'), t('nav.lab'));
     const metaBtn = navBtn('meta', imgOr('coin'), t('nav.meta.short'));
     const setBtn = navBtn('settings', plainIcon('settings'), t('nav.settings'));
     side.replaceChildren(
       h('div', { class: 'brand' }, h('span', { class: 'logo', html: imgOr('mark') }), h('div', null, h('strong', null, t('app.title')))),
       h('div', { class: 'games' }, list, fusionHead, fusionList),
-      h('div', { class: 'navs' }, labBtn, metaBtn, setBtn));
+      h('div', { class: 'navs' }, hubBtn, labBtn, metaBtn, setBtn));
 
     sideUpdate = () => {
       for (const c of cards) {
@@ -147,6 +164,9 @@ export function createApp(save) {
         setText(c.amt, fmt(s.amt));
         setText(c.rate, t('c.perSec', { v: fmt(totalRate(save, c.id), 1) }));
         c.card.classList.toggle('on', save.active === c.id);
+        // 転生のしどきは金の点、手を入れてほしいときは紅の点
+        const att = attentionOf(save, c.id);
+        c.dot.className = visit.id === c.id ? 'cdot bird' : att ? 'cdot att' : prestigeRipe(GAMES[c.id], s) ? 'cdot pp' : 'cdot';
       }
       if (lock) {
         const ready = unlockReady(save, lock.g);
@@ -158,6 +178,8 @@ export function createApp(save) {
           b.disabled = !can;
         }
       }
+      hubBtn.hidden = !hubOpen();
+      hubBtn.classList.toggle('on', save.active === 'hub');
       labBtn.hidden = !save.lab.unlocked;
       labBtn.classList.toggle('on', save.active === 'lab');
       metaBtn.hidden = !save.meta.unlocked;
@@ -182,6 +204,16 @@ export function createApp(save) {
         guideEl.classList.add('done');
       }
       const st = currentStep(save);
+      // 長い目標のあいだと、目標を終えたあとは、いちばん近い具体的な目当てを出す（あとどれだけかが、いつも見える）
+      const near = !st || st.near ? nearGoal(save) : null;
+      if (near) {
+        const has = near.cur != null;
+        setText(text, t(`guide.near.${near.kind}`, { g: near.game ? gname(near.game) : '', r: near.res ? t(`res.${near.res}`) : '', v: has ? fmt(near.cur) : '', n: has ? fmt(near.need) : '' }));
+        bar.hidden = !has;
+        // 桁が大きく離れるので、棒は桁数の比で伸ばす
+        if (has) bar.firstChild.style.width = `${Math.max(2, Math.min(100, (Math.log10(Number(fmtRaw(near.cur)) + 1) / Math.log10(Number(fmtRaw(near.need)) + 1)) * 100))}%`;
+        return;
+      }
       setText(text, st ? t(`guide.${st.id}`) : t('guide.end'));
       const p = st && st.prog ? st.prog(save) : null;
       bar.hidden = !p;
@@ -189,16 +221,72 @@ export function createApp(save) {
     };
   }
 
+  // ---- 金の鳥：ときどき、どれかのゲームの絵に来る客。その画面で捕まえると、まとまった実入りがある ----
+  // 司令室や左の一覧には「来ている」印だけが出る。捕まえるには、そのゲームの画面を見に行く。
+  // 放っておいても損はしない（居なくなるだけ）。セーブには残さない。
+  const VISIT = { stay: 50, gapMin: 150, gapMax: 270, worth: 150 }; // 居る秒数、次に来るまでの秒数、実入り（毎秒の稼ぎの何秒ぶん）
+  const visit = { id: null, until: 0, next: performance.now() + (60 + Math.random() * 60) * 1000 };
+  const visitorOf = () => visit.id;
+  const visitLeave = () => {
+    visit.id = null;
+    visit.next = performance.now() + (VISIT.gapMin + Math.random() * (VISIT.gapMax - VISIT.gapMin)) * 1000;
+  };
+  function visitTick() {
+    const now = performance.now();
+    if (visit.id && (now > visit.until || !save.games[visit.id])) visitLeave();
+    const ids = Object.keys(save.games);
+    if (!visit.id && now >= visit.next && ids.length >= 2) {
+      visit.id = ids[Math.floor(Math.random() * ids.length)];
+      visit.until = now + VISIT.stay * 1000;
+    }
+  }
+  // 捕まえた：毎秒の稼ぎの VISIT.worth 秒ぶん（稼ぎが無いゲームは、累計の 2%）
+  function visitCatch(id, host) {
+    if (visit.id !== id) return;
+    const s = save.games[id];
+    const byRate = totalRate(save, id).mul(VISIT.worth);
+    const byLife = s.life.mul(0.02);
+    const got = byRate.gt(byLife) ? byRate : byLife;
+    earn(s, got);
+    visitLeave();
+    se('grand');
+    burst();
+    const el = h('div', { class: 'boom big' }, h('i'), h('b', null, `+${fmt(got)}`), h('small', null, t('visit.name')));
+    host.append(el);
+    setTimeout(() => el.remove(), 1700);
+  }
+
+  // 司令室は、ゲームが 3 本になってから（1〜2 本のうちは、見わたすものが無い）
+  const hubOpen = () => Object.keys(save.games).length >= 3;
+  // 転生の確認と演出（ゲームの画面と司令室の両方から使う）
+  function doPrestige(id, after) {
+    const g = GAMES[id];
+    const st = save.games[id];
+    const gain = prestigeGain(g, st);
+    if (gain.lt(1)) return;
+    const ppName = t(`${id}.pp.n`);
+    modal(t('pp.title'), t('pp.confirm', { n: ppName, v: fmt(gain) }), [
+      { label: t('c.cancel') },
+      { label: t('pp.btn'), primary: true, fn: () => {
+        if (!prestige(g, st)) return;
+        se('prestige');
+        ceremony({ kind: 'prestige', title: t('pp.title'), big: `+${fmt(gain)}`, sub: ppName });
+        after?.();
+      } },
+    ]);
+  }
+
   // ---- 本体の切り替え ----
   function select(id) {
     if (view && id !== save.active) se('select');
-    if (!['lab', 'meta', 'settings'].includes(id) && !save.games[id]) id = 'clicker';
+    if (!['hub', 'lab', 'meta', 'settings'].includes(id) && !save.games[id]) id = 'clicker';
+    if (id === 'hub' && !hubOpen()) id = 'clicker';
     if (id === 'lab' && !save.lab.unlocked) id = 'clicker';
     if (id === 'meta' && !save.meta.unlocked) id = 'clicker';
     view?.destroy?.();
     save.active = id;
     panel.replaceChildren();
-    view = id === 'lab' ? renderLab() : id === 'meta' ? renderMeta() : id === 'settings' ? renderSettings() : renderGame(id);
+    view = id === 'hub' ? renderHub({ save, panel, select, toast, se, modal, doPrestige, visitorOf }) : id === 'lab' ? renderLab() : id === 'meta' ? renderMeta() : id === 'settings' ? renderSettings() : renderGame(id);
     view.update();
     sideUpdate();
   }
@@ -217,6 +305,15 @@ export function createApp(save) {
 
     const play = h('div', { class: 'play' });
     const gv = g.mount(play, api);
+    // 金の鳥：このゲームに来ているあいだ、絵の上を飛ぶ
+    const box = play.querySelector('.playbox') || play;
+    const scene = play.querySelector('canvas');
+    const bird = h('button', { class: 'visitor', 'aria-label': t('visit.name'), hidden: true, onpointerdown: (ev) => {
+      ev.stopPropagation();
+      visitCatch(id, box);
+      update();
+    } }, h('img', { src: 'assets/img/visitor/bird.png', alt: '', draggable: 'false' }));
+    box.append(bird);
 
     // 強化。何度でも買えるものと、1 回きりの「改良」を分けて並べる
     const amts = [1, 10, 'max'];
@@ -227,9 +324,16 @@ export function createApp(save) {
       const desc = h('small');
       const cost = h('span', { class: 'cost' });
       const btn = h('button', { class: 'up', onclick: () => {
+        const before = totalRate(save, id);
+        const lvBefore = lvl(s(), u.id);
         if (!gameBuy(g, s(), u, u.once ? 1 : save.settings.buy)) return;
-        se('buy');
         bought(btn);
+        // 稼ぎが跳ねた買い物は、倍率を大きく見せる。所持数の節目（10、25、50…）と 1 回きりの改良は、いつも見せる
+        const after = totalRate(save, id);
+        const ratio = before.gt(0) ? after.div(before).toNumber() : 1;
+        const crossed = u.gen && MILESTONES_OWN.some((th) => lvBefore < th && lvl(s(), u.id) >= th);
+        if (ratio >= 1.5 || crossed || (u.once && ratio > 1.05)) boom(play, ratio, crossed || u.once);
+        else se('buy');
         update();
       } }, h('span', { class: 'uptop' }, name, lv), desc, cost);
       return { u, btn, lv, desc, cost };
@@ -243,19 +347,7 @@ export function createApp(save) {
     const perOf = (st) => (typeof g.ppPer === 'function' ? g.ppPer(st) : g.ppPer);
     const ppHave = h('div');
     const ppGain = h('div', { class: 'sub' });
-    const ppBtn = h('button', { class: 'btn primary', onclick: () => {
-      const gain = prestigeGain(g, s());
-      if (gain.lt(1)) return;
-      modal(t('pp.title'), t('pp.confirm', { n: ppName, v: fmt(gain) }), [
-        { label: t('c.cancel') },
-        { label: t('pp.btn'), primary: true, fn: () => {
-          if (!prestige(g, s())) return;
-          se('prestige');
-          ceremony({ kind: 'prestige', title: t('pp.title'), big: `+${fmt(gain)}`, sub: ppName });
-          update();
-        } },
-      ]);
-    } }, t('pp.btn'));
+    const ppBtn = h('button', { class: 'btn primary', onclick: () => doPrestige(id, update) }, t('pp.btn'));
     const ppBox = h('div', { class: 'box' }, h('h3', null, g.ppImg ? h('span', { class: 'ticon', html: imgOr(g.ppImg) }) : null, `${t('pp.title')}${t('c.sep')}${ppName}`),
       h('div', { class: 'sub' }, t(`${id}.pp.d`)), ppHave, ppGain, ppBtn);
 
@@ -318,6 +410,8 @@ export function createApp(save) {
     function update() {
       const st = s();
       const ctx = ctxOf(id);
+      bird.hidden = visit.id !== id;
+      if (!bird.hidden && scene) bird.style.top = `${scene.offsetTop + scene.offsetHeight * 0.16}px`;
       setText(amt, fmt(st.amt));
       setText(rate, t('c.perSec', { v: fmt(totalRate(save, id), 1) }));
       mult.hidden = ctx.mult.lte(1);
@@ -817,7 +911,13 @@ export function createApp(save) {
     saving: true,
     stopSaving() { app.saving = false; },
     activeGame: () => (GAMES[save.active] ? save.active : null),
+    // 確かめ用：金の鳥を、いますぐそのゲームへ呼ぶ
+    visitNow(id) {
+      visit.id = id;
+      visit.until = performance.now() + VISIT.stay * 1000;
+    },
     update() {
+      visitTick();
       if (lab.labUnlocked(save) && !labSeen) {
         labSeen = true;
         toast(t('toast.lab'), 'cut');

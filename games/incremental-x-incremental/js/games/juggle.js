@@ -29,7 +29,7 @@ const ppPer = (s) => 0.1 + 0.02 * treeLvl(s, 'ovationpower');
 const cycle = (s) => 1.6 / (1 + 0.08 * lvl(s, 'tempo')); // 1 投げにかかる秒数
 const perfectWin = (s) => 0.06 + 0.01 * lvl(s, 'focus') + 0.01 * treeLvl(s, 'widewindow');
 const streakCap = (s) => 10 + 5 * lvl(s, 'nerve');
-const streakFloor = (s) => 5 * treeLvl(s, 'keepstreak'); // 相棒が受けても、連続はここまでしか減らない
+const streakFloor = (s) => 5 * treeLvl(s, 'keepstreak'); // 連続は、ここより下がらない（落としても、転生しても）
 const hasAuto = (s) => lvl(s, 'partner') > 0;
 const crowdMult = (s) => 1 + (2 * s.crowd) / CROWD.max;
 // 観客の沸きを除いた、1 回受けるごとの拍手
@@ -69,7 +69,7 @@ function settle(s, ctx, q) {
   } else if (q === 'good') {
     cheer(s, CROWD.good);
   } else {
-    s.streak = 0;
+    s.streak = Math.min(streakFloor(s), streakCap(s));
   }
   if (s.streak > (s.stats.best || 0)) s.stats.best = s.streak;
   earn(s, got);
@@ -152,27 +152,25 @@ const game = {
       }
       return;
     }
-    // 相棒は手に届いた瞬間に受ける。記録は 1 ずつ減る
+    // 相棒は手に届いた瞬間に受ける。自分で積んだ連続は、相棒が保つ（放っておいても減らない。伸ばすのは自分の手だけ）
     let throws = Math.floor(s.phase);
     s.phase -= throws;
     const b = base(s, ctx);
-    const floor = Math.min(streakFloor(s), streakCap(s));
+    s.streak = Math.max(s.streak, Math.min(streakFloor(s), streakCap(s)));
     if (dt > 5) {
-      // 長い経過：観客は相棒任せの落ち着く先へ、記録は下限まで下がったものとして集計する
+      // 長い経過：観客は相棒任せの落ち着く先へ
       s.crowd = crowdSteady(s);
-      s.streak = Math.min(s.streak, floor);
       earn(s, b.mul(throws * streakMult(s) * crowdMult(s)));
       return;
     }
     s.crowd = Math.max(0, s.crowd - (CROWD.drain + CROWD.cool * s.crowd) * dt);
     for (; throws > 0; throws--) {
       earn(s, b.mul(streakMult(s) * crowdMult(s)));
-      if (s.streak > floor) s.streak--;
       cheer(s, partnerCheer(s));
     }
   },
 
-  rate: (s, ctx) => (hasAuto(s) ? base(s, ctx).mul((1 + 0.1 * Math.min(streakFloor(s), streakCap(s))) * (1 + (2 * crowdSteady(s)) / CROWD.max)).div(cycle(s)) : ZERO),
+  rate: (s, ctx) => (hasAuto(s) ? base(s, ctx).mul((1 + 0.1 * Math.min(Math.max(s.streak, streakFloor(s)), streakCap(s))) * (1 + (2 * crowdSteady(s)) / CROWD.max)).div(cycle(s)) : ZERO),
 
   // 受ける。手に届く瞬間との近さで出来が決まる
   click(s, ctx) {

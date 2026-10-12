@@ -81,7 +81,7 @@ const game = {
   id: 'brewery',
   kind: 'fusion',
   parents: ['farm', 'factory'],
-  stars: 15, // 実験できるようになる星の累計
+  stars: 12, // 実験できるようになる星の累計
   icon: '🍶',
   ppPer,
   keep: ['at'],
@@ -157,6 +157,12 @@ const game = {
     }
   },
 
+  // 司令室に出す「手を入れてほしい状態」。自動にしていれば出さない
+  attention(s) {
+    if (hasAuto(s)) return null;
+    const st = s.age.slice(0, barrels(s)).map(stageOf);
+    return st.some((x) => x > OLD) ? 'sour' : st.every((x) => x > 0) ? 'ready' : null;
+  },
   rate(s, ctx) {
     if (!hasAuto(s)) return ZERO;
     const st = target(s);
