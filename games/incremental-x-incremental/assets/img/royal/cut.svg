@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<defs>
+<radialGradient id="rind" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#e4f0a0"/><stop offset=".42" stop-color="#8fca78"/><stop offset="1" stop-color="#2f7d58"/></radialGradient>
+<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9bd98a"/><stop offset="1" stop-color="#2f7d58"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeebe"/><stop offset=".5" stop-color="#e3c16f"/><stop offset="1" stop-color="#a47c26"/></linearGradient>
+<linearGradient id="goldDeep" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3c16f"/><stop offset="1" stop-color="#8a6518"/></linearGradient>
+<linearGradient id="royal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f7bff"/><stop offset="1" stop-color="#16277a"/></linearGradient>
+<radialGradient id="flesh" cx="45%" cy="40%" r="70%"><stop offset="0" stop-color="#fff6d6"/><stop offset="1" stop-color="#f0cf7c"/></radialGradient>
+<radialGradient id="seed" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#b58a5e"/><stop offset=".5" stop-color="#5c3b26"/><stop offset="1" stop-color="#2a1a12"/></radialGradient>
+</defs>
+<g transform="rotate(-15 128 128)"><path d="M48 139C41 101 61 71 96 64c34-10 83 1 110 34 21 25 23 58 0 85-26 31-73 37-110 20-30-12-41-41-48-64Z" fill="url(#rind)"/>
+<path d="M66 138c-5-30 11-53 38-59 28-8 67 0 88 26 16 20 18 45 0 66-20 24-58 29-87 16-23-10-33-31-39-49Z" fill="url(#flesh)"/>
+<ellipse cx="98" cy="118" rx="10" ry="15" transform="rotate(-20 98 118)" fill="url(#seed)"/><ellipse cx="128" cy="110" rx="10" ry="15" transform="rotate(-20 128 110)" fill="url(#seed)"/><ellipse cx="158" cy="114" rx="10" ry="15" transform="rotate(-20 158 114)" fill="url(#seed)"/><ellipse cx="104" cy="156" rx="10" ry="15" transform="rotate(20 104 156)" fill="url(#seed)"/><ellipse cx="134" cy="162" rx="10" ry="15" transform="rotate(20 134 162)" fill="url(#seed)"/><ellipse cx="164" cy="152" rx="10" ry="15" transform="rotate(20 164 152)" fill="url(#seed)"/>
+<path d="M80 112c8-16 22-24 40-27" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="7" stroke-linecap="round"/></g></svg>

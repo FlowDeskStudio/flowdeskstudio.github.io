@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>10 Problems in Solo AI Game Development and How We Fixed Them</title>
+  <meta name="description" content="We built a 16-game idle game in three days with Claude Code. The 10 problems that came up in solo AI game development, and how each was fixed. Playable in the browser.">
+  <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-005/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-005/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-005/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-005/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/en/experiments/exp-005/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="10 Problems in Solo AI Game Development and How We Fixed Them">
+  <meta property="og:description" content="Notes from building a 16-game idle game in three days with Claude Code: where it got stuck and what fixed it. Playable in the browser.">
+  <meta property="og:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-10-12T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="10 Problems in Solo AI Game Development and How We Fixed Them">
+  <meta name="twitter:description" content="Notes from building a 16-game idle game in three days with Claude Code.">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-005/exp-005.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"10 Problems in Solo AI Game Development and How We Fixed Them: Building an Idle Game in 3 Days","description":"We built an idle game with 16 games inside it in three days with Claude Code. Here are the 10 problems that came up in solo AI game development and how each was fixed.","inLanguage":"en","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png","mainEntityOfPage":"https://flowdeskstudio.net/en/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/en/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/en/experiments/"},{"@type":"ListItem","position":3,"name":"10 Problems in Solo AI Game Development and How We Fixed Them","item":"https://flowdeskstudio.net/en/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can an AI build a game on its own?","acceptedAnswer":{"@type":"Answer","text":"The AI (Claude Code) did the implementation: the program, the text and the rendering of the art. A human decided what to build, what was missing and where to stop. Every change of direction in this project started with a remark a human made after actually looking at the screen."}},{"@type":"Question","name":"How long does solo game development with AI take?","acceptedAnswer":{"@type":"Answer","text":"In this case it took three days to get an idle game with 16 games inside it running in the browser. Tuning by a human playing the final version from start to ending is not finished. Getting something that runs and getting something finished are different lengths of time."}},{"@type":"Question","name":"Where did the art and sound come from?","acceptedAnswer":{"@type":"Answer","text":"The art was rendered from CC0 3D models (Kenney and 3DAssets.dev) with a small custom rendering tool that gives every model the same light and colors. Sound effects are CC0 assets from Kenney and the fonts are under the SIL OFL. Every asset is listed with its source and license."}},{"@type":"Question","name":"Can a game that uses AI-made assets be published or sold?","acceptedAnswer":{"@type":"Answer","text":"Yes, if the license of each asset allows it. Thirteen of the 3D models used here are CC0 assets that their source declares as made with AI. Steam requires developers to disclose AI-generated content in the Content Survey, so you need a record of which assets are AI-made."}},{"@type":"Question","name":"How should the numbers in an idle (incremental) game be balanced?","acceptedAnswer":{"@type":"Answer","text":"In this project, formulas that double and formulas that grow as a power were mixed, so progress either ran away or stalled at some point. The fix was to use power formulas throughout and to build a simulated run that plays 100 hours of the game in under four minutes."}}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="/en/" aria-label="FlowDeskStudio home"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/experiments/" aria-current="page">Experiments</a>
+      <a href="/en/projects/">Projects</a>
+      <a href="/en/downloads/">Downloads</a>
+      <a class="nav-pill" href="/en/about.html">About</a>
+      <span class="language-switch" aria-label="Language"><a href="/experiments/exp-005/" lang="ja" hreflang="ja">JA</a><span aria-current="true">EN</span></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-005">
+      <p class="kicker">EXPERIMENT #005 / COMPLETE</p>
+      <h1>10 problems in solo<br>AI game development</h1>
+      <p class="article-deck">And how each was fixed: notes from building a 16-game idle game in three days</p>
+      <div class="article-meta" aria-label="Article information">
+        <span>2026.10.12</span>
+        <span>CLAUDE CODE</span>
+        <span>3 DAYS / 16 GAMES</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>We built an idle game you can play in the browser, in three days, with an AI.</p>
+        <p>It is called "Incremental × Incremental". It starts with clicking a single fruit, then 16 idle games (also called incremental or clicker games) grow, and crossing two of them produces a new one. The program is about 15,000 lines and there are 249 pieces of art. The AI (Claude Code) did the implementation, and a human gave direction and made the calls.</p>
+        <p>Something that ran came quickly. The trouble came after that. This article lists the 10 problems that actually came up in solo game development with AI and how each was fixed, along with the development history and cases published by other developers.</p>
+        <div class="play-cta">
+          <h2>You can play the game here</h2>
+          <p>No install and no sign-up. It is a mouse-driven game for desktop browsers, available in English and Japanese.</p>
+          <a class="button button-primary" href="/games/incremental-x-incremental/">Play Incremental × Incremental <span aria-hidden="true">↗</span></a>
+          <p class="note">About 7 MB in total, with sound. Saves stay in your browser and nothing is sent anywhere. It has not been tested on phones.</p>
+        </div>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/clicker-en.webp" alt="The Clicker screen of the idle game Incremental × Incremental. A list of games on the left, a large fruit with an orchard scene in the middle, and a list of upgrades on the right" width="1280" height="800">
+        <figcaption><strong>The Clicker screen</strong>The first game. Unlocked games are added to the list on the left.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="Contents">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#summary">The short version: 10 problems and fixes</a></li>
+            <li><a href="#game">The game: Incremental × Incremental</a></li>
+            <li><a href="#timeline">Timeline: what happened in three days</a></li>
+            <li><a href="#problems">10 problems in solo AI game development</a></li>
+            <li><a href="#human">What could not be left to the AI</a></li>
+            <li><a href="#checklist">A checklist for getting started</a></li>
+            <li><a href="#limits">What was checked and what was not</a></li>
+            <li><a href="#faq">Frequently asked questions</a></li>
+            <li><a href="#sources">Sources</a></li>
+          </ol>
+        </nav>
+
+        <section id="summary">
+          <h2>The short version: 10 problems and fixes</h2>
+          <p>The details come later. Here is the list first.</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>Problem</th><th>Fix</th></tr></thead><tbody>
+            <tr><td>1</td><td>Work starts before the spec is settled</td><td>Hand over a spec that marks undecided items as undecided. The AI decides provisionally and keeps a list of those decisions</td></tr>
+            <tr><td>2</td><td>As the code grows, names collide and another screen breaks</td><td>Make it a rule to search for a name before adding it</td></tr>
+            <tr><td>3</td><td>In a new conversation, the AI does not remember what was decided</td><td>Keep rules and past mistakes, briefly, in a file that is loaded every time</td></tr>
+            <tr><td>4</td><td>"I checked everything" covered only part of it</td><td>Build a tool that captures every screen as a whole page, and check from images</td></tr>
+            <tr><td>5</td><td>The screen being checked was the old art</td><td>Start loading assets at launch. Capture only after loading is done</td></tr>
+            <tr><td>6</td><td>A check overwrote a save that was being played</td><td>Use only a throwaway environment when setting up state to check</td></tr>
+            <tr><td>7</td><td>Progress is too fast, and slowing it down makes it stall</td><td>Use one kind of growth formula. Build a simulated run that plays 100 hours</td></tr>
+            <tr><td>8</td><td>The capture tool hangs in an infinite loop</td><td>Cap the loops and add a timeout to the tool</td></tr>
+            <tr><td>9</td><td>The art does not match and looks cheap</td><td>Render every asset with the same light and colors. Settle the method on one game before spreading it</td></tr>
+            <tr><td>10</td><td>Asset licenses and AI-made assets</td><td>Record the source, license and whether it is AI-made for every asset</td></tr>
+          </tbody></table></div>
+          <p>What they share is that none of them was a case of the AI being unable to write the code. The trouble was in deciding, remembering and checking.</p>
+        </section>
+
+        <section id="game">
+          <h2>The game: Incremental × Incremental</h2>
+          <p>Idle games are a genre where watching numbers grow is the fun. Resources increase through clicks and passing time, and you spend them to increase faster.</p>
+          <p>This one has you raise 16 of those games together. The plan rested on three ideas.</p>
+          <ul class="article-list">
+            <li>Each game is fun to grow on its own</li>
+            <li>Crossing two games produces a new game</li>
+            <li>As you progress, your view rises from playing single games to running the whole cluster</li>
+          </ul>
+          <p>There are eight base games (a clicker, mining, a brick breaker, a factory, cell growth, farming, a maze and a ball drop) and eight fusion games born from them (a smeltery, a blast site, a depot, breeding, juggling, a brewery, a market and a tower). Above those sit three layers: the lab, the headquarters and the new world. Once you have three games, a Control Room also opens, showing everything on one screen.</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Item</th><th>Current state</th></tr></thead><tbody>
+            <tr><td>Games</td><td>16 (8 base, 8 fusion)</td></tr>
+            <tr><td>Languages</td><td>Japanese and English (about 1,000 strings)</td></tr>
+            <tr><td>Program</td><td>About 15,000 lines of plain HTML / CSS / JavaScript with no build step</td></tr>
+            <tr><td>Assets</td><td>249 images and 60 sound effects</td></tr>
+            <tr><td>Size</td><td>About 7 MB for the browser package</td></tr>
+            <tr><td>Network</td><td>None. No analytics and no ads</td></tr>
+            <tr><td>Development time</td><td>Three days (10 to 12 October 2026)</td></tr>
+          </tbody></table></div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/lab-en.webp" alt="The Lab screen, where two games are picked and crossed to produce a new game" width="1280" height="800" loading="lazy">
+        <figcaption><strong>The Lab</strong>Crossing two games produces a new one.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="timeline">
+          <h2>Timeline: what happened in three days</h2>
+          <p>The starting point was a pitch and a basic spec worked out in conversation. The spec separated what was decided, what would be tried and checked, what was undecided and what would not be done, and it stated that undecided items must not be quietly turned into provisional implementation specs. The numbers, the fusion combinations and the technology were all undecided.</p>
+          <p>The way of working was agreed at the start. The AI decides undecided items provisionally and asks only when it is unsure. Provisional decisions go on a list. If there is nothing to confirm, the work continues without interim reports.</p>
+          <h3>Day 1: the foundation and 13 games</h3>
+          <p>The foundation came first: big-number math, upgrades, prestige, saving and offline progress, plus the eight base games. Five fusion games followed. Partway through, the goal rose from a playable prototype to each game being deep enough to stand on its own, and the 13 games were built out one after another.</p>
+          <h3>Day 2: length and late-game content</h3>
+          <p>Playing it showed that progress was too fast. The target length went to over 20 hours and then to around 100 hours. Simply slowing it down would be dull, so late-game content was added so that something new appears every few hours. Three more fusion games brought the total to 16.</p>
+          <h3>Day 3: a new look and getting ready to publish</h3>
+          <p>The plan to use prepared character art was dropped, and the look was redone in calm navy and gold. Art drawn only from shapes was replaced with art made from assets. Sound effects were swapped, milestone scenes and an ending were added, and every screen was checked in Japanese and English.</p>
+          <p>As finishing work, the overall view and the feel of play were improved. A "Control Room" was added: one screen that shows the income and growth of every game, the number of affordable upgrades and good moments to prestige. When buying an upgrade makes income per second jump by 1.5 times or more, the multiplier now pops up over the picture, and the bar at the top always shows progress toward the next game. In Juggling, leaving it to the partner no longer reduces the streak you built yourself.</p>
+          <p>The waits in the middle of the game were shortened too. With the conditions for unlocking new games moved earlier, the simulated run showed the longest stretch with nothing new going from 8.2 hours to 4.6 hours, and the time to the ending going from about 93 hours to about 76 hours (both are values from simulated runs and not time played by a human). So that watching the Control Room alone would not be enough, a "golden bird" was added that sometimes flies into the picture of one of the games. Catching it on the screen of that game gives a sizable reward.</p>
+          <p>Finally it was packaged for the browser.</p>
+        </section>
+
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/hub-en.webp" alt="The Control Room screen. The 16 games are laid out in two rows, joined by lines along which goods flow as dots. Below, the income of each game and its counts of affordable upgrades and prestige are listed" width="1280" height="800" loading="lazy">
+        <figcaption><strong>The Control Room</strong>Every game on one screen. Added on day 3.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="problems">
+          <h2>10 problems in solo AI game development</h2>
+          <p>This is the main part. The problems are ordered by stage of development and not by when they happened. Each has what happened, how it was fixed, and a case from elsewhere.</p>
+
+          <div class="problem" id="p1">
+            <h3>1. Work starts before the spec is settled</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>In solo game development, not everything is decided when you start. Here the numbers, the fusion combinations, the unlock order and the technology were open. If you ask an AI to just make it good, it fills the open parts without saying so. Later you cannot tell which parts a human decided and which the AI filled in.</p>
+            <h4>THE FIX</h4>
+            <p>The spec itself separated decided items from undecided ones. On top of that, the agreement was that the AI decides undecided items provisionally and keeps a list of them. When revisiting after playing, the list shows which decisions were provisional.</p>
+            <h4>ELSEWHERE</h4>
+            <p>A developer who built a puzzle game with Claude Code wrote that, because the AI pushes implementation forward so fast, detailed requirements and control over the scope and size of tasks were needed<a href="#src-zenn">[1]</a>. Another developer who built a web game with chat-based AI tools wrote that the AI interprets prompts however it wants, so prompts have to be very specific<a href="#src-devto">[2]</a>.</p>
+            <p>Deciding everything up front and handing over undecided items as undecided point in opposite directions, but they aim at the same thing: not leaving the parts the AI filled in invisible.</p>
+          </div>
+
+          <div class="problem" id="p2">
+            <h3>2. As the code grows, names collide and another screen breaks</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>A style rule added for the brewery game was given the same name as one already used by the ball drop screen. The ball drop screen shrank to 12 pixels and rotated at an angle. The work was on the brewery, and a different game broke.</p>
+            <h4>THE FIX</h4>
+            <p>The name was changed. Then a rule was written down: before adding a name to the styles, search for the same name. Past 10,000 lines, neither the AI nor the human can hold the whole thing in mind. A search step replaces remembering.</p>
+            <h4>ELSEWHERE</h4>
+            <p>The puzzle game developer above wrote that the repository became hard to follow and tended to get messy because the AI kept implementing, and named written coding rules and term definitions as the countermeasure<a href="#src-zenn">[1]</a>.</p>
+          </div>
+
+          <div class="problem" id="p3">
+            <h3>3. In a new conversation, the AI does not remember what was decided</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>Three days of development do not fit in one conversation. In a new conversation the AI starts without knowing what was decided before or what went wrong before. It makes the same mistake again.</p>
+            <h4>THE FIX</h4>
+            <p>Rules and past mistakes went into the project's instruction file (CLAUDE.md in Claude Code). Besides policies such as "edit Japanese and English together" and "do not over-explain in the text", it holds the mistakes themselves as reasons: "search before adding a name; adding a duplicate once broke another screen" and "do not overwrite saves in the browser; this has happened".</p>
+            <h4>OFFICIAL GUIDANCE</h4>
+            <p>The Claude Code documentation explains that each session begins with a fresh context, that CLAUDE.md is loaded at the start of every conversation, and that the more specific and concise the instructions are, the more consistently they are followed<a href="#src-claude">[3]</a>. Longer is not better.</p>
+          </div>
+
+          <div class="problem" id="p4">
+            <h3>4. "I checked everything" covered only part of it</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>The AI reported that it had checked everything. It had looked only at the contents of the art and not at the whole page. Overlapping text and empty space on wide screens only show up when you look at the whole page. Unless asked, the AI does not look at the result of its code as a screen.</p>
+            <h4>THE FIX</h4>
+            <p>A tool was built to capture every screen as a full page: the 16 games, the lab, the headquarters, the settings and the milestone scenes, one image each in Japanese and English. The AI checks from those images and the human looks at the same ones. The way of checking became a tool.</p>
+            <h4>ELSEWHERE</h4>
+            <p>An article on making agents prove their work says that an agent's claim that something is fixed is frequently wrong, and recommends taking a screenshot after each claim of success, keeping reference images in the project and capturing console errors as well. It also notes that screenshots miss flicker and timing problems<a href="#src-paddo">[4]</a>.</p>
+          </div>
+
+          <div class="problem" id="p5">
+            <h3>5. The screen being checked was the old art</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>After the art was replaced with new assets, the screens were captured to check them. The captures showed the old art. Assets started loading only when a game was opened, so the old art stayed on screen for the few seconds until loading finished. Something that had been fixed was being checked in its unfixed state.</p>
+            <h4>THE FIX</h4>
+            <p>Asset loading was moved to launch. Players also no longer see the old art for a moment when opening a game. What looked like a problem with checking was also a problem with the game.</p>
+          </div>
+
+          <div class="problem" id="p6">
+            <h3>6. A check overwrote a save that was being played</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>Checking a late-game screen needs a late-game state. The screen the AI touched to set up that state held the save the human was actually playing. A browser game opened at the same address uses the same save.</p>
+            <h4>THE FIX</h4>
+            <p>The rule became: when setting up state to check, use only a throwaway environment that does not touch the regular save. A tool opens the game in that environment and captures early, middle and late scenes. On the screen the human is playing, the AI only looks.</p>
+            <p>This kind of accident is not limited to games. If you hand work to an AI, keep the place for checking separate from the real one.</p>
+          </div>
+
+          <div class="problem" id="p7">
+            <h3>7. Progress is too fast, and slowing it down makes it stall</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>How the numbers grow decides whether an idle game is fun. The first version progressed too fast. Adjusting the numbers to slow it down made it either run away or stop dead at some point. The cause was a mix of formulas that double and formulas that grow as a power.</p>
+            <h4>THE FIX</h4>
+            <p>The growth formulas were unified as powers. Then a simulated run was built that plays 100 hours of the game automatically. It was too slow at first and was brought down to under four minutes. After every change to the numbers, the run shows where progress stalls or runs away.</p>
+            <p>One problem remained: just being slower is dull. A formula does not solve that. Late-game content was added so that something new appears every few hours.</p>
+            <h4>A USEFUL REFERENCE</h4>
+            <p>For idle game math, Anthony Pecorella's "The Math of Idle Games" is widely read. It explains that costs typically grow exponentially while production grows linearly or polynomially, so production leads early and costs catch up later, and that multipliers and prestige are tools for temporarily shifting that balance<a href="#src-idle">[5]</a>.</p>
+          </div>
+
+          <div class="problem" id="p8">
+            <h3>8. The capture tool hangs in an infinite loop</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>The tool stopped in the middle of capturing screens. A loop that stacks a pile inside the art never ended under one condition. A person watching would notice, but an automated job just stays stuck in silence.</p>
+            <h4>THE FIX</h4>
+            <p>The loops were capped and the capture tool got a timeout. The longer the work you hand to an AI, the more you need something that notices when it has stopped.</p>
+          </div>
+
+          <div class="problem" id="p9">
+            <h3>9. The art does not match and looks cheap</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>The first art was drawn only from shapes. It worked but looked like it was made from rough placeholders. Swapping in downloaded assets brought a different problem: each asset had its own light direction and colors, so they looked out of place side by side. The prepared character art was dropped in the end.</p>
+            <h4>THE FIX</h4>
+            <p>No 3D software was used. A small rendering tool was written to turn CC0 3D models into 2D art under one fixed setup: a camera looking down 24 degrees from the front, a single light from the upper left front, and a thin dark navy outline. Colors are repainted at render time to fit the navy and gold screen. Where no model fits, the same tool builds the object from boxes and cylinders. Since everything is drawn under the same light, nothing looks out of place.</p>
+            <p>The order of work mattered too. The method was settled on one game, the factory, which was redone three times. Once the method was fixed it became a tool and was spread to the other 15 games, which went quickly.</p>
+            <p>Using assets did not always make things better. The smeltery's furnace looked boxy and plain after being replaced with a downloaded model, so it went back to the custom shape.</p>
+            <h4>ELSEWHERE</h4>
+            <p>The blog of a company that sells a game art generation service says that most AI generators solve the individual asset problem but not the consistency problem. It is promoting its own product, which should be discounted, but the point that single images are good while the set does not match fits what happened here<a href="#src-makko">[6]</a>.</p>
+          </div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/factory-before-after.webp" alt="A comparison of the factory game's art. On the left, the first art drawn only from shapes. On the right, art rendered from CC0 3D models with the same light and colors. Three stages are stacked: early, middle and late game. Labels are in Japanese" width="1600" height="1212" loading="lazy">
+        <figcaption><strong>Redoing the factory art</strong>Left: the first art, drawn from shapes. Right: art made from assets. Top to bottom: early, middle and late game. Purchased upgrades show up in the picture. Labels are in Japanese.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <div class="problem" id="p10">
+            <h3>10. Asset licenses and AI-made assets</h3>
+            <h4>WHAT HAPPENED</h4>
+            <p>When you look for missing assets on distribution sites, the license differs per asset. In this project, 13 of the 3D models used are declared by their source as made with AI. Working out afterwards whether an asset was allowed, or which ones are AI-made, is hard.</p>
+            <h4>THE FIX</h4>
+            <p>Each time an asset was taken, its license was checked individually and its source, license and AI status were written into a list. Assets with an unclear license were not used. The 3D models behind the art are CC0 (Kenney and 3DAssets.dev), the sound effects are CC0 (Kenney) and the fonts are under the SIL OFL. The list ships with the game.</p>
+            <h4>WHERE THE ASSETS CAME FROM</h4>
+            <ul class="article-list">
+              <li><a href="https://kenney.nl/assets" rel="noopener">Kenney</a>: 3D models and sound effects. CC0</li>
+              <li><a href="https://3dassets.dev/assets" rel="noopener">3DAssets.dev</a>: 3D models. The ones used are CC0, and all 13 are declared by the source as AI-made</li>
+              <li><a href="https://fonts.google.com/specimen/Shippori+Mincho" rel="noopener">Shippori Mincho</a> and <a href="https://fonts.google.com/specimen/Zen+Maru+Gothic" rel="noopener">Zen Maru Gothic</a>: fonts. SIL OFL 1.1</li>
+              <li>License texts: <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener">CC0 1.0</a> / <a href="https://openfontlicense.org/" rel="noopener">SIL Open Font License</a></li>
+            </ul>
+            <p>Terms on distribution sites can change. Check the page of each individual asset before using it.</p>
+            <h4>OFFICIAL GUIDANCE</h4>
+            <p>Kenney states on its site that its assets are CC0, can be used in commercial projects and do not require attribution<a href="#src-kenney">[7]</a>.</p>
+            <p>Publishing on Steam comes with rules about AI. According to the Steamworks documentation, the Content Survey has a section on AI covering content that ships with the game and that players consume, such as artwork, sound, narrative and localization. Content created with the help of AI tools during development is called pre-generated, and content created while the game is running is called live-generated. If either is used, the developer has to describe it<a href="#src-steam">[8]</a>. This game is not on Steam yet, but the AI-made assets are listed so they can be disclosed when it is.</p>
+          </div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/brewery-en.webp" alt="The Brewery screen. Round windows on the casks stacked on shelves show the color and level of the drink inside" width="1280" height="800" loading="lazy">
+        <figcaption><strong>The Brewery</strong>Round windows show the drink inside each cask. Aging is shown through color and level and not through text.</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="human">
+          <h2>What could not be left to the AI</h2>
+          <p>Lined up, most of the 10 problems can be fixed with tools and rules. What triggered the fixes came from somewhere else.</p>
+          <p>Direction changed during development when a human looked at the screen and said what they thought. Progress is too fast. This part looks cheap. The empty space stands out on a wide screen. Each of those remarks only came from looking.</p>
+          <p>The brewery is an example. The first version showed the state of each cask with a word such as "aging". It worked correctly. It was redone after the remark that it was leaning on text. The casks got round windows, and the color, the level and the bubbles of the drink show how far it has aged. The AI can draw a round window when asked. It did not say on its own that getting by with text was not enough.</p>
+          <p>Other developers describe something similar. The developer who built a web game with chat-based AI tools wrote that after a few hundred prompts, with the project near completion, the AI could no longer identify the main issue, and the final 25% was finished by reading the code and tuning it by hand<a href="#src-devto">[2]</a>.</p>
+          <p>The same thing happened in the first experiment on this site. A game left entirely to an AI ran but was not fun. The score went up after a human proposed improvements (<a href="/en/experiments/exp-001/">EXP-001: I let AI handle the whole game build</a>).</p>
+        </section>
+
+        <section id="checklist">
+          <h2>A checklist for getting started</h2>
+          <p>From this project, here is what is worth doing early when you build a game solo with AI.</p>
+          <ul class="article-list">
+            <li>Write undecided items in the spec as undecided. Have the AI list what it decided provisionally</li>
+            <li>Keep rules and past mistakes, briefly, in an instruction file that is loaded every time</li>
+            <li>Have the AI search for a name (function, style, file) before adding it</li>
+            <li>Separate the environment for checking from the one you play in. Let the AI touch only the checking one</li>
+            <li>Build a tool that captures every screen early. Accept "checked" only as images</li>
+            <li>Put loop caps and timeouts into automated jobs</li>
+            <li>For a game with numbers, build a simulated run that plays many hours</li>
+            <li>Settle the art method on one game before spreading it</li>
+            <li>Record the source, license and AI status every time an asset goes in</li>
+            <li>Play it yourself. Only someone who has played can give an impression</li>
+          </ul>
+        </section>
+
+        <section id="limits">
+          <h2>What was checked and what was not</h2>
+          <p>Looking like it works and having been checked are different things. Every oversight in this project happened somewhere that had not been checked. So the same split is given for the game itself.</p>
+          <p>Checked:</p>
+          <ul class="article-list">
+            <li>The 16 games, the Control Room, the lab, the headquarters, the settings and the milestone scenes, one screen each in Japanese and English (1280 by 800 pixels)</li>
+            <li>Tests of the number math, a launch check and simulated runs</li>
+            <li>Opening it as placed on this site, with no failed loads, no errors and no network requests to other hosts</li>
+          </ul>
+          <p>Not checked:</p>
+          <ul class="article-list">
+            <li>A human playing the final version from the start to the ending. The balance of the numbers has only been seen through simulated runs</li>
+            <li>The effect when the golden bird is caught, the multiplier pop-up and the motion of the Control Room diagram (seen only as still images)</li>
+            <li>Display and controls on phones and tablets. It is built for a mouse</li>
+            <li>Browsers other than Chromium-based ones (Firefox, Safari)</li>
+          </ul>
+          <p>In other words, this game is not a finished product. It is what three days brought to a playable state in the browser. You may find places where it gets stuck or where the numbers are off.</p>
+          <div class="play-cta">
+            <h3>Play it and see</h3>
+            <p>It runs as is in a desktop browser.</p>
+            <a class="button button-primary" href="/games/incremental-x-incremental/">Play Incremental × Incremental <span aria-hidden="true">↗</span></a>
+            <p class="note">Saves stay in the browser you opened this site with. The settings screen can export and import a save.</p>
+          </div>
+        </section>
+
+        <section id="faq" class="faq">
+          <h2>Frequently asked questions</h2>
+          <dl>
+            <dt>Can an AI build a game on its own?</dt>
+            <dd>The AI (Claude Code) did the implementation: the program, the text and the rendering of the art. A human decided what to build, what was missing and where to stop. Every change of direction in this project started with a remark a human made after actually looking at the screen.</dd>
+            <dt>How long does solo game development with AI take?</dt>
+            <dd>In this case it took three days to get an idle game with 16 games inside it running in the browser. Tuning by a human playing the final version from start to ending is not finished. Getting something that runs and getting something finished are different lengths of time.</dd>
+            <dt>Where did the art and sound come from?</dt>
+            <dd>The art was rendered from CC0 3D models (Kenney and 3DAssets.dev) with a small custom rendering tool that gives every model the same light and colors. Sound effects are CC0 assets from Kenney and the fonts are under the SIL OFL. Every asset is listed with its source and license.</dd>
+            <dt>Can a game that uses AI-made assets be published or sold?</dt>
+            <dd>Yes, if the license of each asset allows it. Thirteen of the 3D models used here are CC0 assets that their source declares as made with AI. Steam requires developers to disclose AI-generated content in the Content Survey, so you need a record of which assets are AI-made.</dd>
+            <dt>How should the numbers in an idle (incremental) game be balanced?</dt>
+            <dd>In this project, formulas that double and formulas that grow as a power were mixed, so progress either ran away or stalled at some point. The fix was to use power formulas throughout and to build a simulated run that plays 100 hours of the game in under four minutes.</dd>
+          </dl>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>Checking is harder than writing</h2>
+          <p>In three days the AI wrote about 15,000 lines of program and 16 games. Writing is no longer the hard part.</p>
+          <p>The hard parts were keeping undecided things visibly undecided, making rules survive a change of conversation, and turning "it runs" into "it was checked". Every problem that tools or rules fixed was fixed by moving the checking from human attention into a mechanism.</p>
+          <p>This is a record of one game, three days, one person and one kind of AI. A different genre, different tools or a team would run into different problems.</p>
+          <p class="conclusion-line">Let checking keep up with the speed at which the AI builds. That was what solo AI game development needed: tools and rules for exactly that.</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>Development data</h2>
+          <dl>
+            <div><dt>Period</dt><dd>10 to 12 October 2026 (three days)</dd></div>
+            <div><dt>AI used</dt><dd>Claude Code</dd></div>
+            <div><dt>Roles</dt><dd>Human: direction and decisions. AI: implementation, checking and records. The draft of this article was also written by the AI (Claude Code), and a human edited and reviewed it</dd></div>
+            <div><dt>Technology</dt><dd>Plain HTML / CSS / JavaScript with no build step. Art rendered with Python and Pillow</dd></div>
+            <div><dt>Scale</dt><dd>16 games, about 15,000 lines of program, 249 images, 60 sound effects and about 1,000 strings</dd></div>
+            <div><dt>Assets</dt><dd>3D models from Kenney and 3DAssets.dev (CC0), sound effects from Kenney (CC0), and the fonts Shippori Mincho and Zen Maru Gothic (SIL OFL 1.1). Thirteen of the 3D models are declared by their source as AI-made</dd></div>
+            <div><dt>Release form</dt><dd>Browser version, about 7 MB, no network requests. Saves stay in the browser</dd></div>
+            <div><dt>Still to do</dt><dd>A full human playthrough of the final version, checks on phones and non-Chromium browsers, and a Steam release</dd></div>
+          </dl>
+        </section>
+
+        <section id="sources">
+          <h2>Sources</h2>
+          <p>External articles are cited only for what they state. Personal accounts are one person's experience, and company blogs are written to promote their own products.</p>
+          <ol class="source-list">
+            <li id="src-zenn">kubo_gene, "Claude CodeでVibe Coding!!!(Tシャツは貰えないけど)", Zenn, July 2025 (in Japanese). <a href="https://zenn.dev/kubo_gene/articles/a9d08386186342" rel="noopener">https://zenn.dev/kubo_gene/articles/a9d08386186342</a></li>
+            <li id="src-devto">Nino Ross Rodriguez, "Vibe Coding a Web Game from Scratch — Fast, Fun, and Occasionally on Fire", DEV Community. <a href="https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd" rel="noopener">https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd</a></li>
+            <li id="src-claude">Claude Code documentation, "How Claude remembers your project". <a href="https://code.claude.com/docs/en/memory" rel="noopener">https://code.claude.com/docs/en/memory</a></li>
+            <li id="src-paddo">"Visual Verification: Making Agents Prove Their Work", paddo.dev, December 2025. <a href="https://paddo.dev/blog/multimodal-validation-visual-verification/" rel="noopener">https://paddo.dev/blog/multimodal-validation-visual-verification/</a></li>
+            <li id="src-idle">Anthony Pecorella, "The Math of Idle Games, Part I", Game Developer, October 2016 (first published on Kongregate's developer blog). <a href="https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i" rel="noopener">https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i</a></li>
+            <li id="src-makko">Makko AI, "AI Game Art Generator: Characters, Backgrounds, Animations and Why Consistency Is the Hard Part", March 2026 (blog of a company that sells an image generation service). <a href="https://blog.makko.ai/ai-game-art-generator/" rel="noopener">https://blog.makko.ai/ai-game-art-generator/</a></li>
+            <li id="src-kenney">Kenney, "Support" (explanation of asset licensing). <a href="https://kenney.nl/support" rel="noopener">https://kenney.nl/support</a></li>
+            <li id="src-steam">Steamworks documentation, "Content Survey" (section on AI). <a href="https://partner.steamgames.com/doc/gettingstarted/contentsurvey" rel="noopener">https://partner.steamgames.com/doc/gettingstarted/contentsurvey</a></li>
+          </ol>
+          <p>Related records on this site: <a href="/en/experiments/exp-001/">EXP-001 I let AI handle the whole game build</a> / <a href="/en/experiments/exp-003/">EXP-003 How far can one sentence take an AI build?</a></p>
+        </section>
+
+        <nav class="article-back" aria-label="Article navigation"><a href="/en/experiments/">← Back to experiment log</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>

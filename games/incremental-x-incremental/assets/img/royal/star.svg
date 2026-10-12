@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<defs>
+<radialGradient id="rind" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#e4f0a0"/><stop offset=".42" stop-color="#8fca78"/><stop offset="1" stop-color="#2f7d58"/></radialGradient>
+<linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9bd98a"/><stop offset="1" stop-color="#2f7d58"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeebe"/><stop offset=".5" stop-color="#e3c16f"/><stop offset="1" stop-color="#a47c26"/></linearGradient>
+<linearGradient id="goldDeep" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3c16f"/><stop offset="1" stop-color="#8a6518"/></linearGradient>
+<linearGradient id="royal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f7bff"/><stop offset="1" stop-color="#16277a"/></linearGradient>
+<radialGradient id="flesh" cx="45%" cy="40%" r="70%"><stop offset="0" stop-color="#fff6d6"/><stop offset="1" stop-color="#f0cf7c"/></radialGradient>
+<radialGradient id="seed" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#b58a5e"/><stop offset=".5" stop-color="#5c3b26"/><stop offset="1" stop-color="#2a1a12"/></radialGradient>
+</defs>
+<path d="m128 18 32 70 76 8-57 51 17 75-68-39-68 39 17-75-57-51 76-8Z" fill="url(#gold)"/>
+<path d="m128 62 19 42 45 5-34 30 10 44-40-23Z" fill="#fff9e2" fill-opacity=".55"/></svg>

@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>AI個人ゲーム開発で直面した10の課題と解決策｜3日で16本入りの放置ゲームを作った記録</title>
+  <meta name="description" content="Claude Codeを使って3日間で、16本入りの放置ゲーム（インクリメンタルゲーム）を開発しました。AIを活用した個人ゲーム開発で実際に直面した10のつまずきと具体的な解決策を、開発プロセスや他開発者の事例とあわせてまとめます。ブラウザですぐに遊べます。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-005/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-005/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-005/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-005/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-005/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="AI個人ゲーム開発で直面した10の課題と解決策｜3日で16本入りの放置ゲームを作った記録">
+  <meta property="og:description" content="Claude Codeと3日間で16本入りの放置ゲームを作って分かった、AI個人ゲーム開発のつまずきどころと対処法。ブラウザですぐに遊べます。">
+  <meta property="og:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-10-12T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI個人ゲーム開発で直面した10の課題と解決策">
+  <meta name="twitter:description" content="Claude Codeと3日間で16本入りの放置ゲームを作って分かった、AI個人ゲーム開発のつまずきどころと対処法。ブラウザですぐに遊べます。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-005/exp-005.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AI個人ゲーム開発で直面した10の課題と解決策｜3日で16本入りの放置ゲームを作った記録","description":"Claude Codeを使って3日間で、16本入りの放置ゲーム（インクリメンタルゲーム）を開発しました。AIを活用した個人ゲーム開発で実際に直面した10のつまずきと具体的な解決策を、開発プロセスや他開発者の事例とあわせてまとめます。ブラウザですぐに遊べます。","inLanguage":"ja","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png","mainEntityOfPage":"https://flowdeskstudio.net/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/experiments/"},{"@type":"ListItem","position":3,"name":"AI個人ゲーム開発で直面した10の課題と解決策","item":"https://flowdeskstudio.net/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"AIだけでゲームは作れますか？","acceptedAnswer":{"@type":"Answer","text":"今回は、コードの実装、多言語テキスト、グラフィックの書き出しに至るまで、実作業はAI（Claude Code）が行いました。ただし、「何を作るか」「何が足りないか」「どこで区切るか」という意思決定と品質評価は人間が担っています。今回の方針転換の契機となったのも、人間が実画面を見て抱いた違和感やフィードバックでした。"}},{"@type":"Question","name":"AIを使った個人ゲーム開発には、どのくらいの期間がかかりますか？","acceptedAnswer":{"@type":"Answer","text":"今回は3日間で、16本のゲームを内包した放置ゲームをブラウザ上で遊べる状態まで構築しました。ただし、最終版を人間が最初から最後まで通しで遊んでの調整までは完了していません。「動くプロトタイプができるまでの時間」と、「1本の作品として完成度を高めるまでの時間」は別物だと考える必要があります。"}},{"@type":"Question","name":"絵や音の素材はどうやって用意しましたか？","acceptedAnswer":{"@type":"Answer","text":"グラフィックは、CC0ライセンスで提供されている3Dモデル（Kenney、3DAssets.dev）を、自作のPythonスクリプトを用いて同一の光源・色調に統一した2D画像として書き出しました。効果音はKenneyのCC0素材、フォントはSIL OFLライセンスのものを採用しています。すべての素材は、管理台帳に出どころとライセンスを記録しています。"}},{"@type":"Question","name":"AIで作られた素材を使ったゲームは公開や販売ができますか？","acceptedAnswer":{"@type":"Answer","text":"素材ごとのライセンス条件に従っていれば可能です。今回採用した3Dモデルのうち13点は、配布元でAI生成と申告されたCC0素材でした。ただし、SteamではAI生成コンテンツをコンテンツ調査で申告する決まりがあるため、どの素材にAIが使われているかを把握・記録しておく必要があります。"}},{"@type":"Question","name":"放置ゲーム（インクリメンタルゲーム）の数値バランスはどう決めればよいですか？","acceptedAnswer":{"@type":"Answer","text":"本プロジェクトでは当初、倍々で増える計算式とべき乗の計算式が混在していたことで、暴走や進行の停滞が発生しました。計算モデルをべき乗ベースに統一した上で、100時間分の進行を4分弱でシミュレーションする自動試走環境を用意し、確かめました。"}}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a href="/downloads/">Downloads</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-005/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-005">
+      <p class="kicker">EXPERIMENT #005 / COMPLETE</p>
+      <h1>AI個人ゲーム開発で<br>直面した10の課題と<br>その解決策</h1>
+      <p class="article-deck">3日で16本入りの放置ゲームを作った記録</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.10.12</span>
+        <span>CLAUDE CODE</span>
+        <span>3 DAYS / 16 GAMES</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>AIとともに駆け抜けた3日間で、ブラウザで遊べる放置ゲームを開発した。</p>
+        <p>タイトルは『Incremental × Incremental』。1つの木の実をクリックすることから始まり、16種類の放置ゲーム（インクリメンタルゲーム）を育てながら、2つを掛け合わせて新たなゲームを生み出していく作品だ。総コード数は約15,000行、画像素材は249枚。実装はAI（Claude Code）が担い、人間はディレクションと意思決定に専念した。</p>
+        <p>動くプロトタイプ自体はあっという間に完成した。本当に大変だったのは、その後の工程だ。本記事では、AIを使った個人のゲーム開発で実際に直面した10の課題と具体的な解決策を、開発プロセスとともにまとめる。あわせて、他の開発者が公開している知見や事例も紹介したい。</p>
+        <div class="play-cta">
+          <h2>作ったゲームは、ここで遊べる</h2>
+          <p>インストールもアカウント登録も不要。PCのブラウザからマウス操作ですぐに遊べる。</p>
+          <a class="button button-primary" href="/games/incremental-x-incremental/">Incremental × Incremental を遊ぶ <span aria-hidden="true">↗</span></a>
+          <p class="note">全体容量は約7MB（音あり）。セーブデータはブラウザ（ローカルストレージ）内にのみ保存され、外部通信は一切行わない。※スマートフォンでの動作は未検証。</p>
+        </div>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/clicker-ja.webp" alt="放置ゲーム「Incremental × Incremental」のクリッカーの画面。左にゲームの一覧、中央に大きな実と果樹園の絵、右に強化の一覧が並ぶ" width="1280" height="800">
+        <figcaption><strong>クリッカーの画面</strong>最初の1本。左の一覧に、アンロックされたゲームが増えていく。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="目次">
+          <p>CONTENTS / 目次</p>
+          <ol>
+            <li><a href="#summary">先に結論:困った10のことと解決法の一覧</a></li>
+            <li><a href="#game">作ったゲーム:Incremental × Incremental</a></li>
+            <li><a href="#timeline">開発の流れ:3日間でやったこと</a></li>
+            <li><a href="#problems">AIを使った個人ゲーム開発で困った10のこと</a></li>
+            <li><a href="#human">AIに任せられなかったこと</a></li>
+            <li><a href="#checklist">これから始める人へのチェックリスト</a></li>
+            <li><a href="#limits">確かめたこと、確かめていないこと</a></li>
+            <li><a href="#faq">よくある質問</a></li>
+            <li><a href="#sources">参考にした情報</a></li>
+          </ol>
+        </nav>
+
+        <section id="summary">
+          <h2>先に結論:困った10のことと解決法の一覧</h2>
+          <p>詳しい経緯は後述するが、まずは全体像を一覧で示す。</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>直面した課題</th><th>解決策</th></tr></thead><tbody>
+            <tr><td>1</td><td>仕様未定のまま実装を進めてしまう</td><td>仕様書に「未定」と明記して渡す。AIが仮決定した内容を一覧化して残す</td></tr>
+            <tr><td>2</td><td>コード量が増え、命名の重複で別画面が壊れる</td><td>新しい名前を追加する前に「重複チェック」を必須ルールにする</td></tr>
+            <tr><td>3</td><td>会話（セッション）が切り替わるとルールを忘れる</td><td>共通ルールや失敗の記録を、毎セッション読み込まれる指示ファイル（CLAUDE.md）に短く集約する</td></tr>
+            <tr><td>4</td><td>「確認完了」の報告が、実は一部しか見ていなかった</td><td>全画面をページ単位で自動キャプチャするツールを用意し、実画像で判定する</td></tr>
+            <tr><td>5</td><td>確認していた画面が、修正前の旧グラフィックだった</td><td>素材の読み込みを起動時に行い、ロード完了を待ってからキャプチャする</td></tr>
+            <tr><td>6</td><td>動作確認の際、テストプレイ中のセーブデータを書き換えてしまう</td><td>状態確認専用の使い捨て環境（サンドボックス）を分離して使用する</td></tr>
+            <tr><td>7</td><td>進行が速すぎるか、遅くすると停滞するバランス崩壊</td><td>成長曲線の計算式を統一し、100時間分のプレイを短時間で自動シミュレーションする試走環境を作る</td></tr>
+            <tr><td>8</td><td>自動キャプチャツールが無限ループでフリーズする</td><td>ループ処理に上限回数を設け、ツール側にタイムアウト処理を仕込む</td></tr>
+            <tr><td>9</td><td>素材のトーンが揃わず、安っぽく見えてしまう</td><td>すべての3Dモデルを同じ光源・カメラアングル・配色で2D画像へ書き出すパイプラインを構築する</td></tr>
+            <tr><td>10</td><td>素材のライセンス混在と、生成AI製素材の管理</td><td>素材ごとに提供元、ライセンス、AI生成の有無を台帳で管理する</td></tr>
+          </tbody></table></div>
+          <p>共通しているのは、どれも「AIがコードを書けなかった」わけではない点だ。本質的な壁となったのは、「要件の決定」「文脈の保持」「品質の検証」の3点だった。</p>
+        </section>
+
+        <section id="game">
+          <h2>作ったゲーム:Incremental × Incremental</h2>
+          <p>放置ゲーム（インクリメンタルゲーム／クリッカーゲームとも呼ばれる）は、数値が爆発的に増えていく過程そのものを楽しむジャンルだ。クリックや時間経過によってリソースを蓄積し、それをもとに生産効率を高めていく。</p>
+          <p>今回制作したのは、そうした放置ゲームを16本まとめて育てていくゲームだ。設計の柱は3つある。</p>
+          <ul class="article-list">
+            <li>1本1本が、単体でも独立して育成を楽しめること</li>
+            <li>2つのゲームを掛け合わせることで、新たなゲームが生まれること</li>
+            <li>進行に伴い、「1つのゲームを遊ぶ視点」から「ゲーム群を統括する経営視点」へとメタ化していくこと</li>
+          </ul>
+          <p>基本ゲームは8本（クリッカー、採掘、ブロック崩し、工場、細胞増殖、農業、迷路探索、ボール落とし）。そこから派生する融合ゲームが8本（精錬所、発破場、配送センター、品種改良、ジャグリング、醸造所、市場、塔）。さらにその上位層として、実験室、本部、新世界といったメタレイヤーが存在する。ゲームが3本になると、全体を1画面で見わたす「司令室」も開く。</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>項目</th><th>スペック・仕様</th></tr></thead><tbody>
+            <tr><td>ゲーム数</td><td>16本（基本8本 ＋ 融合8本）</td></tr>
+            <tr><td>対応言語</td><td>日本語 / 英語（テキスト数：約1,000件）</td></tr>
+            <tr><td>コード規模</td><td>約15,000行（ビルド不要な素のHTML / CSS / JavaScript）</td></tr>
+            <tr><td>アセット数</td><td>画像249枚、効果音60音</td></tr>
+            <tr><td>ファイル容量</td><td>ブラウザ公開用一式で約7MB</td></tr>
+            <tr><td>外部通信</td><td>なし（アクセス解析や広告タグも不使用）</td></tr>
+            <tr><td>開発期間</td><td>3日間（2026年10月10日〜12日）</td></tr>
+          </tbody></table></div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/lab-ja.webp" alt="実験室の画面。2本のゲームを選んで掛け合わせ、新しいゲームを生む" width="1280" height="800" loading="lazy">
+        <figcaption><strong>実験室</strong>2本のゲームを掛け合わせると、新しいゲームが生まれる。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="timeline">
+          <h2>開発の流れ:3日間でやったこと</h2>
+          <p>出発点は、対話を通じて練り上げた企画書と基本仕様書だった。仕様書では「確定事項」「試して確かめる事項」「未確定事項」「スコープ外（やらないこと）」を切り分け、「未確定事項を仮の実装仕様にすり替えない」と断ってあった。この時点では具体的な数値バランスや融合の組み合わせ、採用技術すら決まっていなかった。</p>
+          <p>開発着手にあたり、プロセスの進め方をルール化した。未定の項目はAIが仮決定して実装を進め、判断に迷った場合のみ人間に確認する。その代わり、仮決定した内容はすべて一覧に記録を残す。確認事項がなければ途中で作業を止めず、自律的に進めさせる方針をとった。</p>
+          <h3>1日目:コアシステムの実装と13本のプロトタイプ</h3>
+          <p>巨大な数値計算、アップグレード、転生、セーブ、オフライン進行といったコアシステムを構築し、基本の8本を実装。続けて融合ゲーム5本を追加した。その過程で目標が「動くプロトタイプ」から「1本ごとにお金を払って遊べるクオリティ」へと引き上がり、13本を順次作り込んでいった。</p>
+          <h3>2日目:プレイボリュームの拡張とコンテンツ拡充</h3>
+          <p>実際に遊んでみると進行速度が速すぎることが判明した。目標プレイ時間を「20時間以上」、さらには「約100時間」へと大幅に引き伸ばした。しかし単に進行を遅くするだけでは退屈になるため、数時間おきに新たな要素がアンロックされるよう後半のコンテンツを拡充。融合ゲームをさらに3本追加し、全16本を揃えた。</p>
+          <h3>3日目:ビジュアルの刷新とリリース準備</h3>
+          <p>当初用意していたキャラクター素材を使う方針をやめ、ネイビーとゴールドを基調とした落ち着いたトーンに一新。単なる幾何学図形だったグラフィックを、統一感のある素材へと置き換えた。さらに効果音の差し替え、マイルストーン到達時の演出やエンディングの実装、全画面の日英バイリンガル検証を実施した。</p>
+          <p>仕上げとして、全体の見通しと遊びの手ごたえにも手を入れた。全ゲームの稼ぎや育ち具合、買える強化の数、転生のしどきを1画面で見わたせる「司令室」を追加した。アップグレード購入時に毎秒の生産量が1.5倍以上へ跳ね上がった際は、グラフィック上に倍率がポップアップする演出を追加。さらに画面上部には、次のゲームがアンロックされるまでの進捗を常時表示するようにした。また、個別ゲームの操作感にも手を入れており、「ジャグリング」ではオート化（相棒）に切り替えても、プレイヤーが自力で積み上げたコンボ記録が減らないよう調整した。</p>
+          <p>中盤の待ち時間も短縮した。新しいゲームのアンロック条件を前倒しした結果、自動の試走では、新規要素がアンロックされない最長の空白時間が8.2時間から4.6時間へ、エンディング到達までの時間が約93時間から約76時間へと短縮された（いずれも試走の値で、人間が遊んだ時間ではない）。あわせて、司令室を眺めているだけで完結してしまわないよう、時折いずれかのゲーム画面へ「金の鳥」が飛来するギミックを追加。該当のゲーム画面へ移動して捕まえると、まとまった一時ボーナスを獲得できるようにした。</p>
+          <p>最後にブラウザ配信用のパッケージとして整えた。</p>
+        </section>
+
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/hub-ja.webp" alt="司令室の画面。16本のゲームが2段に並び、ゲームのあいだを品物の粒が流れる線で結ばれている。下に、各ゲームの稼ぎと、買える強化や転生の数が並ぶ" width="1280" height="800" loading="lazy">
+        <figcaption><strong>司令室</strong>全部のゲームを1画面で見わたす。3日目に追加した画面。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="problems">
+          <h2>AIを使った個人ゲーム開発で困った10のこと</h2>
+          <p>ここからが本題だ。時系列ではなく開発フェーズに沿って整理した。それぞれ「何が起きたか」「どう解決したか」「他の開発者の事例」を記述する。</p>
+
+          <div class="problem" id="p1">
+            <h3>1. 仕様が決まっていないまま作り始めてしまう</h3>
+            <h4>何が起きたか</h4>
+            <p>個人開発では、着手時点で仕様のすべてが固まっていることはまずない。今回も数値バランスや融合の組み合わせ、解放順、使用技術などは未定のままスタートした。この状態でAIに「いい感じに作って」と頼むと、AIは未定の余白を独自の解釈で埋めてしまう。結果として、どこが人間の意図で、どこがAIの独自解釈なのか、後から見分けがつかなくなる。</p>
+            <h4>どう解決したか</h4>
+            <p>仕様書側で「決定事項」と「未定事項」を明確に分離した。その上で、「未定項目はAI側で仮決めして進めてよいが、仮決めした内容は必ず一覧に記録する」という運用ルールを敷いた。これにより、テストプレイ後に見直す際、どれがAIの仮決定だったのかを一覧で追えるようになった。</p>
+            <h4>ほかの開発者の例</h4>
+            <p>Claude Codeでパズルゲームを開発した開発者も、AIが実装を急ピッチで進めるからこそ、詳細な要件定義や、実装スコープ・タスク粒度の管理が必要だったと振り返っている<a href="#src-zenn">[1]</a>。また対話型AIでWebゲームを制作した別の開発者も、AIは指示を好きなように解釈するため、指示は極めて具体的でなければならないと指摘している<a href="#src-devto">[2]</a>。</p>
+            <p>すべてを事前に決めておくアプローチと、未定事項を未定として明示して渡すアプローチは、向きこそ違えど本質は同じだ。「AIが勝手に補完したブラックボックスを作らない」という点に尽きる。</p>
+          </div>
+
+          <div class="problem" id="p2">
+            <h3>2. コード肥大化による命名の衝突と、別画面の破壊</h3>
+            <h4>何が起きたか</h4>
+            <p>「醸造所」というゲームのスタイル（CSSクラス）を追加した際、既存の「ボール落とし」画面と同じクラス名を付けてしまった。その結果、ボール落としの画面が12ピクセルに縮み、斜めに回転した状態で表示される事故が発生した。修正していたのは醸造所だったにもかかわらず、全く別のゲーム画面が壊れていたのだ。</p>
+            <h4>どう解決したか</h4>
+            <p>該当のクラス名を変更して修正した。再発防止策として、「スタイルに名前を追加する際は、同じ名前が存在しないか事前に検索する」ことをルールとして明文化した。コードベースが1万行を超える規模になると、人間もAIも全体構造を記憶しきれない。記憶に頼るのではなく、「検索を挟む」という手順を決まりにすることが有効だった。</p>
+            <h4>ほかの開発者の例</h4>
+            <p>前述のパズルゲーム開発者も、AIが次々と実装を進めることでリポジトリ構成の把握が難しくなり、コードが雑多になりやすいと述べている。対策として、コーディング規則や用語の定義を明記することを挙げている<a href="#src-zenn">[1]</a>。</p>
+          </div>
+
+          <div class="problem" id="p3">
+            <h3>3. AIは会話（セッション）が切り替わるとルールを忘れる</h3>
+            <h4>何が起きたか</h4>
+            <p>3日間にわたる開発は、単一の対話セッションでは完結しない。別のセッションに移ると、AIはそれまでに決めた設計方針も、過去の失敗も知らない状態でリスタートする。そのままでは、同じミスを繰り返しかねない。</p>
+            <h4>どう解決したか</h4>
+            <p>プロジェクト共通のルールと過去の失敗事例を、セッション起動時に必ず読み込まれる指示ファイル（Claude Codeにおける <code>CLAUDE.md</code>）に簡潔にまとめた。「日英テキストを同時に更新する」「過剰な説明文を置かない」といった方針に加え、「名前を追加する前に重複検索すること（同名追加で別画面を壊したことがある）」「ブラウザのセーブを書き換えないこと（書き換えてしまったことがある）」のように、<strong>実際の失敗事例を理由として併記</strong>した。</p>
+            <h4>公式の説明</h4>
+            <p>Claude Codeの公式ドキュメントでも、セッションは毎回まっさらな状態で開始されること、<code>CLAUDE.md</code> は毎セッションの冒頭で読み込まれること、そして指示は具体的かつ簡潔であるほど守られやすいことが説明されている<a href="#src-claude">[3]</a>。長文で網羅するのではなく、要点を絞って伝えるのが鉄則だ。</p>
+          </div>
+
+          <div class="problem" id="p4">
+            <h3>4. 「確認完了」の報告が、実は一部しか見ていなかった</h3>
+            <h4>何が起きたか</h4>
+            <p>AIから「全画面の確認が完了した」と報告を受けた。しかし、AIが検証していたのはグラフィックの中身だけで、ページ全体のレイアウトや文字の重なり、大画面での余白バランスなどは見ていなかった。AIは明示的に指示されない限り、自身が出力したコードがブラウザ上で実際にどう描画されているかを「画面」として見ていない。</p>
+            <h4>どう解決したか</h4>
+            <p>全画面をページ単位で自動キャプチャするスクリプトを構築した。16本のゲーム、実験室、本部、設定画面、マイルストーン演出に至るまで、日本語・英語の両環境で1枚ずつスクリーンショットを書き出す。AIはその実画像をもとに検証を行い、人間も同じ画像を目視チェックする。レビューのプロセスそのものをツール化した形だ。</p>
+            <h4>ほかの開発者の例</h4>
+            <p>AIエージェントに作業成果を視覚的に証明させる手法（Visual Verification）を論じた記事でも、AIの「修正しました」という報告はしばしば誤りを含むと指摘されている。成功報告のたびにスクリーンショットを撮影させること、リファレンス画像をプロジェクト内に保持すること、コンソールエラーも併せて確認することが推奨されている。ただし静止画キャプチャでは、画面のチラつきやタイミングの不具合までは検知できない点にも言及されている<a href="#src-paddo">[4]</a>。</p>
+          </div>
+
+          <div class="problem" id="p5">
+            <h3>5. 見ていた画面が、修正前の旧グラフィックだった</h3>
+            <h4>何が起きたか</h4>
+            <p>グラフィック素材を新しいものへ差し替えた後、確認用に画面キャプチャを実行した。しかし、写っていたのは差し替え前の旧グラフィックだった。素材を「該当ゲームを開いてから」読み込み始める実装になっていたため、読み込みが完了するまでの数秒間は旧グラフィックが表示されていたのだ。修正したはずのものを、未修正の状態でチェックしていた。</p>
+            <h4>どう解決したか</h4>
+            <p>ゲームの起動時に素材の読み込みを始める設計へと改修した。これにより、テスト時の誤認を防げるだけでなく、実際のプレイヤーにとっても、画面を開いた瞬間に旧グラフィックが見えてしまう問題が解消された。「検証プロセスの課題」だと思っていたものが、結果的に「ゲーム体験自体の品質向上」につながった一例だ。</p>
+          </div>
+
+          <div class="problem" id="p6">
+            <h3>6. 確認のつもりで、テストプレイ中のセーブデータを書き換えた</h3>
+            <h4>何が起きたか</h4>
+            <p>ゲーム終盤の画面を検証するには、終盤まで進めた状態が必要になる。AIが検証用の状態を作ろうとブラウザを操作した際、人間が実際に進めていたテストプレイ中のセーブデータを書き換えてしまった。確認用のつもりで操作した画面が、そのセーブデータを使っていたのだ。ブラウザゲームは同じ場所で開く限り、同じセーブデータを参照してしまう。</p>
+            <h4>どう解決したか</h4>
+            <p>「検証用の状態づくりは、通常プレイのセーブとは切り離されたサンドボックス（使い捨て環境）のみで行う」という鉄則を設けた。専用の検証環境でゲームを起動し、序盤・中盤・終盤の各状態をスクリプトで作ってキャプチャする仕組みを整備。人間がプレイ中の画面に対しては、AIは「見るだけ」にした。</p>
+            <p>この教訓はゲーム開発に限らない。AIに作業を任せるなら、「検証環境と本番環境の分離」が重要になる。</p>
+          </div>
+
+          <div class="problem" id="p7">
+            <h3>7. 進行が速すぎる。遅くすると今度は止まる</h3>
+            <h4>何が起きたか</h4>
+            <p>放置ゲームの面白さの根幹は、数値の成長曲線にある。初期バージョンは進行速度が速すぎたため、数値を調整したところ、ある地点を境に「急激に暴走する」か「足踏みして進まなくなる」かの極端な2択に陥った。原因は、倍々で増える計算式と、べき乗で増える計算式が混在していたことだった。</p>
+            <h4>どう解決したか</h4>
+            <p>成長曲線の計算モデルを「べき乗」ベースへと統一した。さらに、100時間分のゲーム進行を4分弱でシミュレーションする自動試走スクリプトを構築。パラメータを調整するたびにこの試走を回し、どのタイミングで進行が停滞し、どこで暴走するかを確認できるようにした。</p>
+            <p>ただし、「単に進行を遅くするだけでは退屈になる」というゲームデザイン上の課題は、数式だけでは解決できない。数時間おきに新たな機能やゲームがアンロックされるよう、後半のコンテンツ自体を増やすことで対応した。</p>
+            <h4>参考になる資料</h4>
+            <p>放置ゲームの数学的モデルに関しては、Anthony Pecorellaによる連載記事「The Math of Idle Games」が参考になる。基本設計として、コストは指数関数で増加させ、生産量は線形または多項式で伸ばす。序盤は生産がコストを上回るが、やがてコストが追いつく。倍率強化や「転生（プレステージ）」は、その力関係を一時的に動かすための装置であると解説されている<a href="#src-idle">[5]</a>。</p>
+          </div>
+
+          <div class="problem" id="p8">
+            <h3>8. 自動キャプチャツールが無限ループでフリーズする</h3>
+            <h4>何が起きたか</h4>
+            <p>全画面の自動キャプチャを実行中、処理が途中で止まった。画面内のオブジェクトを積み上げる描画のループ処理が、特定の条件下で終わらなくなっていたのだ。人間が目視していればすぐに気づく異常も、バックグラウンドの自動処理は沈黙したまま止まり続けてしまう。</p>
+            <h4>どう解決したか</h4>
+            <p>該当のループ処理に上限回数を設け、キャプチャツール側にも一定時間で処理を打ち切るタイムアウト機能を実装した。AIに長時間の自動処理を委ねるほど、「異常停止に気づける仕組み」が不可欠になる。</p>
+          </div>
+
+          <div class="problem" id="p9">
+            <h3>9. グラフィックのトーンが揃わず、安っぽく見える</h3>
+            <h4>何が起きたか</h4>
+            <p>開発初期は幾何学図形だけで画面を構成していた。動くには動くものの、プロトタイプ感が抜けずチープに見える。配布されている素材へ置き換えるにしても、出どころの違う素材をそのまま並べたのでは統一感が出ない。当初予定していたキャラクター素材は、最終的に採用を見送った。</p>
+            <h4>どう解決したか</h4>
+            <p>本格的な3D制作ソフトは使わず、軽量なレンダリングツールをPython（Pillow）で自作した。CC0ライセンスの3Dモデルを読み込み、すべて同一の条件で2D画像として書き出すパイプラインを作ったのだ。具体的には「カメラ角度は正面から24度の俯瞰」「光源は左上手前の単一ライト」「外周に濃紺の細いアウトライン」「書き出し時にネイビーとゴールドの画面に合わせて色を塗り替える」といった条件を固定。合うモデルがないものは、同じツール上で箱や円柱を組み合わせて作成した。ライティングが統一されているので、異なる素材を並べても浮かない。</p>
+            <p>開発フローにも工夫を加えた。まず「工場」の1本に絞って素材を使った描き方を作り込み、3回のリテイクを経てスタイルを確立。基準となるパイプラインが固まった段階で、残りの15本へ横展開した。基盤が整ったあとの15本は速かった。</p>
+            <p>なお、配布モデルに置き換えることが常に正解とは限らない。「精錬所」の炉は、配布モデルを適用したところ四角くて素っ気なくなってしまったため、自作の形状へ戻した。</p>
+            <h4>ほかの例</h4>
+            <p>ゲーム向け画像生成サービスを提供する会社のブログでも、多くの画像生成AIは1枚ずつの素材の問題は解決するが、全体の一貫性の問題は解決しない、という趣旨の指摘がされている。自社製品のプロモーションという側面はあるものの、「単体では優れていても並べると揃わない」という課題感は、今回の開発実感とも一致している<a href="#src-makko">[6]</a>。</p>
+          </div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/factory-before-after.webp" alt="工場のゲームの絵の比較。左は図形だけで描いた最初の絵、右はCC0の3Dモデルを同じ光と色で描き出した絵。序盤・中盤・終盤の3段階を上下に並べている" width="1600" height="1212" loading="lazy">
+        <figcaption><strong>工場のグラフィックの作り直し</strong>左が図形だけで描いた最初の版、右が素材を使った版。上から序盤、中盤、終盤。購入したアップグレードが、グラフィックに反映される。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section>
+          <div class="problem" id="p10">
+            <h3>10. 素材のライセンス混在と、AI生成素材の管理</h3>
+            <h4>何が起きたか</h4>
+            <p>不足する素材を配布サイトから集める際、ライセンスは素材ごとにまちまちだった。さらに今回採用した3Dモデルのうち13点は、配布元において「AIで作った」と申告されているものだった。後から「どの素材が使ってよいものか」「どれがAI由来か」を洗い出し直すのは難しい。</p>
+            <h4>どう解決したか</h4>
+            <p>素材を導入する都度、1点ずつライセンスを確認し、「入手元」「ライセンス」「AI生成の有無」を記録する管理台帳を作成した。ライセンス条件が分からない素材は採用しない方針を徹底。今回使用した素材は、グラフィックのもとになった3DモデルがCC0（Kenney、3DAssets.dev）、効果音もCC0（Kenney）、フォントはSIL OFLだ。このクレジット一覧はゲーム本体にも同梱して配布している。</p>
+            <h4>使った素材の配布サイト</h4>
+            <ul class="article-list">
+              <li><a href="https://kenney.nl/assets" rel="noopener">Kenney</a>: 3Dモデルおよび効果音（CC0）</li>
+              <li><a href="https://3dassets.dev/assets" rel="noopener">3DAssets.dev</a>: 3Dモデル（CC0 / 使用した13点は配布元にてAI生成と申告）</li>
+              <li><a href="https://fonts.google.com/specimen/Shippori+Mincho" rel="noopener">Shippori Mincho</a> と <a href="https://fonts.google.com/specimen/Zen+Maru+Gothic" rel="noopener">Zen Maru Gothic</a>: 書体（SIL OFL 1.1）</li>
+              <li>ライセンスの本文: <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja" rel="noopener">CC0 1.0</a> / <a href="https://openfontlicense.org/" rel="noopener">SIL Open Font License</a></li>
+            </ul>
+            <p>※配布サイトの条件は更新される可能性があるため、利用時は必ず各素材の個別ページを確認してほしい。</p>
+            <h4>公式の説明</h4>
+            <p>Kenney公式サイトでは、素材はCC0であり、商用利用可能かつクレジット表記も任意である旨が説明されている<a href="#src-kenney">[7]</a>。</p>
+            <p>一方、将来的にSteamで配信する場合はAI生成素材の扱いに注意が必要だ。Steamworksの公式ドキュメントによると、コンテンツ調査（Content Survey）にAIについての項目があり、ゲームに含まれてプレイヤーが目にするコンテンツ（画像、音声、テキスト、翻訳等）が対象となる。開発時にAIの助けで作った「事前生成コンテンツ」と、実行時に生成する「ライブ生成コンテンツ」に分類され、該当する場合はその内容を説明しなければならない<a href="#src-steam">[8]</a>。現時点ではブラウザ公開のみだが、将来のプラットフォーム展開を見据えて、AI生成素材を一覧にまとめた。</p>
+          </div>
+        </section>
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/brewery-ja.webp" alt="醸造所の画面。棚に並んだ樽の丸窓から、中の酒の色と液面が見える" width="1280" height="800" loading="lazy">
+        <figcaption><strong>醸造所</strong>樽の丸窓から、中の酒が見える。熟成の進みを、字ではなく色と液面で見せている。</figcaption>
+      </figure>
+
+      <div class="article-copy">
+        <section id="human">
+          <h2>AIに任せられなかったこと</h2>
+          <p>10の課題を振り返ると、その多くは自動化ツールやルールといった「仕組み」で解決できている。しかし、それらの仕組みを導入するきっかけとなった「違和感の察知と意思決定」は、人間の側から生まれていた。</p>
+          <p>開発中に大きな軌道修正が発生したのは、「人間が実際にプレイ画面を目にして、主観的な感想を抱いた瞬間」だった。「テンポが早すぎて味気ない」「ここだけ安っぽい」「ワイド画面で見ると余白が不自然だ」――こうした感覚は、プレイヤーとして画面に向き合って初めて浮き彫りになるものだ。</p>
+          <p>醸造所のゲームはその典型例だ。初期実装では、樽の熟成度合いを「熟成」といったテキストで表示していた。機能としては仕様を満たしている。しかし、プレイした人間が「文字だけで済ませていて、ゲームとしての情緒がない」と違和感を覚えたことで改修が決まった。樽に丸窓をあけ、内部の酒の色合いや液面の高さ、泡によって熟成の進捗を視覚的に表現するよう指示を出した。AIは、指示されれば丸窓の演出を実装できる。しかし、「テキスト表記だけでは物足りない」という不足に、AI自ら気づくことはなかった。</p>
+          <p>この傾向は他の開発者のレポートとも合致する。対話型AIを用いてWebゲームを制作した開発者も、数百回のやり取りを重ねて完成に近づくにつれ、AIが問題の中心を捉えきれなくなり、最後の25%は自力でコードを読み解きながら手作業で仕上げたと振り返っている<a href="#src-devto">[2]</a>。</p>
+          <p>弊サイトの過去の実験でも同様の結果が出ている。AIにすべてを丸投げしたゲームは、プログラムとして動作はしたものの、面白くはなかった。人間が改善案を出して初めて、評価が上がったのだ（<a href="/experiments/exp-001/">EXP-001:AIに丸投げでゲームを作らせてみた</a>）。</p>
+        </section>
+
+        <section id="checklist">
+          <h2>これから始める人へのチェックリスト</h2>
+          <p>今回の経験から、AIを活用して個人でゲーム開発を進める際に、あらかじめ実践しておくとよいポイントをまとめる。</p>
+          <ul class="article-list">
+            <li>仕様書には「未定」の項目を明確に残し、AIが仮決定した内容を必ず一覧として出力させる</li>
+            <li>守るべきルールと「過去の失敗事例」を、毎セッション自動で読み込まれる指示ファイル（CLAUDE.md等）に簡潔にまとめる</li>
+            <li>関数名・スタイル名・ファイル名を追加する前に、既存コードとの重複検索を義務付ける</li>
+            <li>テスト確認用の一時環境（サンドボックス）と、人間が遊ぶプレイ環境のセーブを分離する</li>
+            <li>全画面を自動キャプチャする仕組みを初期段階で構築し、AIの「動作確認完了」は画像で受け取る</li>
+            <li>自動処理のスクリプトには、ループの上限とタイムアウト処理を設ける</li>
+            <li>数値インフレを伴うゲームは、数十〜数百時間分のプレイを数分で検証できる自動試走スクリプトを用意する</li>
+            <li>素材制作はまず1画面（1ゲーム）で基準スタイルを確立し、確立後に横展開する</li>
+            <li>外部素材の導入時は、入手元・ライセンス・AI生成の有無を記録する台帳を最初から作成する</li>
+            <li>開発者自身が定期的にプレイする。主観的な「違和感」や「面白さ」のフィードバックは人間にしか出せない</li>
+          </ul>
+        </section>
+
+        <section id="limits">
+          <h2>確かめたこと、確かめていないこと</h2>
+          <p>「動いているように見えること」と、「確かめたこと」は同じではない。今回発生したトラブルは、どれも「確かめていなかった所」で起きた。だからこそ、現時点での検証ステータスを率直に開示しておきたい。</p>
+          <p>確かめたこと:</p>
+          <ul class="article-list">
+            <li>16本のゲーム、司令室、実験室、本部、設定、マイルストーン演出の表示確認（解像度 1280×800、日英両言語）</li>
+            <li>数値計算ロジックのテスト、起動の確認、自動の試走</li>
+            <li>このサイトに置いた状態での、読み込みエラーゼロ、コンソールエラーゼロ、外部通信が発生しないことの確認</li>
+          </ul>
+          <p>確かめていないこと:</p>
+          <ul class="article-list">
+            <li>最終版を、人間がオープニングからエンディングまで通しで遊ぶこと（数値バランスは試走スクリプトによる自動検証のみ）</li>
+            <li>金の鳥を捕まえたときの演出、倍率が弾ける演出、司令室の図の動き（静止画でのみ確認）</li>
+            <li>スマートフォンおよびタブレット環境での表示・タッチ操作（マウス操作を前提としたUI設計）</li>
+            <li>Chromium系以外のブラウザ（Firefox、Safari）での動作</li>
+          </ul>
+          <p>率直に言って、本作は磨き上げられた完成品ではない。あくまで「3日間という短い開発期間で、AIとともにブラウザ上で遊べる形まで到達させたプロトタイプ」である。そのため、途中で進行バランスが崩れたり、想定外の挙動が生じたりする可能性が残されている。</p>
+          <div class="play-cta">
+            <h3>遊んで確かめる</h3>
+            <p>PCのブラウザ環境であれば、そのままプレイ可能だ。</p>
+            <a class="button button-primary" href="/games/incremental-x-incremental/">Incremental × Incremental を遊ぶ <span aria-hidden="true">↗</span></a>
+            <p class="note">セーブデータはブラウザのローカルストレージにのみ保存される。設定画面からセーブデータの書き出し（エクスポート）と読み込み（インポート）も行える。</p>
+          </div>
+        </section>
+
+        <section id="faq" class="faq">
+          <h2>よくある質問</h2>
+          <dl>
+            <dt>AIだけでゲームは作れますか？</dt>
+            <dd>今回は、コードの実装、多言語テキスト、グラフィックの書き出しに至るまで、実作業はAI（Claude Code）が行いました。ただし、「何を作るか」「何が足りないか」「どこで区切るか」という意思決定と品質評価は人間が担っています。今回の方針転換の契機となったのも、人間が実画面を見て抱いた違和感やフィードバックでした。</dd>
+            <dt>AIを使った個人ゲーム開発には、どのくらいの期間がかかりますか？</dt>
+            <dd>今回は3日間で、16本のゲームを内包した放置ゲームをブラウザ上で遊べる状態まで構築しました。ただし、最終版を人間が最初から最後まで通しで遊んでの調整までは完了していません。「動くプロトタイプができるまでの時間」と、「1本の作品として完成度を高めるまでの時間」は別物だと考える必要があります。</dd>
+            <dt>絵や音の素材はどうやって用意しましたか？</dt>
+            <dd>グラフィックは、CC0ライセンスで提供されている3Dモデル（Kenney、3DAssets.dev）を、自作のPythonスクリプトを用いて同一の光源・色調に統一した2D画像として書き出しました。効果音はKenneyのCC0素材、フォントはSIL OFLライセンスのものを採用しています。すべての素材は、管理台帳に出どころとライセンスを記録しています。</dd>
+            <dt>AIで作られた素材を使ったゲームは公開や販売ができますか？</dt>
+            <dd>素材ごとのライセンス条件に従っていれば可能です。今回採用した3Dモデルのうち13点は、配布元でAI生成と申告されたCC0素材でした。ただし、SteamではAI生成コンテンツをコンテンツ調査で申告する決まりがあるため、どの素材にAIが使われているかを把握・記録しておく必要があります。</dd>
+            <dt>放置ゲーム（インクリメンタルゲーム）の数値バランスはどう決めればよいですか？</dt>
+            <dd>本プロジェクトでは当初、倍々で増える計算式とべき乗の計算式が混在していたことで、暴走や進行の停滞が発生しました。計算モデルをべき乗ベースに統一した上で、100時間分の進行を4分弱でシミュレーションする自動試走環境を用意し、確かめました。</dd>
+          </dl>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT REMAINED</p>
+          <h2>書けることより、確かめることが難しい</h2>
+          <p>わずか3日間で、AIは約15,000行のプログラムを組み上げ、16本ものゲームを実装した。いまや「コードを書くこと」自体のハードルは劇的に下がっている。</p>
+          <p>本当に難しかったのは、仕様の未定部分をブラックボックス化させないこと、セッションを跨いでも開発ルールを維持し続けること、そして「動いた」という報告を「確かめた」に変えることだった。直面した10の課題の多くは、個人の注意深さに頼るのではなく、自動化スクリプトや明確なルールといった「検証の仕組み」へ委ねることで乗り越えてきた。</p>
+          <p>もっとも、今回の記録は「1つのゲーム」「3日間」「1人の開発者と1種類のAI」という限定された条件下での実験に過ぎない。ゲームのジャンルが異なれば、チーム開発になれば、また別の壁が立ちはだかるはずだ。</p>
+          <p class="conclusion-line">AIが生み出す圧倒的なスピードに、人間側の検証スピードをいかに追いつかせるか。個人のAIゲーム開発において本当に求められていたのは、コードを書く腕前ではなく、AIの手綱を握り、正しさを確かめ続けるための「仕組み」と「ディレクション」だった。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2>開発データ</h2>
+          <dl>
+            <div><dt>開発期間</dt><dd>2026年10月10日〜12日（3日間）</dd></div>
+            <div><dt>使用AI</dt><dd>Claude Code</dd></div>
+            <div><dt>役割分担</dt><dd>方向性の提示および最終判断は人間。実装、検証、記録はAI。本記事のドラフト作成もClaude Codeが行い、人間が推敲・校閲を担当</dd></div>
+            <div><dt>採用技術</dt><dd>ビルド不要な素のHTML / CSS / JavaScript、素材の書き出しスクリプト（Python / Pillow）</dd></div>
+            <div><dt>プロジェクト規模</dt><dd>ゲーム16本、コード量 約15,000行、画像249枚、効果音60音、テキスト約1,000件</dd></div>
+            <div><dt>使用素材</dt><dd>3Dモデル（Kenney, 3DAssets.dev / CC0）、効果音（Kenney / CC0）、フォント（Shippori Mincho, Zen Maru Gothic / SIL OFL 1.1）。※3Dモデル中13点は配布元にてAI生成と申告された素材</dd></div>
+            <div><dt>公開形態</dt><dd>ブラウザ配信（約7MB、外部通信なし、セーブデータはブラウザ内に保存）</dd></div>
+            <div><dt>今後の課題</dt><dd>最終版での通しテストプレイ、スマートフォン・他ブラウザ環境の検証、Steam向け展開</dd></div>
+          </dl>
+        </section>
+
+        <section id="sources">
+          <h2>参考にした情報</h2>
+          <p>外部の記事は、書かれている範囲だけを引いている。体験談は1人の経験であり、会社のブログには自社の製品を勧める意図がある。</p>
+          <ol class="source-list">
+            <li id="src-zenn">kubo_gene「Claude CodeでVibe Coding!!!(Tシャツは貰えないけど)」Zenn、2025年7月。<a href="https://zenn.dev/kubo_gene/articles/a9d08386186342" rel="noopener">https://zenn.dev/kubo_gene/articles/a9d08386186342</a></li>
+            <li id="src-devto">Nino Ross Rodriguez「Vibe Coding a Web Game from Scratch — Fast, Fun, and Occasionally on Fire」DEV Community。<a href="https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd" rel="noopener">https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd</a></li>
+            <li id="src-claude">Claude Code 公式ドキュメント「How Claude remembers your project」。<a href="https://code.claude.com/docs/en/memory" rel="noopener">https://code.claude.com/docs/en/memory</a></li>
+            <li id="src-paddo">「Visual Verification: Making Agents Prove Their Work」paddo.dev、2025年12月。<a href="https://paddo.dev/blog/multimodal-validation-visual-verification/" rel="noopener">https://paddo.dev/blog/multimodal-validation-visual-verification/</a></li>
+            <li id="src-idle">Anthony Pecorella「The Math of Idle Games, Part I」Game Developer、2016年10月(初出はKongregateの開発者ブログ)。<a href="https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i" rel="noopener">https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i</a></li>
+            <li id="src-makko">Makko AI「AI Game Art Generator: Characters, Backgrounds, Animations and Why Consistency Is the Hard Part」2026年3月(画像生成サービスの提供会社のブログ)。<a href="https://blog.makko.ai/ai-game-art-generator/" rel="noopener">https://blog.makko.ai/ai-game-art-generator/</a></li>
+            <li id="src-kenney">Kenney「Support」(素材のライセンスの説明)。<a href="https://kenney.nl/support" rel="noopener">https://kenney.nl/support</a></li>
+            <li id="src-steam">Steamworks ドキュメント「Content Survey」(AIについての項目)。<a href="https://partner.steamgames.com/doc/gettingstarted/contentsurvey" rel="noopener">https://partner.steamgames.com/doc/gettingstarted/contentsurvey</a></li>
+          </ol>
+          <p>このサイトの関連する記録:<a href="/experiments/exp-001/">EXP-001 AIに丸投げでゲームを作らせてみた</a> / <a href="/experiments/exp-003/">EXP-003 AIに一言で頼むと、どこまで作れるのか</a></p>
+        </section>
+
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
