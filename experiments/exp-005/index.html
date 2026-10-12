@@ -15,19 +15,19 @@
   <meta property="og:site_name" content="FlowDeskStudio">
   <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-005/">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="AIで個人ゲーム開発をして困った10のことと解決法｜3日で放置ゲームを作った記録">
+  <meta property="og:title" content="AI個人ゲーム開発で困った10のことと解決法｜3日で放置ゲームを作った記録">
   <meta property="og:description" content="Claude Codeと3日で16本入りの放置ゲームを作って分かった、AI個人ゲーム開発のつまずきどころと直し方。ブラウザで遊べます。">
   <meta property="og:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="article:published_time" content="2026-10-12T00:00:00+09:00">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AIで個人ゲーム開発をして困った10のことと解決法">
+  <meta name="twitter:title" content="AI個人ゲーム開発で困った10のことと解決法">
   <meta name="twitter:description" content="Claude Codeと3日で16本入りの放置ゲームを作って分かった、つまずきどころと直し方。">
   <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png">
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/experiments/exp-005/exp-005.css">
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AIで個人ゲーム開発をして困った10のことと解決法｜3日で放置ゲームを作った記録","description":"Claude Codeと3日間で、16本入りの放置ゲームを作りました。AIを使った個人ゲーム開発で実際に困った10のことと、その解決法をまとめます。","inLanguage":"ja","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png","mainEntityOfPage":"https://flowdeskstudio.net/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/experiments/"},{"@type":"ListItem","position":3,"name":"AIで個人ゲーム開発をして困った10のことと解決法","item":"https://flowdeskstudio.net/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"AIだけでゲームは作れますか？","acceptedAnswer":{"@type":"Answer","text":"プログラム、文言、絵の描き出しまで、実装はAI(Claude Code)が行いました。ただし、何を作るか、どこが足りないか、どこで区切るかは人が決めています。今回の開発で方針が変わったきっかけは、どれも人が実際に画面を見て出した感想でした。"}},{"@type":"Question","name":"AIを使った個人ゲーム開発には、どのくらいの期間がかかりますか？","acceptedAnswer":{"@type":"Answer","text":"今回は3日間で、16本のゲームが入った放置ゲームをブラウザで遊べる形にしました。ただし、はじめからエンディングまでを人が通しで遊んでの調整は終わっていません。動くものができるまでと、仕上がるまでは別の長さです。"}},{"@type":"Question","name":"絵や音の素材はどうやって用意しましたか？","acceptedAnswer":{"@type":"Answer","text":"絵は、CC0で配布されている3Dモデル(Kenneyと3DAssets.dev)を、自作の小さな描き出しの道具で同じ光と色にそろえて2Dの絵にしました。効果音はKenneyのCC0素材、書体はSIL OFLのものです。素材ごとに出どころとライセンスを一覧にしています。"}},{"@type":"Question","name":"AIで作られた素材を使ったゲームは公開や販売ができますか？","acceptedAnswer":{"@type":"Answer","text":"素材のライセンスが許していれば使えます。今回使った3Dモデルのうち12点は、配布元でAIで作ったと申告されているCC0の素材でした。Steamでは、ゲームに含まれるAI生成コンテンツをコンテンツ調査で申告する決まりがあるため、どの素材がAI製かを記録しておく必要があります。"}},{"@type":"Question","name":"放置ゲーム(インクリメンタルゲーム)の数値バランスはどう決めればよいですか？","acceptedAnswer":{"@type":"Answer","text":"今回は、倍々で増える式とべき乗で増える式が混ざっていたために、ある所で暴走するか止まるかのどちらかになりました。式をべき乗にそろえ、100時間ぶんを自動で遊ばせる試走を4分弱で回せるようにして確かめました。"}}]}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AI個人ゲーム開発で困った10のことと解決法｜3日で放置ゲームを作った記録","description":"Claude Codeと3日間で、16本入りの放置ゲームを作りました。AIを使った個人ゲーム開発で実際に困った10のことと、その解決法をまとめます。","inLanguage":"ja","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-ja.png","mainEntityOfPage":"https://flowdeskstudio.net/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/experiments/"},{"@type":"ListItem","position":3,"name":"AI個人ゲーム開発で困った10のことと解決法","item":"https://flowdeskstudio.net/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"AIだけでゲームは作れますか？","acceptedAnswer":{"@type":"Answer","text":"プログラム、文言、絵の描き出しまで、実装はAI(Claude Code)が行いました。ただし、何を作るか、どこが足りないか、どこで区切るかは人が決めています。今回の開発で方針が変わったきっかけは、どれも人が実際に画面を見て出した感想でした。"}},{"@type":"Question","name":"AIを使った個人ゲーム開発には、どのくらいの期間がかかりますか？","acceptedAnswer":{"@type":"Answer","text":"今回は3日間で、16本のゲームが入った放置ゲームをブラウザで遊べる形にしました。ただし、はじめからエンディングまでを人が通しで遊んでの調整は終わっていません。動くものができるまでと、仕上がるまでは別の長さです。"}},{"@type":"Question","name":"絵や音の素材はどうやって用意しましたか？","acceptedAnswer":{"@type":"Answer","text":"絵は、CC0で配布されている3Dモデル(Kenneyと3DAssets.dev)を、自作の小さな描き出しの道具で同じ光と色にそろえて2Dの絵にしました。効果音はKenneyのCC0素材、書体はSIL OFLのものです。素材ごとに出どころとライセンスを一覧にしています。"}},{"@type":"Question","name":"AIで作られた素材を使ったゲームは公開や販売ができますか？","acceptedAnswer":{"@type":"Answer","text":"素材のライセンスが許していれば使えます。今回使った3Dモデルのうち12点は、配布元でAIで作ったと申告されているCC0の素材でした。Steamでは、ゲームに含まれるAI生成コンテンツをコンテンツ調査で申告する決まりがあるため、どの素材がAI製かを記録しておく必要があります。"}},{"@type":"Question","name":"放置ゲーム(インクリメンタルゲーム)の数値バランスはどう決めればよいですか？","acceptedAnswer":{"@type":"Answer","text":"今回は、倍々で増える式とべき乗で増える式が混ざっていたために、ある所で暴走するか止まるかのどちらかになりました。式をべき乗にそろえ、100時間ぶんを自動で遊ばせる試走を4分弱で回せるようにして確かめました。"}}]}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#article">本文へ移動</a>
@@ -254,6 +254,14 @@
             <p>足りない素材を配布サイトから探すと、ライセンスは素材ごとに違う。さらに今回、使った3Dモデルのうち12点は、配布元で「AIで作った」と申告されているものだった。あとから「この素材は使ってよかったのか」「どれがAI製か」を調べ直すのは難しい。</p>
             <h4>どう直したか</h4>
             <p>素材を取るたびに、1点ずつライセンスを確かめ、出どころ、ライセンス、AI製かどうかを一覧に書いた。ライセンスの分からない素材は入れない。今回使ったのは、絵のもとになった3DモデルがCC0(Kenneyと3DAssets.dev)、効果音がCC0(Kenney)、書体がSIL OFLだ。一覧はゲームと一緒に配っている。</p>
+            <h4>使った素材の配布サイト</h4>
+            <ul class="article-list">
+              <li><a href="https://kenney.nl/assets" rel="noopener">Kenney</a>:3Dモデルと効果音。CC0</li>
+              <li><a href="https://3dassets.dev/assets" rel="noopener">3DAssets.dev</a>:3Dモデル。使ったものはCC0で、12点とも配布元でAI製と申告されている</li>
+              <li><a href="https://fonts.google.com/specimen/Shippori+Mincho" rel="noopener">Shippori Mincho</a> と <a href="https://fonts.google.com/specimen/Zen+Maru+Gothic" rel="noopener">Zen Maru Gothic</a>:書体。SIL OFL 1.1</li>
+              <li>ライセンスの本文:<a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja" rel="noopener">CC0 1.0</a> / <a href="https://openfontlicense.org/" rel="noopener">SIL Open Font License</a></li>
+            </ul>
+            <p>配布サイトの条件は変わることがある。使う前に、素材1点ごとのページで確かめてほしい。</p>
             <h4>公式の説明</h4>
             <p>KenneyはWebサイトで、素材はCC0で、商用でも使え、表記は義務ではないと説明している<a href="#src-kenney">[7]</a>。</p>
             <p>Steamで公開する場合は、AIの扱いに決まりがある。Steamworksの公式ドキュメントによると、コンテンツ調査にAIについての項目があり、ゲームに含まれて遊ぶ人が目にするコンテンツ(絵、音、文章、翻訳など)が対象になる。開発中にAIの助けで作ったものを「事前生成」、ゲームの実行中にAIが作るものを「ライブ生成」と呼び、使っている場合はその内容を説明する必要がある<a href="#src-steam">[8]</a>。今回のゲームはまだSteamに出していないが、出すときに申告できるよう、AI製の素材を一覧にしてある。</p>
