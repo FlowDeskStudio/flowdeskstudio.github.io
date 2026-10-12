@@ -27,7 +27,7 @@
   <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png">
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/experiments/exp-005/exp-005.css">
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"10 Problems in Solo AI Game Development and How We Fixed Them: Building an Idle Game in 3 Days","description":"We built an idle game with 16 games inside it in three days with Claude Code. Here are the 10 problems that came up in solo AI game development and how each was fixed.","inLanguage":"en","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png","mainEntityOfPage":"https://flowdeskstudio.net/en/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/en/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/en/experiments/"},{"@type":"ListItem","position":3,"name":"10 Problems in Solo AI Game Development and How We Fixed Them","item":"https://flowdeskstudio.net/en/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can an AI build a game on its own?","acceptedAnswer":{"@type":"Answer","text":"The AI (Claude Code) did the implementation: the program, the text and the rendering of the art. A human decided what to build, what was missing and where to stop. Every change of direction in this project started with a remark a human made after actually looking at the screen."}},{"@type":"Question","name":"How long does solo game development with AI take?","acceptedAnswer":{"@type":"Answer","text":"In this case it took three days to get an idle game with 16 games inside it running in the browser. It was then reworked based on a human playthrough, but a playthrough and fine tuning of the reworked version are not finished. Getting something that runs and getting something finished are different lengths of time."}},{"@type":"Question","name":"Where did the art and sound come from?","acceptedAnswer":{"@type":"Answer","text":"The art was rendered from CC0 3D models (Kenney and 3DAssets.dev) with a small custom rendering tool that gives every model the same light and colors. Sound effects are CC0 assets from Kenney and the fonts are under the SIL OFL. Every asset is listed with its source and license."}},{"@type":"Question","name":"Can a game that uses AI-made assets be published or sold?","acceptedAnswer":{"@type":"Answer","text":"Yes, if the license of each asset allows it. Thirteen of the 3D models used here are CC0 assets that their source declares as made with AI. Steam requires developers to disclose AI-generated content in the Content Survey, so you need a record of which assets are AI-made."}},{"@type":"Question","name":"How should the numbers in an idle (incremental) game be balanced?","acceptedAnswer":{"@type":"Answer","text":"In this project, formulas that double and formulas that grow as a power were mixed, so progress either ran away or stalled at some point. The fix was to use power formulas throughout and to build a simulated run that plays 100 hours of the game in under four minutes."}}]}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"10 Problems in Solo AI Game Development and How We Fixed Them: Building an Idle Game in 3 Days","description":"We built an idle game with 16 games inside it in three days with Claude Code. Here are the 10 problems that came up in solo AI game development and how each was fixed.","inLanguage":"en","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/experiments/exp-005/assets/og-en.png","mainEntityOfPage":"https://flowdeskstudio.net/en/experiments/exp-005/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/en/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/en/experiments/"},{"@type":"ListItem","position":3,"name":"10 Problems in Solo AI Game Development and How We Fixed Them","item":"https://flowdeskstudio.net/en/experiments/exp-005/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can an AI build a game on its own?","acceptedAnswer":{"@type":"Answer","text":"The AI (Claude Code) did the implementation: the program, the text and the rendering of the art. A human decided what to build, what was missing and where to stop. Every change of direction in this project started with a remark a human made after actually looking at the screen."}},{"@type":"Question","name":"How long does solo game development with AI take?","acceptedAnswer":{"@type":"Answer","text":"In this case it took three days to get an idle game with 16 games inside it running in the browser. Tuning by a human playing the final version from start to ending is not finished. Getting something that runs and getting something finished are different lengths of time."}},{"@type":"Question","name":"Where did the art and sound come from?","acceptedAnswer":{"@type":"Answer","text":"The art was rendered from CC0 3D models (Kenney and 3DAssets.dev) with a small custom rendering tool that gives every model the same light and colors. Sound effects are CC0 assets from Kenney and the fonts are under the SIL OFL. Every asset is listed with its source and license."}},{"@type":"Question","name":"Can a game that uses AI-made assets be published or sold?","acceptedAnswer":{"@type":"Answer","text":"Yes, if the license of each asset allows it. Thirteen of the 3D models used here are CC0 assets that their source declares as made with AI. Steam requires developers to disclose AI-generated content in the Content Survey, so you need a record of which assets are AI-made."}},{"@type":"Question","name":"How should the numbers in an idle (incremental) game be balanced?","acceptedAnswer":{"@type":"Answer","text":"In this project, formulas that double and formulas that grow as a power were mixed, so progress either ran away or stalled at some point. The fix was to use power formulas throughout and to build a simulated run that plays 100 hours of the game in under four minutes."}}]}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#article">Skip to content</a>
@@ -81,7 +81,6 @@
             <li><a href="#timeline">Timeline: what happened in three days</a></li>
             <li><a href="#problems">10 problems in solo AI game development</a></li>
             <li><a href="#human">What could not be left to the AI</a></li>
-            <li><a href="#update">The pre-release update: fixes after a full playthrough</a></li>
             <li><a href="#checklist">A checklist for getting started</a></li>
             <li><a href="#limits">What was checked and what was not</a></li>
             <li><a href="#faq">Frequently asked questions</a></li>
@@ -116,7 +115,7 @@
             <li>Crossing two games produces a new game</li>
             <li>As you progress, your view rises from playing single games to running the whole cluster</li>
           </ul>
-          <p>There are eight base games (a clicker, mining, a brick breaker, a factory, cell growth, farming, a maze and a ball drop) and eight fusion games born from them (a smeltery, a blast site, a depot, breeding, juggling, a brewery, a market and a tower). Above those sit three layers: the lab, the headquarters and the new world.</p>
+          <p>There are eight base games (a clicker, mining, a brick breaker, a factory, cell growth, farming, a maze and a ball drop) and eight fusion games born from them (a smeltery, a blast site, a depot, breeding, juggling, a brewery, a market and a tower). Above those sit three layers: the lab, the headquarters and the new world. Once you have three games, a Control Room also opens, showing everything on one screen.</p>
           <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Item</th><th>Current state</th></tr></thead><tbody>
             <tr><td>Games</td><td>16 (8 base, 8 fusion)</td></tr>
             <tr><td>Languages</td><td>Japanese and English (about 1,000 strings)</td></tr>
@@ -144,10 +143,20 @@
           <h3>Day 2: length and late-game content</h3>
           <p>Playing it showed that progress was too fast. The target length went to over 20 hours and then to around 100 hours. Simply slowing it down would be dull, so late-game content was added so that something new appears every few hours. Three more fusion games brought the total to 16.</p>
           <h3>Day 3: a new look and getting ready to publish</h3>
-          <p>The plan to use prepared character art was dropped, and the look was redone in calm navy and gold. Art drawn only from shapes was replaced with art made from assets. Sound effects were swapped, milestone scenes and an ending were added, and every screen was checked in Japanese and English. Finally it was packaged for the browser.</p>
-          <p>After that, before release, a human played it through and the game was reworked again based on what came out of that. The details are in <a href="#update">the pre-release update</a>.</p>
+          <p>The plan to use prepared character art was dropped, and the look was redone in calm navy and gold. Art drawn only from shapes was replaced with art made from assets. Sound effects were swapped, milestone scenes and an ending were added, and every screen was checked in Japanese and English.</p>
+          <p>As finishing work, the overall view and the feel of play were improved. A "Control Room" was added: one screen that shows the income and growth of every game, the number of affordable upgrades and good moments to prestige. When buying an upgrade makes income per second jump by 1.5 times or more, the multiplier now pops up over the picture, and the bar at the top always shows progress toward the next game. In Juggling, leaving it to the partner no longer reduces the streak you built yourself.</p>
+          <p>The waits in the middle of the game were shortened too. With the conditions for unlocking new games moved earlier, the simulated run showed the longest stretch with nothing new going from 8.2 hours to 4.6 hours, and the time to the ending going from about 93 hours to about 76 hours (both are values from simulated runs and not time played by a human). So that watching the Control Room alone would not be enough, a "golden bird" was added that sometimes flies into the picture of one of the games. Catching it on the screen of that game gives a sizable reward.</p>
+          <p>Finally it was packaged for the browser.</p>
         </section>
 
+      </div>
+
+      <figure class="article-wide-figure shot-figure">
+        <img src="/experiments/exp-005/assets/hub-en.webp" alt="The Control Room screen. The 16 games are laid out in two rows, joined by lines along which goods flow as dots. Below, the income of each game and its counts of affordable upgrades and prestige are listed" width="1280" height="800" loading="lazy">
+        <figcaption><strong>The Control Room</strong>Every game on one screen. Added on day 3.</figcaption>
+      </figure>
+
+      <div class="article-copy">
         <section id="problems">
           <h2>10 problems in solo AI game development</h2>
           <p>This is the main part. The problems are ordered by stage of development and not by when they happened. Each has what happened, how it was fixed, and a case from elsewhere.</p>
@@ -286,36 +295,6 @@
           <p>The same thing happened in the first experiment on this site. A game left entirely to an AI ran but was not fun. The score went up after a human proposed improvements (<a href="/en/experiments/exp-001/">EXP-001: I let AI handle the whole game build</a>).</p>
         </section>
 
-        <section id="update">
-          <h2>The pre-release update: fixes after a full playthrough</h2>
-          <p>After everything above was written, and before release, a human played the game through. These were the impressions that came out of it.</p>
-          <ul class="article-list">
-            <li>The progression is flat, with few moments where the numbers jump</li>
-            <li>The whole picture is hard to see</li>
-            <li>Manual play sometimes gets in the way</li>
-            <li>Fusion looks like nothing more than multiplication</li>
-            <li>The waits in the middle of the game are long</li>
-          </ul>
-          <p>Each of these only came up once a human played. A simulated run shows progress as numbers, but "it feels flat to play" does not show up in numbers. Based on these impressions, the following changes were made before release.</p>
-          <ul class="article-list">
-            <li><strong>The Control Room (a new screen)</strong>: It appears once you have three games. One screen shows the income and growth of every game, the number of affordable upgrades, good moments to prestige, and states that need attention. A diagram shows goods flowing between games as dots, and you can jump to any game or prestige from there</li>
-            <li><strong>Feedback on purchases</strong>: When buying an upgrade makes income per second jump by 1.5 times or more, the multiplier (for example ×2.08) pops up over the picture. Ten times or more is shown larger</li>
-            <li><strong>Juggling</strong>: Leaving it to the partner no longer reduces the streak you built yourself. Before, leaving it alone made you lose out</li>
-            <li><strong>The next target</strong>: The bar at the top of the screen always shows how many more are needed until the next game opens, along with the progress</li>
-            <li><strong>Waits in the middle</strong>: The conditions for unlocking new games were moved earlier</li>
-          </ul>
-          <p>Once the Control Room was in, a new impression followed: you could get by just watching the Control Room. So a "golden bird" was added that sometimes flies into the picture of one of the games. Catching it on the screen of that game gives a sizable reward. The Control Room and the list on the left only show a mark that it has arrived, which gives a reason to visit the individual screens.</p>
-          <p>The waits in the middle can be compared before and after using the simulated run. The longest stretch with nothing new went from 8.2 hours to 4.6 hours (up to reaching the new world). The time to the ending went from about 93 hours to about 76 hours. Both are values from simulated runs and not time played by a human.</p>
-          <p>Some things about the updated version have not been checked: the effect and reward at the moment the golden bird is caught, the motion of the multiplier pop-up and of the Control Room diagram (seen only as still images), and how the new conditions feel when a human plays through.</p>
-        </section>
-      </div>
-
-      <figure class="article-wide-figure shot-figure">
-        <img src="/experiments/exp-005/assets/hub-en.webp" alt="The Control Room screen. The 16 games are laid out in two rows, joined by lines along which goods flow as dots. Below, the income of each game and its counts of affordable upgrades and prestige are listed" width="1280" height="800" loading="lazy">
-        <figcaption><strong>The Control Room</strong>Every game on one screen. Added after the playthrough.</figcaption>
-      </figure>
-
-      <div class="article-copy">
         <section id="checklist">
           <h2>A checklist for getting started</h2>
           <p>From this project, here is what is worth doing early when you build a game solo with AI.</p>
@@ -344,7 +323,7 @@
           </ul>
           <p>Not checked:</p>
           <ul class="article-list">
-            <li>A human playing the updated version from the start to the ending. The balance after the update has only been seen through simulated runs</li>
+            <li>A human playing the final version from the start to the ending. The balance of the numbers has only been seen through simulated runs</li>
             <li>The effect when the golden bird is caught, the multiplier pop-up and the motion of the Control Room diagram (seen only as still images)</li>
             <li>Display and controls on phones and tablets. It is built for a mouse</li>
             <li>Browsers other than Chromium-based ones (Firefox, Safari)</li>
@@ -364,7 +343,7 @@
             <dt>Can an AI build a game on its own?</dt>
             <dd>The AI (Claude Code) did the implementation: the program, the text and the rendering of the art. A human decided what to build, what was missing and where to stop. Every change of direction in this project started with a remark a human made after actually looking at the screen.</dd>
             <dt>How long does solo game development with AI take?</dt>
-            <dd>In this case it took three days to get an idle game with 16 games inside it running in the browser. It was then reworked based on a human playthrough, but a playthrough and fine tuning of the reworked version are not finished. Getting something that runs and getting something finished are different lengths of time.</dd>
+            <dd>In this case it took three days to get an idle game with 16 games inside it running in the browser. Tuning by a human playing the final version from start to ending is not finished. Getting something that runs and getting something finished are different lengths of time.</dd>
             <dt>Where did the art and sound come from?</dt>
             <dd>The art was rendered from CC0 3D models (Kenney and 3DAssets.dev) with a small custom rendering tool that gives every model the same light and colors. Sound effects are CC0 assets from Kenney and the fonts are under the SIL OFL. Every asset is listed with its source and license.</dd>
             <dt>Can a game that uses AI-made assets be published or sold?</dt>
@@ -394,7 +373,7 @@
             <div><dt>Scale</dt><dd>16 games, about 15,000 lines of program, 249 images, 60 sound effects and about 1,000 strings</dd></div>
             <div><dt>Assets</dt><dd>3D models from Kenney and 3DAssets.dev (CC0), sound effects from Kenney (CC0), and the fonts Shippori Mincho and Zen Maru Gothic (SIL OFL 1.1). Thirteen of the 3D models are declared by their source as AI-made</dd></div>
             <div><dt>Release form</dt><dd>Browser version, about 7 MB, no network requests. Saves stay in the browser</dd></div>
-            <div><dt>Still to do</dt><dd>A full human playthrough of the updated version, checks on phones and non-Chromium browsers, and a Steam release</dd></div>
+            <div><dt>Still to do</dt><dd>A full human playthrough of the final version, checks on phones and non-Chromium browsers, and a Steam release</dd></div>
           </dl>
         </section>
 
