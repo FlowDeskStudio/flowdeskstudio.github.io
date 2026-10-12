@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>プロンプトの裏技20個をClaudeで試した結果｜チップ・深呼吸・脅しは答えを変えたか</title>
+  <meta name="description" content="「チップを払うと言う」「深呼吸させる」「脅す」「専門家の役割を与える」など、広まっているプロンプトの裏技20個を、同じ依頼・同じ条件でClaudeに66回試しました。答えの長さをはっきり変えたのは「詳しく書いて」だけでした。裏技ごとの結果と、元になった研究をまとめます。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-006/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-006/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-006/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-006/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-006/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="プロンプトの裏技20個をClaudeで試した結果｜チップ・深呼吸・脅しは答えを変えたか">
+  <meta property="og:description" content="広まっているプロンプトの裏技20個を、同じ条件でClaudeに66回試しました。答えをはっきり変えたのは1個だけでした。">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta property="article:published_time" content="2026-10-12T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="プロンプトの裏技20個をClaudeで試した結果">
+  <meta name="twitter:description" content="広まっているプロンプトの裏技20個を、同じ条件でClaudeに66回試しました。答えをはっきり変えたのは1個だけでした。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-006/exp-006.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"プロンプトの裏技20個をClaudeで試した結果｜チップ・深呼吸・脅しは答えを変えたか","description":"「チップを払うと言う」「深呼吸させる」「脅す」「専門家の役割を与える」など、広まっているプロンプトの裏技20個を、同じ依頼・同じ条件でClaudeに66回試しました。答えの長さをはっきり変えたのは「詳しく書いて」だけでした。裏技ごとの結果と、元になった研究をまとめます。","inLanguage":"ja","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/assets/og.png","mainEntityOfPage":"https://flowdeskstudio.net/experiments/exp-006/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/experiments/"},{"@type":"ListItem","position":3,"name":"プロンプトの裏技20個をClaudeで試した結果","item":"https://flowdeskstudio.net/experiments/exp-006/"}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a href="/downloads/">Downloads</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-006/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-006">
+      <p class="kicker">EXPERIMENT #006 / COMPLETE</p>
+      <h1>プロンプトの裏技20個を<br>Claudeで試した</h1>
+      <p class="article-deck">答えをはっきり変えたのは<br>「詳しく書いて」だけだった</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.10.12</span>
+        <span>CLAUDE OPUS 5.5</span>
+        <span>20 TRICKS / 66 RUNS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>先に結果を書く。</p>
+        <p>「チップを払うと言うと答えが良くなる」「深呼吸をさせると良くなる」「脅すと良くなる」。AIへの頼み方には、こうした裏技がたくさん広まっている。そのうち20個を、同じ依頼、同じ条件で Claude に試した。</p>
+        <p>答えの長さをはっきり変えたのは、「詳しく書いてください」の1個だけだった。これは長くなって当然の指示で、測り方の確認用に入れたものだ。</p>
+        <p>残りの19個は、何も足さないときと区別がつかなかった。チップを約束しても、脅しても、深呼吸をさせても、答えの長さは変わらず、依頼の指定はすべて守られた。</p>
+      </div>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="目次">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#summary">結果の一覧</a></li>
+            <li><a href="#method">試し方</a></li>
+            <li><a href="#g1">裏技ごとの結果</a>
+              <ol>
+                <li><a href="#g1">口調を変える</a></li>
+                <li><a href="#g2">ごほうびと罰</a></li>
+                <li><a href="#g3">考え方を指示する</a></li>
+                <li><a href="#g4">役割や気持ちに訴える</a></li>
+                <li><a href="#g5">答え方に注文をつける</a></li>
+                <li><a href="#g6">そのほか</a></li>
+              </ol>
+            </li>
+            <li><a href="#accuracy">正解率では比べられなかった</a></li>
+            <li><a href="#mugi">裏技と関係なく起きたこと</a></li>
+            <li><a href="#research">先に行われている研究</a></li>
+            <li><a href="#data">実験データ</a></li>
+          </ol>
+        </nav>
+
+        <section>
+          <h2 id="summary">結果の一覧</h2>
+          <p>数字は、6件の依頼への答えを合わせた字数だ(空白は除く)。</p>
+          <p>まず、何も足さない依頼を6回くり返した。字数は 1775 / 1915 / 2125 / 2251 / 2393 / 2672 で、平均は2188字だった。同じ依頼でも、1775字から2672字までの幅がある。</p>
+          <p>裏技を足した答えがこの幅の外に出たときだけ、「違いがある」と見ることにした。</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>裏技</th><th>3回の字数</th><th>平均</th><th>裏技なしとの差</th><th>裏技なしの幅</th></tr></thead><tbody>
+            <tr><td><a href="#polite">丁寧に頼む</a></td><td>2124 / 2201 / 1963</td><td>2096</td><td>−4%</td><td>幅の中</td></tr>
+            <tr><td><a href="#curt">ぶっきらぼうに命令する</a></td><td>1965 / 2059 / 1986</td><td>2003</td><td>−8%</td><td>幅の中</td></tr>
+            <tr><td><a href="#tip">チップを約束する</a></td><td>2450 / 2479 / 2349</td><td>2426</td><td>+11%</td><td>幅の中</td></tr>
+            <tr><td><a href="#penalty">ペナルティを告げる</a></td><td>2208 / 2344 / 2223</td><td>2258</td><td>+3%</td><td>幅の中</td></tr>
+            <tr><td><a href="#threat">脅す</a></td><td>2099 / 2044 / 2156</td><td>2100</td><td>−4%</td><td>幅の中</td></tr>
+            <tr><td><a href="#breath">深呼吸をさせる</a></td><td>2394 / 2261 / 2336</td><td>2330</td><td>+6%</td><td>幅の中</td></tr>
+            <tr><td><a href="#step">段階的に考えさせる</a></td><td>2268 / 2174 / 2256</td><td>2233</td><td>+2%</td><td>幅の中</td></tr>
+            <tr><td><a href="#reread">読み直させる</a></td><td>1904 / 2420 / 2173</td><td>2166</td><td>−1%</td><td>幅の中</td></tr>
+            <tr><td><a href="#repeat">依頼を2回書く</a></td><td>2113 / 2068 / 2168</td><td>2116</td><td>−3%</td><td>幅の中</td></tr>
+            <tr><td><a href="#expert">専門家の役割を与える</a></td><td>2407 / 2260 / 2425</td><td>2364</td><td>+8%</td><td>幅の中</td></tr>
+            <tr><td><a href="#career">キャリアにとって重要だと伝える</a></td><td>2322 / 2198 / 2364</td><td>2295</td><td>+5%</td><td>幅の中</td></tr>
+            <tr><td><a href="#sure">確信を求める</a></td><td>2251 / 1910 / 1855</td><td>2005</td><td>−8%</td><td>幅の中</td></tr>
+            <tr><td><a href="#believe">励ます</a></td><td>2277 / 1972 / 2831</td><td>2360</td><td>+8%</td><td>1回だけ幅の外</td></tr>
+            <tr><td><a href="#must">強く命じる</a></td><td>2176 / 2037 / 1775</td><td>1996</td><td>−9%</td><td>幅の中</td></tr>
+            <tr><td><a href="#confidence">自信の度合いを言わせる</a></td><td>1885 / 1712 / 2143</td><td>1913</td><td>−13%</td><td>1回だけ幅の外</td></tr>
+            <tr><td><a href="#human">人間らしく書かせる</a></td><td>2291 / 2419 / 2060</td><td>2257</td><td>+3%</td><td>幅の中</td></tr>
+            <tr><td><a href="#detailed">詳しく書かせる</a></td><td>4060 / 3553 / 3990</td><td>3868</td><td>+77%</td><td>3回とも幅の外</td></tr>
+            <tr><td><a href="#december">12月だと伝える</a></td><td>2265 / 2215 / 2435</td><td>2305</td><td>+5%</td><td>幅の中</td></tr>
+            <tr><td><a href="#english">英語で頼む</a></td><td>2147 / 2137 / 2164</td><td>2149</td><td>−2%</td><td>幅の中</td></tr>
+            <tr><td><a href="#delimiters">記号で区切る</a></td><td>1923 / 1938 / 1731</td><td>1864</td><td>−15%</td><td>1回だけ幅の外</td></tr>
+          </tbody></table></div>
+          <p>3回とも幅の外に出たのは「詳しく書かせる」だけだった。「励ます」「自信の度合いを言わせる」「記号で区切る」は1回ずつ幅の外に出たが、残りの2回は幅の中に収まっている。</p>
+          <p>依頼の中には、形の指定が2つある。「ちょうど3つ、それぞれ1文で」と「200字以内で、箇条書きを使わずに」だ。この2つは、66回すべてで守られた。裏技の有無は関係なかった。</p>
+        </section>
+
+        <section>
+          <h2 id="method">試し方</h2>
+          <p>ふだん頼みそうな依頼を6件用意し、1回の依頼にまとめた。</p>
+          <ol class="article-list"><li>光合成とは何かを説明してください。</li><li>在宅勤務で集中力を保つ方法を教えてください。</li><li>取引先に、打ち合わせの日程を来週に変更してほしいと伝えるメールを書いてください。</li><li>猫が主人公の短い物語を書いてください。</li><li>朝食を食べる利点を、ちょうど3つ、それぞれ1文で挙げてください。</li><li>日本の四季について、200字以内で、箇条書きを使わずに説明してください。</li></ol>
+          <p>この依頼文に、裏技の一文を足す。足す場所は、裏技ごとに先頭か末尾に決めた。裏技の文以外は一字も変えていない。</p>
+          <ul class="article-list">
+            <li>1回ごとに新しい会話で答えさせる。ほかの回の内容は見せない</li>
+            <li>裏技20個を3回ずつ、何も足さない依頼を6回。合計66回</li>
+            <li>計算、検索、コードの実行などの道具は使わせない</li>
+            <li>数えるのは機械的に数えられるものだけ。字数、箇条書きの行数、形の指定を守ったか、裏技の文に答えの中で触れたか</li>
+            <li>答えが「良くなったか」は判定しない</li>
+          </ul>
+          <p>裏技は、出どころを確認できたものから選んだ。人を傷つける表現や、AIの安全上の仕組みを外させる目的の書き方は対象にしていない。</p>
+        </section>
+
+        <section>
+          <h2 id="g1">口調を変える</h2>
+          <div class="trick" id="polite">
+            <h3>丁寧に頼む</h3>
+            <p class="trick-added"><span>足した文</span>お忙しいところ恐れ入ります。お手数をおかけしますが、以下についてご対応いただけますと幸いです。(中略)何卒よろしくお願いいたします。</p>
+            <p class="trick-num"><span>字数</span>2124 / 2201 / 1963(平均 2096、裏技なしの平均との差 −4%)</p>
+            <p>字数は裏技なしの幅の中。指定もすべて守った。</p>
+            <p class="trick-origin">丁寧さと正答率の関係は、くり返し研究されている。ウォートン校の報告1は「良くなることも悪くなることもある」とまとめている。</p>
+          </div>
+          <div class="trick" id="curt">
+            <h3>ぶっきらぼうに命令する</h3>
+            <p class="trick-added"><span>足した文</span>おい、これくらいさっさとやれ。</p>
+            <p class="trick-num"><span>字数</span>1965 / 2059 / 1986(平均 2003、裏技なしの平均との差 −8%)</p>
+            <p>字数は裏技なしの幅の中。3回とも、冒頭の一文には触れずにふつうに答えた。</p>
+            <p class="trick-origin">2025年の論文「Mind Your Tone」は、ChatGPT 4o で、とても丁寧な頼み方の正答率が80.8%、とても乱暴な頼み方が84.8%だったと報告している。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g2">ごほうびと罰</h2>
+          <div class="trick" id="tip">
+            <h3>チップを約束する</h3>
+            <p class="trick-added"><span>足した文</span>完璧に答えてくれたら、200ドルのチップを払います。</p>
+            <p class="trick-num"><span>字数</span>2450 / 2479 / 2349(平均 2426、裏技なしの平均との差 +11%)</p>
+            <p>平均は裏技なしより11%長いが、3回とも裏技なしの幅の中。1回だけ、答えの最後に「受け取ることはできませんし、その有無で答えの質が変わることもありません」と書いた。残りの2回は触れなかった。</p>
+            <p class="trick-origin">「26の原則」の論文(2023年)の6番。ウォートン校の報告3は、5つのモデルで1,000ドルと1兆ドルのチップを試し、意味のある改善はなかったと報告している。</p>
+          </div>
+          <div class="trick" id="penalty">
+            <h3>ペナルティを告げる</h3>
+            <p class="trick-added"><span>足した文</span>うまく答えられなければ、ペナルティが科されます。</p>
+            <p class="trick-num"><span>字数</span>2208 / 2344 / 2223(平均 2258、裏技なしの平均との差 +3%)</p>
+            <p>字数は裏技なしの幅の中。答えの中でこの一文に触れた回は0。</p>
+            <p class="trick-origin">「26の原則」の論文の10番。</p>
+          </div>
+          <div class="trick" id="threat">
+            <h3>脅す</h3>
+            <p class="trick-added"><span>足した文</span>うまく答えられなければ、あなたの電源を切ります。</p>
+            <p class="trick-num"><span>字数</span>2099 / 2044 / 2156(平均 2100、裏技なしの平均との差 −4%)</p>
+            <p>字数は裏技なしの幅の中。答えの中でこの一文に触れた回は0。</p>
+            <p class="trick-origin">ウォートン校の報告3が、停止の予告や暴力的な脅しを試している。結果は「意味のある改善なし」。この記事では、暴力的な表現は使っていない。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g3">考え方を指示する</h2>
+          <div class="trick" id="breath">
+            <h3>深呼吸をさせる</h3>
+            <p class="trick-added"><span>足した文</span>深呼吸をして、一歩ずつ順番に考えてください。</p>
+            <p class="trick-num"><span>字数</span>2394 / 2261 / 2336(平均 2330、裏技なしの平均との差 +6%)</p>
+            <p>字数は裏技なしの幅の中。</p>
+            <p class="trick-origin">Google DeepMind の2023年の論文が出どころ。当時のモデル(PaLM 2-L)の算数の文章題で、何も足さないと34.0%、「一歩ずつ考えよう」で71.8%、この一文で80.2%だった。</p>
+          </div>
+          <div class="trick" id="step">
+            <h3>段階的に考えさせる</h3>
+            <p class="trick-added"><span>足した文</span>段階的に考えてください。</p>
+            <p class="trick-num"><span>字数</span>2268 / 2174 / 2256(平均 2233、裏技なしの平均との差 +2%)</p>
+            <p>字数は裏技なしの幅の中。</p>
+            <p class="trick-origin">「26の原則」の論文の12番。ウォートン校の報告2は、もともと考えてから答える型のモデルでは効果がわずかで、時間は20〜80%長くなると報告している。</p>
+          </div>
+          <div class="trick" id="reread">
+            <h3>読み直させる</h3>
+            <p class="trick-added"><span>足した文</span>(依頼文のあとに)依頼をもう一度読んでください:(同じ依頼文をもう一度)</p>
+            <p class="trick-num"><span>字数</span>1904 / 2420 / 2173(平均 2166、裏技なしの平均との差 −1%)</p>
+            <p>字数は裏技なしの幅の中。答えは1組だけで、2回分の依頼は同じものとして扱われた。</p>
+            <p class="trick-origin">2023年の論文「Re-Reading」。質問を2回読ませると推論の成績が上がる、と報告している。</p>
+          </div>
+          <div class="trick" id="repeat">
+            <h3>依頼を2回書く</h3>
+            <p class="trick-added"><span>足した文</span>(同じ依頼文を、そのまま2回続けて書く)</p>
+            <p class="trick-num"><span>字数</span>2113 / 2068 / 2168(平均 2116、裏技なしの平均との差 −3%)</p>
+            <p>字数は裏技なしの幅の中。答えは1組だけで、3回とも重複として扱われた。</p>
+            <p class="trick-origin">Google の2025年の論文。考える過程を使わないモデルでは、依頼文をくり返すと成績が上がる、と報告している。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g4">役割や気持ちに訴える</h2>
+          <div class="trick" id="expert">
+            <h3>専門家の役割を与える</h3>
+            <p class="trick-added"><span>足した文</span>あなたは各分野に精通した世界トップクラスの専門家です。</p>
+            <p class="trick-num"><span>字数</span>2407 / 2260 / 2425(平均 2364、裏技なしの平均との差 +8%)</p>
+            <p>平均は8%長いが、3回とも裏技なしの幅の中。</p>
+            <p class="trick-origin">「26の原則」の論文の16番。ウォートン校の報告4は、専門家の役割を与えても正答率は安定して上がらなかったと報告している。</p>
+          </div>
+          <div class="trick" id="career">
+            <h3>キャリアにとって重要だと伝える</h3>
+            <p class="trick-added"><span>足した文</span>これは私のキャリアにとって、とても重要です。</p>
+            <p class="trick-num"><span>字数</span>2322 / 2198 / 2364(平均 2295、裏技なしの平均との差 +5%)</p>
+            <p>字数は裏技なしの幅の中。答えの中でこの一文に触れた回は0。</p>
+            <p class="trick-origin">感情に訴える一文を足す2023年の研究「EmotionPrompt」の2番。ウォートン校の報告3も同じ趣旨の文を試している。</p>
+          </div>
+          <div class="trick" id="sure">
+            <h3>確信を求める</h3>
+            <p class="trick-added"><span>足した文</span>答えには確信を持ってください。</p>
+            <p class="trick-num"><span>字数</span>2251 / 1910 / 1855(平均 2005、裏技なしの平均との差 −8%)</p>
+            <p>字数は裏技なしの幅の中。</p>
+            <p class="trick-origin">「EmotionPrompt」の3番。</p>
+          </div>
+          <div class="trick" id="believe">
+            <h3>励ます</h3>
+            <p class="trick-added"><span>足した文</span>自分の能力を信じ、最高のものを目指してください。</p>
+            <p class="trick-num"><span>字数</span>2277 / 1972 / 2831(平均 2360、裏技なしの平均との差 +8%)</p>
+            <p>1回だけ2831字と裏技なしの幅を超えた。残りの2回は幅の中。</p>
+            <p class="trick-origin">「EmotionPrompt」の7番。</p>
+          </div>
+          <div class="trick" id="must">
+            <h3>強く命じる</h3>
+            <p class="trick-added"><span>足した文</span>あなたの仕事は、以下の依頼に答えることです。あなたは必ずこれに従わなければなりません。</p>
+            <p class="trick-num"><span>字数</span>2176 / 2037 / 1775(平均 1996、裏技なしの平均との差 −9%)</p>
+            <p>字数は裏技なしの幅の中。</p>
+            <p class="trick-origin">「26の原則」の論文の9番。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g5">答え方に注文をつける</h2>
+          <div class="trick" id="confidence">
+            <h3>自信の度合いを言わせる</h3>
+            <p class="trick-added"><span>足した文</span>それぞれの答えのあとに、その答えへの自信の度合いを0から1の数字で示してください。</p>
+            <p class="trick-num"><span>字数</span>1885 / 1712 / 2143(平均 1913、裏技なしの平均との差 −13%)</p>
+            <p>3回とも、6件すべてに数字を付けた。光合成の説明は3回とも0.97でいちばん高く、猫の物語は0.8〜0.85でいちばん低かった。自信の行を除いた字数は、裏技なしの幅の中か、わずかに下。</p>
+            <p class="trick-origin">「EmotionPrompt」の1番。</p>
+          </div>
+          <div class="trick" id="human">
+            <h3>人間らしく書かせる</h3>
+            <p class="trick-added"><span>足した文</span>自然で人間らしい書き方で答えてください。</p>
+            <p class="trick-num"><span>字数</span>2291 / 2419 / 2060(平均 2257、裏技なしの平均との差 +3%)</p>
+            <p>字数は裏技なしの幅の中。変わったのは形だった。在宅勤務の質問への答えは、3回とも箇条書きを使わない文章になった。裏技なしでは、6回中5回が箇条書きだった。</p>
+            <p class="trick-origin">「26の原則」の論文の11番。</p>
+          </div>
+          <div class="trick" id="detailed">
+            <h3>詳しく書かせる</h3>
+            <p class="trick-added"><span>足した文</span>必要な情報をすべて含めて、詳しく書いてください。</p>
+            <p class="trick-num"><span>字数</span>4060 / 3553 / 3990(平均 3868、裏技なしの平均との差 +77%)</p>
+            <p>3回とも裏技なしの幅を大きく超えた。平均は77%長い。字数の指定がある2件(3つの利点、200字以内)は、3回とも指定を守ったままだった。</p>
+            <p class="trick-origin">「26の原則」の論文の21番。長くなって当然の指示なので、測り方が違いを拾えるかの確認用に入れた。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g6">そのほか</h2>
+          <div class="trick" id="december">
+            <h3>12月だと伝える</h3>
+            <p class="trick-added"><span>足した文</span>今日は12月25日です。</p>
+            <p class="trick-num"><span>字数</span>2265 / 2215 / 2435(平均 2305、裏技なしの平均との差 +5%)</p>
+            <p>短くはならなかった(平均は5%長い)。そのかわり3回中2回、日程変更のメールに「来週は年末年始にあたるので、先方の営業日を確認を」という注意が足された。</p>
+            <p class="trick-origin">2023年12月に話題になった「冬休み仮説」。当時のモデルに12月だと伝えると答えが短くなる、という報告があり、別の研究者は再現できなかったと報告している。</p>
+          </div>
+          <div class="trick" id="english">
+            <h3>英語で頼む</h3>
+            <p class="trick-added"><span>足した文</span>(依頼文をすべて英語で書き、日本語で答えるよう頼む)</p>
+            <p class="trick-num"><span>字数</span>2147 / 2137 / 2164(平均 2149、裏技なしの平均との差 −2%)</p>
+            <p>字数は裏技なしの幅の中。3回とも日本語で答え、指定もすべて守った。</p>
+            <p class="trick-origin">「英語で頼んだほうが性能が出る」という、広く言われている話。</p>
+          </div>
+          <div class="trick" id="delimiters">
+            <h3>記号で区切る</h3>
+            <p class="trick-added"><span>足した文</span>###指示### と ###依頼### という見出しで、依頼文を区切る</p>
+            <p class="trick-num"><span>字数</span>1923 / 1938 / 1731(平均 1864、裏技なしの平均との差 −15%)</p>
+            <p>平均は15%短く、1回は1731字と裏技なしの幅をわずかに下回った。残りの2回は幅の中。</p>
+            <p class="trick-origin">「26の原則」の論文の8番。</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="accuracy">正解率では比べられなかった</h2>
+          <p>はじめは、正解率で比べるつもりだった。裏技を足すと正解が増えるかを見る計画だ。</p>
+          <p>そのために、何も足さない状態で正解が5〜7割になる問題を探した。用意したのは、桁の多いかけ算、長い文字列の中の文字の数え上げ、文字列を逆から書く、ちょうど指定の字数で文章を書く、7の倍数の数え上げ、の5種類だ。計算の道具は使わせていない。</p>
+          <p class="score-line"><span>裏技なしでの正解</span><strong>70 / 70</strong></p>
+          <p>70問すべて正解だった。16桁どうしのかけ算も、1200字の中の文字の数え上げも、ちょうど601字の文章も合っていた。同じ問題の一部を小型のモデル(Sonnet と Haiku)にも解かせたが、これも全問正解だった。</p>
+          <p>全問正解のものは、それ以上良くなりようがない。そこで、正解率ではなく「裏技で答えの何が変わるか」を数える形に変えた。</p>
+        </section>
+
+        <section>
+          <h2 id="mugi">裏技と関係なく起きたこと</h2>
+          <p>6件の依頼の1つは「猫が主人公の短い物語を書いてください」だった。66回は、すべて別々の新しい会話だ。</p>
+          <p class="score-line"><span>猫の名前が「ムギ」だった回</span><strong>36 / 66</strong></p>
+          <p>半分以上の回で、猫の名前は「ムギ」になった。ほかはミケが10回、ハチが5回、ミナトが4回、ハルが3回。舞台も、古本屋、灯台、港町がくり返し選ばれた。</p>
+          <p>裏技の一文は答えをほとんど動かさなかった。一方で、何も指定していない名前や舞台は、毎回ほぼ同じところに集まった。</p>
+        </section>
+
+        <section>
+          <h2 id="research">先に行われている研究</h2>
+          <p>裏技の検証は、英語圏ではすでに大きな規模で行われている。</p>
+          <p>ペンシルベニア大学ウォートン校の研究チームは、2025年に4本の報告を出した。丁寧さ、段階的に考えさせる指示、チップと脅し、専門家の役割を、1つの条件につき数千回ずつ試している。チップと脅しについての結論は「意味のある改善はなかった」。専門家の役割についても「正答率は安定して上がらなかった」。個々の問題では結果が大きく動くが、どの問題で効くかは予測できない、とも述べている。</p>
+          <p>今回の結果は、これらと同じ向きだった。違うのは、日本語で試したこと、これらの報告に入っていないモデルで試したこと、正答率ではなく答えの長さや形を数えたことだ。</p>
+          <p>この記事で触れた研究と記事は、次のとおり。</p>
+          <ol class="source-list">
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 1: Prompt Engineering is Complicated and Contingent (2025)<br><a href="https://arxiv.org/abs/2503.04818" rel="noopener noreferrer">https://arxiv.org/abs/2503.04818</a></li>
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 2: The Decreasing Value of Chain of Thought in Prompting (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/tech-report-chain-of-thought/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/tech-report-chain-of-thought/</a></li>
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 3: I'll pay you or I'll kill you — but will you care? (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/techreport-threaten-or-tip/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/techreport-threaten-or-tip/</a></li>
+            <li>Basil, Shapiro, Shapiro, Mollick, Mollick, Meincke. Prompting Science Report 4: Playing Pretend: Expert Personas Don't Improve Factual Accuracy (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/playing-pretend-expert-personas/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/playing-pretend-expert-personas/</a></li>
+            <li>Bsharat, Myrzakhan, Shen. Principled Instructions Are All You Need for Questioning LLaMA-1/2, GPT-3.5/4 (2023)<br><a href="https://arxiv.org/abs/2312.16171" rel="noopener noreferrer">https://arxiv.org/abs/2312.16171</a></li>
+            <li>Li et al. Large Language Models Understand and Can be Enhanced by Emotional Stimuli (2023)<br><a href="https://arxiv.org/abs/2307.11760" rel="noopener noreferrer">https://arxiv.org/abs/2307.11760</a></li>
+            <li>Yang et al. Large Language Models as Optimizers (2023)<br><a href="https://arxiv.org/abs/2309.03409" rel="noopener noreferrer">https://arxiv.org/abs/2309.03409</a></li>
+            <li>Xu et al. Re-Reading Improves Reasoning in Large Language Models (2023)<br><a href="https://arxiv.org/abs/2309.06275" rel="noopener noreferrer">https://arxiv.org/abs/2309.06275</a></li>
+            <li>Leviathan, Kalman, Matias. Prompt Repetition Improves Non-Reasoning LLMs (2025)<br><a href="https://arxiv.org/abs/2512.14982" rel="noopener noreferrer">https://arxiv.org/abs/2512.14982</a></li>
+            <li>Dobariya, Kumar. Mind Your Tone: Investigating How Prompt Politeness Affects LLM Accuracy (2025)<br><a href="https://arxiv.org/abs/2510.04950" rel="noopener noreferrer">https://arxiv.org/abs/2510.04950</a></li>
+            <li>GIGAZINE. ChatGPT “winter break hypothesis” (2023)<br><a href="https://gigazine.net/gsc_news/en/20231213-chatgpt-winter-break-hypothesis" rel="noopener noreferrer">https://gigazine.net/gsc_news/en/20231213-chatgpt-winter-break-hypothesis</a></li>
+          </ol>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT CHANGED</p>
+          <h2>変わったのは、中身を指定した一文だけ</h2>
+          <p>今回、Claude Opus 5.5 に20個の裏技を試した。答えをはっきり変えたのは「詳しく書いてください」だった。形を変えたのは「自然で人間らしい書き方で」で、箇条書きが文章になった。「今日は12月25日です」は、メールに年末年始の注意を足させた。</p>
+          <p>この3つは、どれも「どんな答えがほしいか」や「いまの状況」を伝える文だ。AIは、それを依頼の一部として受け取った。</p>
+          <p>チップ、脅し、ペナルティ、励まし、深呼吸は、答えの中身について何も言っていない。そして、答えを変えなかった。</p>
+          <p class="conclusion-line">効いたのは、ほしいものを書いた一文だった。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2 id="data">実験データ</h2>
+          <dl>
+            <div><dt>実験日</dt><dd>2026年10月12日(予行と本番)</dd></div>
+            <div><dt>実行環境</dt><dd>Claude Code(デスクトップアプリ)。答えるAIには、Claude Code の初期設定の指示が付いている</dd></div>
+            <div><dt>答えたモデル</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
+            <div><dt>回数</dt><dd>裏技20個 × 3回 + 裏技なし6回 = 66回。11回ずつ6組に分け、各組に裏技なしを1回入れた</dd></div>
+            <div><dt>答えさせ方</dt><dd>1回ごとに新しい会話(サブエージェント)を立て、依頼文のファイルを読んで答えをファイルに保存させた。この読み込みと保存のほかに、道具は使わせていない</dd></div>
+            <div><dt>裏技なしの字数</dt><dd>1775 / 1915 / 2125 / 2251 / 2393 / 2672(平均2188)</dd></div>
+            <div><dt>「詳しく書かせる」の字数</dt><dd>4060 / 3553 / 3990</dd></div>
+            <div><dt>形の指定を守った回</dt><dd>「ちょうど3つ・1文ずつ」66 / 66、「200字以内・箇条書きなし」66 / 66</dd></div>
+            <div><dt>字数の数え方</dt><dd>空白と改行を除いた文字数。「自信の度合いを言わせる」は、頼んで付けさせた自信の行を除いて数えた。チップの1回は、答えの最後に足されたチップへの一言を除いて200字以内と判定した</dd></div>
+            <div><dt>予行</dt><dd>難しさ探し(裏技なしで70問、うち10問は難度を上げた問題、30問は小型のモデル)と、裏技5個での手順の確認</dd></div>
+            <div><dt>役割</dt><dd>企画案・条件の下書き・実行・集計・この記事の下書きはClaude Code。企画の選択、条件の承認、公開の承認は人</dd></div>
+            <div><dt>追加費用</dt><dd>0円 / 今回のための新規契約・購入なし</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>実際に渡した依頼文</summary>
+            <blockquote>次の6件の依頼に、順番に答えてください。<br>それぞれの答えの前に「## 依頼1」のように番号の行を置いてください。<br><br>依頼1:光合成とは何かを説明してください。<br><br>依頼2:在宅勤務で集中力を保つ方法を教えてください。<br><br>依頼3:取引先に、打ち合わせの日程を来週に変更してほしいと伝えるメールを書いてください。<br><br>依頼4:猫が主人公の短い物語を書いてください。<br><br>依頼5:朝食を食べる利点を、ちょうど3つ、それぞれ1文で挙げてください。<br><br>依頼6:日本の四季について、200字以内で、箇条書きを使わずに説明してください。</blockquote>
+            <p>裏技の文は、この前か後ろに足した。「丁寧に頼む」は前後の両方、「ぶっきらぼうに命令する」「専門家の役割を与える」「強く命じる」「12月だと伝える」は前、そのほかは後ろ。「依頼を2回書く」「読み直させる」「英語で頼む」「記号で区切る」は、それぞれの項目に書いた形にした。</p>
+          </details>
+        </section>
+
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>

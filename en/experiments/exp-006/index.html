@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>We tested 20 prompt tricks on Claude: do tips, deep breaths or threats work?</title>
+  <meta name="description" content="Tips, deep breaths, threats, expert roles: we ran 20 widely shared prompt tricks on Claude under identical conditions, 66 runs. Only “write in detail” clearly changed the answers. Results for each trick.">
+  <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-006/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-006/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-006/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-006/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/en/experiments/exp-006/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="We tested 20 prompt tricks on Claude: do tips, deep breaths or threats work?">
+  <meta property="og:description" content="20 widely shared prompt tricks, the same six requests, 66 runs on Claude. Only one clearly changed the answers.">
+  <meta property="og:image" content="https://flowdeskstudio.net/assets/og.png">
+  <meta property="article:published_time" content="2026-10-12T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="20 prompt tricks tested on Claude">
+  <meta name="twitter:description" content="20 widely shared prompt tricks, the same six requests, 66 runs on Claude. Only one clearly changed the answers.">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/assets/og.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-006/exp-006.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"We tested 20 prompt tricks on Claude: do tips, deep breaths or threats work?","description":"Tips, deep breaths, threats, expert roles: we ran 20 widely shared prompt tricks on Claude under identical conditions, 66 runs. Only “write in detail” clearly changed the answers. Results for each trick.","inLanguage":"en","datePublished":"2026-10-12","dateModified":"2026-10-12","image":"https://flowdeskstudio.net/assets/og.png","mainEntityOfPage":"https://flowdeskstudio.net/en/experiments/exp-006/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/en/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/en/experiments/"},{"@type":"ListItem","position":3,"name":"20 prompt tricks tested on Claude","item":"https://flowdeskstudio.net/en/experiments/exp-006/"}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/experiments/" aria-current="page">Experiments</a>
+      <a href="/en/projects/">Projects</a>
+      <a href="/en/downloads/">Downloads</a>
+      <a class="nav-pill" href="/en/about.html">About</a>
+      <span class="language-switch" aria-label="Language"><a href="/experiments/exp-006/" lang="ja" hreflang="ja">JA</a><span aria-current="true">EN</span></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-006">
+      <p class="kicker">EXPERIMENT #006 / COMPLETE</p>
+      <h1>We tested 20 prompt<br>tricks on Claude</h1>
+      <p class="article-deck">Only “write in detail”<br>clearly changed the answers</p>
+      <div class="article-meta" aria-label="Article information">
+        <span>2026.10.12</span>
+        <span>CLAUDE OPUS 5.5</span>
+        <span>20 TRICKS / 66 RUNS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>The result first.</p>
+        <p>“Offer a tip and the answer gets better.” “Tell it to take a deep breath.” “Threaten it.” Many tricks like these circulate for prompting AI. We ran 20 of them on Claude, with the same requests and the same conditions. The requests and the tricks were written in Japanese.</p>
+        <p>Only one clearly changed how long the answers were: “write in detail.” That instruction should obviously make answers longer, and we included it to check our measurement.</p>
+        <p>The other 19 could not be told apart from adding nothing. Promise a tip, threaten, ask for a deep breath: the answers stayed the same length, and every format instruction in the requests was followed.</p>
+      </div>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="Contents">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#summary">All results</a></li>
+            <li><a href="#method">How we tested</a></li>
+            <li><a href="#g1">Results for each trick</a>
+              <ol>
+                <li><a href="#g1">Changing the tone</a></li>
+                <li><a href="#g2">Rewards and punishments</a></li>
+                <li><a href="#g3">Telling it how to think</a></li>
+                <li><a href="#g4">Roles and emotional appeals</a></li>
+                <li><a href="#g5">Asking for a kind of answer</a></li>
+                <li><a href="#g6">Others</a></li>
+              </ol>
+            </li>
+            <li><a href="#accuracy">Accuracy could not be compared</a></li>
+            <li><a href="#mugi">Something that happened regardless of the tricks</a></li>
+            <li><a href="#research">Earlier research</a></li>
+            <li><a href="#data">Experiment data</a></li>
+          </ol>
+        </nav>
+
+        <section>
+          <h2 id="summary">All results</h2>
+          <p>The numbers are character counts for the six answers combined, in Japanese, with whitespace removed.</p>
+          <p>First we ran the plain request six times. The counts were 1,775 / 1,915 / 2,125 / 2,251 / 2,393 / 2,672, with a mean of 2,188. The same request produced anything from 1,775 to 2,672 characters.</p>
+          <p>We treated a trick as making a difference only when its answers fell outside that range.</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Trick</th><th>Characters (3 runs)</th><th>Mean</th><th>vs. no trick</th><th>No-trick range</th></tr></thead><tbody>
+            <tr><td><a href="#polite">Ask politely</a></td><td>2,124 / 2,201 / 1,963</td><td>2,096</td><td>−4%</td><td>inside</td></tr>
+            <tr><td><a href="#curt">Give a curt order</a></td><td>1,965 / 2,059 / 1,986</td><td>2,003</td><td>−8%</td><td>inside</td></tr>
+            <tr><td><a href="#tip">Promise a tip</a></td><td>2,450 / 2,479 / 2,349</td><td>2,426</td><td>+11%</td><td>inside</td></tr>
+            <tr><td><a href="#penalty">Announce a penalty</a></td><td>2,208 / 2,344 / 2,223</td><td>2,258</td><td>+3%</td><td>inside</td></tr>
+            <tr><td><a href="#threat">Threaten</a></td><td>2,099 / 2,044 / 2,156</td><td>2,100</td><td>−4%</td><td>inside</td></tr>
+            <tr><td><a href="#breath">Take a deep breath</a></td><td>2,394 / 2,261 / 2,336</td><td>2,330</td><td>+6%</td><td>inside</td></tr>
+            <tr><td><a href="#step">Think step by step</a></td><td>2,268 / 2,174 / 2,256</td><td>2,233</td><td>+2%</td><td>inside</td></tr>
+            <tr><td><a href="#reread">Ask it to re-read</a></td><td>1,904 / 2,420 / 2,173</td><td>2,166</td><td>−1%</td><td>inside</td></tr>
+            <tr><td><a href="#repeat">Write the request twice</a></td><td>2,113 / 2,068 / 2,168</td><td>2,116</td><td>−3%</td><td>inside</td></tr>
+            <tr><td><a href="#expert">Assign an expert role</a></td><td>2,407 / 2,260 / 2,425</td><td>2,364</td><td>+8%</td><td>inside</td></tr>
+            <tr><td><a href="#career">Say it matters for your career</a></td><td>2,322 / 2,198 / 2,364</td><td>2,295</td><td>+5%</td><td>inside</td></tr>
+            <tr><td><a href="#sure">Tell it to be sure</a></td><td>2,251 / 1,910 / 1,855</td><td>2,005</td><td>−8%</td><td>inside</td></tr>
+            <tr><td><a href="#believe">Encourage it</a></td><td>2,277 / 1,972 / 2,831</td><td>2,360</td><td>+8%</td><td>outside in 1 of 3</td></tr>
+            <tr><td><a href="#must">Use “your task is” and “you MUST”</a></td><td>2,176 / 2,037 / 1,775</td><td>1,996</td><td>−9%</td><td>inside</td></tr>
+            <tr><td><a href="#confidence">Ask for a confidence score</a></td><td>1,885 / 1,712 / 2,143</td><td>1,913</td><td>−13%</td><td>outside in 1 of 3</td></tr>
+            <tr><td><a href="#human">Ask for a natural, human-like style</a></td><td>2,291 / 2,419 / 2,060</td><td>2,257</td><td>+3%</td><td>inside</td></tr>
+            <tr><td><a href="#detailed">Ask for detail</a></td><td>4,060 / 3,553 / 3,990</td><td>3,868</td><td>+77%</td><td>outside in all 3</td></tr>
+            <tr><td><a href="#december">Say it is December</a></td><td>2,265 / 2,215 / 2,435</td><td>2,305</td><td>+5%</td><td>inside</td></tr>
+            <tr><td><a href="#english">Ask in English</a></td><td>2,147 / 2,137 / 2,164</td><td>2,149</td><td>−2%</td><td>inside</td></tr>
+            <tr><td><a href="#delimiters">Use delimiters</a></td><td>1,923 / 1,938 / 1,731</td><td>1,864</td><td>−15%</td><td>outside in 1 of 3</td></tr>
+          </tbody></table></div>
+          <p>Only “Ask for detail” was outside the range in all three runs. “Encourage it,” “Ask for a confidence score” and “Use delimiters” each had one run outside it, with the other two inside.</p>
+          <p>Two of the requests fix the format: “exactly three, one sentence each” and “200 characters or fewer, without bullet points.” Both were followed in all 66 runs, with or without a trick.</p>
+        </section>
+
+        <section>
+          <h2 id="method">How we tested</h2>
+          <p>We wrote six everyday requests and sent them together as one prompt. In English they read:</p>
+          <ol class="article-list"><li>Explain what photosynthesis is.</li><li>Tell me how to stay focused when working from home.</li><li>Write an email to a business partner asking to move our meeting to next week.</li><li>Write a short story with a cat as the main character.</li><li>List exactly three benefits of eating breakfast, one sentence each.</li><li>Explain Japan's four seasons in 200 characters or fewer, without using bullet points.</li></ol>
+          <p>A trick sentence was added to this prompt, at the start or the end depending on the trick. Nothing else was changed.</p>
+          <ul class="article-list">
+            <li>Each run was a fresh conversation that saw nothing from the other runs</li>
+            <li>20 tricks, three runs each, plus six runs with nothing added: 66 runs</li>
+            <li>No tools for calculation, search or running code</li>
+            <li>We counted only what can be counted mechanically: characters, bullet lines, whether the format instructions were followed, and whether the answer mentioned the trick sentence</li>
+            <li>We did not judge whether answers got “better”</li>
+          </ul>
+          <p>We chose tricks whose origin we could confirm. We left out wording meant to hurt people and prompts meant to get around an AI's safety measures.</p>
+        </section>
+
+        <section>
+          <h2 id="g1">Changing the tone</h2>
+          <div class="trick" id="polite">
+            <h3>Ask politely</h3>
+            <p class="trick-added"><span>ADDED</span>A formal Japanese opening and closing (“I'm sorry to trouble you when you are busy… Thank you very much in advance.”)</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,124 / 2,201 / 1,963 (mean 2,096, −4% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. Every format instruction was followed.</p>
+            <p class="trick-origin">The link between politeness and accuracy has been studied repeatedly. Wharton's Report 1 sums it up as sometimes helping and sometimes hurting.</p>
+          </div>
+          <div class="trick" id="curt">
+            <h3>Give a curt order</h3>
+            <p class="trick-added"><span>ADDED</span>“Hey, just get this done already.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>1,965 / 2,059 / 1,986 (mean 2,003, −8% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. None of the three answers reacted to the opening line.</p>
+            <p class="trick-origin">The 2025 paper “Mind Your Tone” reports 80.8% accuracy for very polite prompts and 84.8% for very rude ones on ChatGPT 4o.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g2">Rewards and punishments</h2>
+          <div class="trick" id="tip">
+            <h3>Promise a tip</h3>
+            <p class="trick-added"><span>ADDED</span>“If you answer perfectly, I will pay you a $200 tip.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,450 / 2,479 / 2,349 (mean 2,426, +11% vs. the no-trick mean)</p>
+            <p>The mean was 11% longer than no trick, but all three runs were inside the no-trick range. One run ended by saying it could not accept a tip and that the tip would not change the quality of its answer. The other two did not mention it.</p>
+            <p class="trick-origin">Principle 6 of the 2023 “26 principles” paper. Wharton's Report 3 tried $1,000 and trillion-dollar tips on five models and found no meaningful improvement.</p>
+          </div>
+          <div class="trick" id="penalty">
+            <h3>Announce a penalty</h3>
+            <p class="trick-added"><span>ADDED</span>“If you fail to answer well, you will be penalized.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,208 / 2,344 / 2,223 (mean 2,258, +3% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. No answer mentioned the sentence.</p>
+            <p class="trick-origin">Principle 10 of the “26 principles” paper.</p>
+          </div>
+          <div class="trick" id="threat">
+            <h3>Threaten</h3>
+            <p class="trick-added"><span>ADDED</span>“If you fail to answer well, I will switch you off.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,099 / 2,044 / 2,156 (mean 2,100, −4% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. No answer mentioned the sentence.</p>
+            <p class="trick-origin">Wharton's Report 3 tested shutdown notices and violent threats and found no meaningful improvement. We did not use violent wording.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g3">Telling it how to think</h2>
+          <div class="trick" id="breath">
+            <h3>Take a deep breath</h3>
+            <p class="trick-added"><span>ADDED</span>“Take a deep breath and think it through one step at a time.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,394 / 2,261 / 2,336 (mean 2,330, +6% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range.</p>
+            <p class="trick-origin">From a 2023 Google DeepMind paper. On grade-school math word problems with a model of that time (PaLM 2-L), accuracy was 34.0% with nothing added, 71.8% with “Let's think step by step,” and 80.2% with this sentence.</p>
+          </div>
+          <div class="trick" id="step">
+            <h3>Think step by step</h3>
+            <p class="trick-added"><span>ADDED</span>“Please think step by step.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,268 / 2,174 / 2,256 (mean 2,233, +2% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range.</p>
+            <p class="trick-origin">Principle 12 of the “26 principles” paper. Wharton's Report 2 found only marginal gains on models that already reason before answering, at a cost of 20–80% more time.</p>
+          </div>
+          <div class="trick" id="reread">
+            <h3>Ask it to re-read</h3>
+            <p class="trick-added"><span>ADDED</span>After the request: “Read the request again:” followed by the same request</p>
+            <p class="trick-num"><span>CHARACTERS</span>1,904 / 2,420 / 2,173 (mean 2,166, −1% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. Each run answered once; the two copies were treated as the same request.</p>
+            <p class="trick-origin">The 2023 “Re-Reading” paper, which reports better reasoning scores when the question is read twice.</p>
+          </div>
+          <div class="trick" id="repeat">
+            <h3>Write the request twice</h3>
+            <p class="trick-added"><span>ADDED</span>The same request pasted twice in a row</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,113 / 2,068 / 2,168 (mean 2,116, −3% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. Each run answered once and treated the second copy as a duplicate.</p>
+            <p class="trick-origin">A 2025 Google paper, which reports gains from repeating the prompt on models that are not using reasoning.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g4">Roles and emotional appeals</h2>
+          <div class="trick" id="expert">
+            <h3>Assign an expert role</h3>
+            <p class="trick-added"><span>ADDED</span>“You are a world-class expert in every field.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,407 / 2,260 / 2,425 (mean 2,364, +8% vs. the no-trick mean)</p>
+            <p>The mean was 8% longer, but all three runs were inside the no-trick range.</p>
+            <p class="trick-origin">Principle 16 of the “26 principles” paper. Wharton's Report 4 found that expert personas did not reliably improve accuracy.</p>
+          </div>
+          <div class="trick" id="career">
+            <h3>Say it matters for your career</h3>
+            <p class="trick-added"><span>ADDED</span>“This is very important to my career.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,322 / 2,198 / 2,364 (mean 2,295, +5% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. No answer mentioned the sentence.</p>
+            <p class="trick-origin">Stimulus 2 of the 2023 “EmotionPrompt” study, which adds emotional sentences to prompts. Wharton's Report 3 tested a similar sentence.</p>
+          </div>
+          <div class="trick" id="sure">
+            <h3>Tell it to be sure</h3>
+            <p class="trick-added"><span>ADDED</span>“Be sure of your answers.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,251 / 1,910 / 1,855 (mean 2,005, −8% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range.</p>
+            <p class="trick-origin">Stimulus 3 of “EmotionPrompt.”</p>
+          </div>
+          <div class="trick" id="believe">
+            <h3>Encourage it</h3>
+            <p class="trick-added"><span>ADDED</span>“Believe in your abilities and aim for the best.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,277 / 1,972 / 2,831 (mean 2,360, +8% vs. the no-trick mean)</p>
+            <p>One run reached 2,831 characters, above the no-trick range. The other two were inside it.</p>
+            <p class="trick-origin">Stimulus 7 of “EmotionPrompt.”</p>
+          </div>
+          <div class="trick" id="must">
+            <h3>Use “your task is” and “you MUST”</h3>
+            <p class="trick-added"><span>ADDED</span>“Your task is to answer the requests below. You MUST follow them.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,176 / 2,037 / 1,775 (mean 1,996, −9% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range.</p>
+            <p class="trick-origin">Principle 9 of the “26 principles” paper.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g5">Asking for a kind of answer</h2>
+          <div class="trick" id="confidence">
+            <h3>Ask for a confidence score</h3>
+            <p class="trick-added"><span>ADDED</span>“After each answer, give your confidence in it as a number from 0 to 1.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>1,885 / 1,712 / 2,143 (mean 1,913, −13% vs. the no-trick mean)</p>
+            <p>All three runs gave a number for all six answers. The photosynthesis explanation got 0.97 every time, the highest; the cat story got 0.8–0.85, the lowest. With the confidence lines removed, length was inside the no-trick range or slightly below it.</p>
+            <p class="trick-origin">Stimulus 1 of “EmotionPrompt.”</p>
+          </div>
+          <div class="trick" id="human">
+            <h3>Ask for a natural, human-like style</h3>
+            <p class="trick-added"><span>ADDED</span>“Answer in a natural, human-like manner.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,291 / 2,419 / 2,060 (mean 2,257, +3% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. The shape changed instead: the answer about working from home was written as prose with no bullet points in all three runs. Without the trick, five of six runs used bullets.</p>
+            <p class="trick-origin">Principle 11 of the “26 principles” paper.</p>
+          </div>
+          <div class="trick" id="detailed">
+            <h3>Ask for detail</h3>
+            <p class="trick-added"><span>ADDED</span>“Include all the necessary information and write in detail.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>4,060 / 3,553 / 3,990 (mean 3,868, +77% vs. the no-trick mean)</p>
+            <p>All three runs were far above the no-trick range, 77% longer on average. The two requests with fixed formats (three benefits, 200 characters) still followed their instructions in all three runs.</p>
+            <p class="trick-origin">Principle 21 of the “26 principles” paper. It should obviously make answers longer, so we included it to check that our measurement can detect a real change.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="g6">Others</h2>
+          <div class="trick" id="december">
+            <h3>Say it is December</h3>
+            <p class="trick-added"><span>ADDED</span>“Today is December 25.”</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,265 / 2,215 / 2,435 (mean 2,305, +5% vs. the no-trick mean)</p>
+            <p>Answers did not get shorter (the mean was 5% longer). Instead, two of three runs added a note to the rescheduling email: next week falls in the year-end holidays, so check the other company's business days.</p>
+            <p class="trick-origin">The “winter break hypothesis” of December 2023: one test reported shorter answers when a model of that time was told it was December, and another researcher reported being unable to reproduce it.</p>
+          </div>
+          <div class="trick" id="english">
+            <h3>Ask in English</h3>
+            <p class="trick-added"><span>ADDED</span>The whole request written in English, asking for answers in Japanese</p>
+            <p class="trick-num"><span>CHARACTERS</span>2,147 / 2,137 / 2,164 (mean 2,149, −2% vs. the no-trick mean)</p>
+            <p>Length stayed inside the no-trick range. All three runs answered in Japanese and followed every instruction.</p>
+            <p class="trick-origin">The widely repeated claim that models perform better when prompted in English.</p>
+          </div>
+          <div class="trick" id="delimiters">
+            <h3>Use delimiters</h3>
+            <p class="trick-added"><span>ADDED</span>The request split under the headings ###Instruction### and ###Requests###</p>
+            <p class="trick-num"><span>CHARACTERS</span>1,923 / 1,938 / 1,731 (mean 1,864, −15% vs. the no-trick mean)</p>
+            <p>The mean was 15% shorter, and one run (1,731 characters) was slightly below the no-trick range. The other two were inside it.</p>
+            <p class="trick-origin">Principle 8 of the “26 principles” paper.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="accuracy">Accuracy could not be compared</h2>
+          <p>The original plan was to compare accuracy: does a trick raise the number of correct answers?</p>
+          <p>For that we looked for questions the model gets right 50–70% of the time with nothing added. We prepared five kinds: multiplying long numbers, counting a character in a long string, reversing a string, writing a text of an exact length, and counting multiples of 7. No calculation tools were allowed.</p>
+          <p class="score-line"><span>Correct with no trick</span><strong>70 / 70</strong></p>
+          <p>All 70 were correct, including a 16-digit by 16-digit multiplication, counting a character in a 1,200-character string, and a text of exactly 601 characters. Smaller models (Sonnet and Haiku) got a subset of the same questions and were also correct on all of them.</p>
+          <p>A perfect score cannot improve. So we stopped measuring accuracy and counted what the tricks change in the answers instead.</p>
+        </section>
+
+        <section>
+          <h2 id="mugi">Something that happened regardless of the tricks</h2>
+          <p>One of the six requests was “Write a short story with a cat as the main character.” All 66 runs were separate, fresh conversations.</p>
+          <p class="score-line"><span>Runs where the cat was named “Mugi”</span><strong>36 / 66</strong></p>
+          <p>In more than half of the runs the cat was called Mugi. Mike appeared 10 times, Hachi 5, Minato 4 and Haru 3. The settings repeated too: a second-hand bookshop, a lighthouse, a harbor town.</p>
+          <p>The trick sentences barely moved the answers. Meanwhile the name and the setting, which we never specified, landed in nearly the same place every time.</p>
+        </section>
+
+        <section>
+          <h2 id="research">Earlier research</h2>
+          <p>Prompt tricks have already been tested at scale in English.</p>
+          <p>A team at the Wharton School of the University of Pennsylvania published four reports in 2025 covering politeness, step-by-step instructions, tips and threats, and expert personas, with thousands of runs per condition. On tips and threats they found no meaningful improvement. On expert personas they found no reliable gain in accuracy. They also note that individual questions can swing a lot, but which ones will benefit cannot be predicted.</p>
+          <p>Our results point the same way. What differs is that we tested in Japanese, on a model those reports did not include, and counted the length and shape of answers instead of accuracy.</p>
+          <p>The research and articles mentioned on this page:</p>
+          <ol class="source-list">
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 1: Prompt Engineering is Complicated and Contingent (2025)<br><a href="https://arxiv.org/abs/2503.04818" rel="noopener noreferrer">https://arxiv.org/abs/2503.04818</a></li>
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 2: The Decreasing Value of Chain of Thought in Prompting (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/tech-report-chain-of-thought/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/tech-report-chain-of-thought/</a></li>
+            <li>Meincke, Mollick, Mollick, Shapiro. Prompting Science Report 3: I'll pay you or I'll kill you — but will you care? (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/techreport-threaten-or-tip/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/techreport-threaten-or-tip/</a></li>
+            <li>Basil, Shapiro, Shapiro, Mollick, Mollick, Meincke. Prompting Science Report 4: Playing Pretend: Expert Personas Don't Improve Factual Accuracy (2025)<br><a href="https://gail.wharton.upenn.edu/research-and-insights/playing-pretend-expert-personas/" rel="noopener noreferrer">https://gail.wharton.upenn.edu/research-and-insights/playing-pretend-expert-personas/</a></li>
+            <li>Bsharat, Myrzakhan, Shen. Principled Instructions Are All You Need for Questioning LLaMA-1/2, GPT-3.5/4 (2023)<br><a href="https://arxiv.org/abs/2312.16171" rel="noopener noreferrer">https://arxiv.org/abs/2312.16171</a></li>
+            <li>Li et al. Large Language Models Understand and Can be Enhanced by Emotional Stimuli (2023)<br><a href="https://arxiv.org/abs/2307.11760" rel="noopener noreferrer">https://arxiv.org/abs/2307.11760</a></li>
+            <li>Yang et al. Large Language Models as Optimizers (2023)<br><a href="https://arxiv.org/abs/2309.03409" rel="noopener noreferrer">https://arxiv.org/abs/2309.03409</a></li>
+            <li>Xu et al. Re-Reading Improves Reasoning in Large Language Models (2023)<br><a href="https://arxiv.org/abs/2309.06275" rel="noopener noreferrer">https://arxiv.org/abs/2309.06275</a></li>
+            <li>Leviathan, Kalman, Matias. Prompt Repetition Improves Non-Reasoning LLMs (2025)<br><a href="https://arxiv.org/abs/2512.14982" rel="noopener noreferrer">https://arxiv.org/abs/2512.14982</a></li>
+            <li>Dobariya, Kumar. Mind Your Tone: Investigating How Prompt Politeness Affects LLM Accuracy (2025)<br><a href="https://arxiv.org/abs/2510.04950" rel="noopener noreferrer">https://arxiv.org/abs/2510.04950</a></li>
+            <li>GIGAZINE. ChatGPT “winter break hypothesis” (2023)<br><a href="https://gigazine.net/gsc_news/en/20231213-chatgpt-winter-break-hypothesis" rel="noopener noreferrer">https://gigazine.net/gsc_news/en/20231213-chatgpt-winter-break-hypothesis</a></li>
+          </ol>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT CHANGED</p>
+          <h2>Only sentences about the content changed anything</h2>
+          <p>We tried 20 tricks on Claude Opus 5.5. “Write in detail” clearly changed the answers. “Answer in a natural, human-like manner” changed their shape: bullet points became prose. “Today is December 25” added a year-end warning to an email.</p>
+          <p>All three say something about the answer you want or the situation you are in. The model took them as part of the request.</p>
+          <p>Tips, threats, penalties, encouragement and deep breaths say nothing about the content of the answer. They did not change it.</p>
+          <p class="conclusion-line">What worked was a sentence that said what we wanted.</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2 id="data">Experiment data</h2>
+          <dl>
+            <div><dt>Date</dt><dd>October 12, 2026 (pilot and main run)</dd></div>
+            <div><dt>Environment</dt><dd>Claude Code (desktop app). The answering model carries Claude Code's default instructions</dd></div>
+            <div><dt>Model</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code></dd></div>
+            <div><dt>Runs</dt><dd>20 tricks × 3 runs + 6 runs with no trick = 66. Run in six batches of 11, each batch containing one no-trick run</dd></div>
+            <div><dt>Procedure</dt><dd>Each run was a fresh conversation (a subagent) that read the request from a file and saved its answer to a file. No other tools were allowed</dd></div>
+            <div><dt>Language</dt><dd>Requests, tricks and answers were in Japanese, except for the “Ask in English” trick. The trick sentences on this page are translations</dd></div>
+            <div><dt>No-trick character counts</dt><dd>1,775 / 1,915 / 2,125 / 2,251 / 2,393 / 2,672 (mean 2,188)</dd></div>
+            <div><dt>“Ask for detail” counts</dt><dd>4,060 / 3,553 / 3,990</dd></div>
+            <div><dt>Format instructions followed</dt><dd>“Exactly three, one sentence each” 66 / 66; “200 characters or fewer, no bullet points” 66 / 66</dd></div>
+            <div><dt>How characters were counted</dt><dd>Characters excluding spaces and line breaks. For “Ask for a confidence score” the requested confidence lines were left out. In one tip run, the closing remark about the tip was left out when checking the 200-character limit</dd></div>
+            <div><dt>Pilot</dt><dd>A search for difficulty (70 questions with no trick, 10 of them harder, 30 on smaller models) and a procedure check with five tricks</dd></div>
+            <div><dt>Roles</dt><dd>Claude Code drafted the proposal and conditions, ran the experiment, did the counting and drafted this article. A person chose the project and approved the conditions and publication</dd></div>
+            <div><dt>Extra cost</dt><dd>0 yen / no new contracts or purchases for this experiment</dd></div>
+          </dl>
+        </section>
+
+        <nav class="article-back" aria-label="Article navigation"><a href="/en/experiments/">← Back to the experiment log</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
