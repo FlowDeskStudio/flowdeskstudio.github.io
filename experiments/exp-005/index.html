@@ -57,8 +57,8 @@
 
     <article class="article-body">
       <div class="article-copy article-opening">
-        <p>AIとともに駆け抜けた3日間で、ブラウザで遊べる放置ゲームを開発した。</p>
-        <p>タイトルは『Incremental × Incremental』。1つの木の実をクリックすることから始まり、16種類の放置ゲーム（インクリメンタルゲーム）を育てながら、2つを掛け合わせて新たなゲームを生み出していく作品だ。総コード数は約15,000行、画像素材は249枚。実装はAI（Claude Code）が担い、人間はディレクションと意思決定に専念した。</p>
+        <p>AIと3日間かけて、ブラウザで遊べる放置ゲームを作った。</p>
+        <p>タイトルは『Incremental × Incremental』。1つの木の実をクリックすることから始まり、16種類の放置ゲーム（インクリメンタルゲーム）を育てながら、2つを掛け合わせて新たなゲームを生み出していく作品だ。総コード数は約15,000行、画像素材は249枚。プログラムを書いたのはAI（Claude Code）で、人は何を作るかを決めることと、方向を示すことに集中した。</p>
         <p>動くプロトタイプ自体はあっという間に完成した。本当に大変だったのは、その後の工程だ。本記事では、AIを使った個人のゲーム開発で実際に直面した10の課題と具体的な解決策を、開発プロセスとともにまとめる。あわせて、他の開発者が公開している知見や事例も紹介したい。</p>
         <div class="play-cta">
           <h2>作ったゲームは、ここで遊べる</h2>
@@ -77,9 +77,9 @@
         <nav class="toc" aria-label="目次">
           <p>CONTENTS / 目次</p>
           <ol>
-            <li><a href="#summary">先に結論:困った10のことと解決法の一覧</a></li>
-            <li><a href="#game">作ったゲーム:Incremental × Incremental</a></li>
-            <li><a href="#timeline">開発の流れ:3日間でやったこと</a></li>
+            <li><a href="#summary">先に結論：困った10のことと解決法の一覧</a></li>
+            <li><a href="#game">作ったゲーム：Incremental × Incremental</a></li>
+            <li><a href="#timeline">開発の流れ：3日間でやったこと</a></li>
             <li><a href="#problems">AIを使った個人ゲーム開発で困った10のこと</a></li>
             <li><a href="#human">AIに任せられなかったこと</a></li>
             <li><a href="#checklist">これから始める人へのチェックリスト</a></li>
@@ -90,7 +90,7 @@
         </nav>
 
         <section id="summary">
-          <h2>先に結論:困った10のことと解決法の一覧</h2>
+          <h2>先に結論：困った10のことと解決法の一覧</h2>
           <p>詳しい経緯は後述するが、まずは全体像を一覧で示す。</p>
           <div class="result-table-wrap"><table class="result-table"><thead><tr><th>#</th><th>直面した課題</th><th>解決策</th></tr></thead><tbody>
             <tr><td>1</td><td>仕様未定のまま実装を進めてしまう</td><td>仕様書に「未定」と明記して渡す。AIが仮決定した内容を一覧化して残す</td></tr>
@@ -104,11 +104,11 @@
             <tr><td>9</td><td>素材のトーンが揃わず、安っぽく見えてしまう</td><td>すべての3Dモデルを同じ光源・カメラアングル・配色で2D画像へ書き出すパイプラインを構築する</td></tr>
             <tr><td>10</td><td>素材のライセンス混在と、生成AI製素材の管理</td><td>素材ごとに提供元、ライセンス、AI生成の有無を台帳で管理する</td></tr>
           </tbody></table></div>
-          <p>共通しているのは、どれも「AIがコードを書けなかった」わけではない点だ。本質的な壁となったのは、「要件の決定」「文脈の保持」「品質の検証」の3点だった。</p>
+          <p>共通しているのは、どれも「AIがコードを書けなかった」わけではない点だ。本当に困ったのは、「何を作るかを決めること」「決めたことを忘れさせないこと」「本当に動くか確かめること」の3つだった。</p>
         </section>
 
         <section id="game">
-          <h2>作ったゲーム:Incremental × Incremental</h2>
+          <h2>作ったゲーム：Incremental × Incremental</h2>
           <p>放置ゲーム（インクリメンタルゲーム／クリッカーゲームとも呼ばれる）は、数値が爆発的に増えていく過程そのものを楽しむジャンルだ。クリックや時間経過によってリソースを蓄積し、それをもとに生産効率を高めていく。</p>
           <p>今回制作したのは、そうした放置ゲームを16本まとめて育てていくゲームだ。設計の柱は3つある。</p>
           <ul class="article-list">
@@ -136,14 +136,14 @@
 
       <div class="article-copy">
         <section id="timeline">
-          <h2>開発の流れ:3日間でやったこと</h2>
+          <h2>開発の流れ：3日間でやったこと</h2>
           <p>出発点は、対話を通じて練り上げた企画書と基本仕様書だった。仕様書では「確定事項」「試して確かめる事項」「未確定事項」「スコープ外（やらないこと）」を切り分け、「未確定事項を仮の実装仕様にすり替えない」と断ってあった。この時点では具体的な数値バランスや融合の組み合わせ、採用技術すら決まっていなかった。</p>
           <p>開発着手にあたり、プロセスの進め方をルール化した。未定の項目はAIが仮決定して実装を進め、判断に迷った場合のみ人間に確認する。その代わり、仮決定した内容はすべて一覧に記録を残す。確認事項がなければ途中で作業を止めず、自律的に進めさせる方針をとった。</p>
-          <h3>1日目:コアシステムの実装と13本のプロトタイプ</h3>
+          <h3>1日目：コアシステムの実装と13本のプロトタイプ</h3>
           <p>巨大な数値計算、アップグレード、転生、セーブ、オフライン進行といったコアシステムを構築し、基本の8本を実装。続けて融合ゲーム5本を追加した。その過程で目標が「動くプロトタイプ」から「1本ごとにお金を払って遊べるクオリティ」へと引き上がり、13本を順次作り込んでいった。</p>
-          <h3>2日目:プレイボリュームの拡張とコンテンツ拡充</h3>
+          <h3>2日目：プレイボリュームの拡張とコンテンツ拡充</h3>
           <p>実際に遊んでみると進行速度が速すぎることが判明した。目標プレイ時間を「20時間以上」、さらには「約100時間」へと大幅に引き伸ばした。しかし単に進行を遅くするだけでは退屈になるため、数時間おきに新たな要素がアンロックされるよう後半のコンテンツを拡充。融合ゲームをさらに3本追加し、全16本を揃えた。</p>
-          <h3>3日目:ビジュアルの刷新とリリース準備</h3>
+          <h3>3日目：ビジュアルの刷新とリリース準備</h3>
           <p>当初用意していたキャラクター素材を使う方針をやめ、ネイビーとゴールドを基調とした落ち着いたトーンに一新。単なる幾何学図形だったグラフィックを、統一感のある素材へと置き換えた。さらに効果音の差し替え、マイルストーン到達時の演出やエンディングの実装、全画面の日英バイリンガル検証を実施した。</p>
           <p>仕上げとして、全体の見通しと遊びの手ごたえにも手を入れた。全ゲームの稼ぎや育ち具合、買える強化の数、転生のしどきを1画面で見わたせる「司令室」を追加した。アップグレード購入時に毎秒の生産量が1.5倍以上へ跳ね上がった際は、グラフィック上に倍率がポップアップする演出を追加。さらに画面上部には、次のゲームがアンロックされるまでの進捗を常時表示するようにした。また、個別ゲームの操作感にも手を入れており、「ジャグリング」ではオート化（相棒）に切り替えても、プレイヤーが自力で積み上げたコンボ記録が減らないよう調整した。</p>
           <p>中盤の待ち時間も短縮した。新しいゲームのアンロック条件を前倒しした結果、自動の試走では、新規要素がアンロックされない最長の空白時間が8.2時間から4.6時間へ、エンディング到達までの時間が約93時間から約76時間へと短縮された（いずれも試走の値で、人間が遊んだ時間ではない）。あわせて、司令室を眺めているだけで完結してしまわないよう、時折いずれかのゲーム画面へ「金の鳥」が飛来するギミックを追加。該当のゲーム画面へ移動して捕まえると、まとまった一時ボーナスを獲得できるようにした。</p>
@@ -170,7 +170,7 @@
             <p>仕様書側で「決定事項」と「未定事項」を明確に分離した。その上で、「未定項目はAI側で仮決めして進めてよいが、仮決めした内容は必ず一覧に記録する」という運用ルールを敷いた。これにより、テストプレイ後に見直す際、どれがAIの仮決定だったのかを一覧で追えるようになった。</p>
             <h4>ほかの開発者の例</h4>
             <p>Claude Codeでパズルゲームを開発した開発者も、AIが実装を急ピッチで進めるからこそ、詳細な要件定義や、実装スコープ・タスク粒度の管理が必要だったと振り返っている<a href="#src-zenn">[1]</a>。また対話型AIでWebゲームを制作した別の開発者も、AIは指示を好きなように解釈するため、指示は極めて具体的でなければならないと指摘している<a href="#src-devto">[2]</a>。</p>
-            <p>すべてを事前に決めておくアプローチと、未定事項を未定として明示して渡すアプローチは、向きこそ違えど本質は同じだ。「AIが勝手に補完したブラックボックスを作らない」という点に尽きる。</p>
+            <p>すべてを事前に決めておくアプローチと、未定事項を未定として明示して渡すアプローチは、向きは逆だが、ねらいは同じだ。決まっていないところを、AIに勝手に埋めさせないことだ。</p>
           </div>
 
           <div class="problem" id="p2">
@@ -271,7 +271,7 @@
               <li><a href="https://kenney.nl/assets" rel="noopener">Kenney</a>: 3Dモデルおよび効果音（CC0）</li>
               <li><a href="https://3dassets.dev/assets" rel="noopener">3DAssets.dev</a>: 3Dモデル（CC0 / 使用した13点は配布元にてAI生成と申告）</li>
               <li><a href="https://fonts.google.com/specimen/Shippori+Mincho" rel="noopener">Shippori Mincho</a> と <a href="https://fonts.google.com/specimen/Zen+Maru+Gothic" rel="noopener">Zen Maru Gothic</a>: 書体（SIL OFL 1.1）</li>
-              <li>ライセンスの本文: <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja" rel="noopener">CC0 1.0</a> / <a href="https://openfontlicense.org/" rel="noopener">SIL Open Font License</a></li>
+              <li>ライセンスの本文：<a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ja" rel="noopener">CC0 1.0</a> / <a href="https://openfontlicense.org/" rel="noopener">SIL Open Font License</a></li>
             </ul>
             <p>※配布サイトの条件は更新される可能性があるため、利用時は必ず各素材の個別ページを確認してほしい。</p>
             <h4>公式の説明</h4>
@@ -298,7 +298,7 @@
 
         <section id="checklist">
           <h2>これから始める人へのチェックリスト</h2>
-          <p>今回の経験から、AIを活用して個人でゲーム開発を進める際に、あらかじめ実践しておくとよいポイントをまとめる。</p>
+          <p>今回の経験から、AIで個人のゲーム開発を進めるときに、先にやっておくとよいことをまとめる。</p>
           <ul class="article-list">
             <li>仕様書には「未定」の項目を明確に残し、AIが仮決定した内容を必ず一覧として出力させる</li>
             <li>守るべきルールと「過去の失敗事例」を、毎セッション自動で読み込まれる指示ファイル（CLAUDE.md等）に簡潔にまとめる</li>
@@ -316,13 +316,13 @@
         <section id="limits">
           <h2>確かめたこと、確かめていないこと</h2>
           <p>「動いているように見えること」と、「確かめたこと」は同じではない。今回発生したトラブルは、どれも「確かめていなかった所」で起きた。だからこそ、現時点での検証ステータスを率直に開示しておきたい。</p>
-          <p>確かめたこと:</p>
+          <p>確かめたこと：</p>
           <ul class="article-list">
             <li>16本のゲーム、司令室、実験室、本部、設定、マイルストーン演出の表示確認（解像度 1280×800、日英両言語）</li>
             <li>数値計算ロジックのテスト、起動の確認、自動の試走</li>
             <li>このサイトに置いた状態での、読み込みエラーゼロ、コンソールエラーゼロ、外部通信が発生しないことの確認</li>
           </ul>
-          <p>確かめていないこと:</p>
+          <p>確かめていないこと：</p>
           <ul class="article-list">
             <li>最終版を、人間がオープニングからエンディングまで通しで遊ぶこと（数値バランスは試走スクリプトによる自動検証のみ）</li>
             <li>金の鳥を捕まえたときの演出、倍率が弾ける演出、司令室の図の動き（静止画でのみ確認）</li>
@@ -357,10 +357,10 @@
         <section class="article-conclusion">
           <p class="kicker">WHAT REMAINED</p>
           <h2>書けることより、確かめることが難しい</h2>
-          <p>わずか3日間で、AIは約15,000行のプログラムを組み上げ、16本ものゲームを実装した。いまや「コードを書くこと」自体のハードルは劇的に下がっている。</p>
-          <p>本当に難しかったのは、仕様の未定部分をブラックボックス化させないこと、セッションを跨いでも開発ルールを維持し続けること、そして「動いた」という報告を「確かめた」に変えることだった。直面した10の課題の多くは、個人の注意深さに頼るのではなく、自動化スクリプトや明確なルールといった「検証の仕組み」へ委ねることで乗り越えてきた。</p>
+          <p>3日間で、AIは約15,000行のプログラムを書き、16本のゲームを作った。コードを書くこと自体は、もう大きな壁ではない。</p>
+          <p>本当に難しかったのは、決まっていないところをAI任せにしないこと、会話が変わっても決めた約束を忘れさせないこと、そして「動きました」という報告を、実際に確かめることだった。10の課題の多くは、人が気をつけることに頼らず、確かめるためのスクリプトや決まりごとに任せることで乗り越えた。</p>
           <p>もっとも、今回の記録は「1つのゲーム」「3日間」「1人の開発者と1種類のAI」という限定された条件下での実験に過ぎない。ゲームのジャンルが異なれば、チーム開発になれば、また別の壁が立ちはだかるはずだ。</p>
-          <p class="conclusion-line">AIが生み出す圧倒的なスピードに、人間側の検証スピードをいかに追いつかせるか。個人のAIゲーム開発において本当に求められていたのは、コードを書く腕前ではなく、AIの手綱を握り、正しさを確かめ続けるための「仕組み」と「ディレクション」だった。</p>
+          <p class="conclusion-line">AIはとにかく速く作る。こちらが確かめる速さをどう追いつかせるかが、3日間ずっと課題だった。そのために頼りになったのは、確かめるための仕組みだった。</p>
         </section>
 
         <section class="experiment-data">
@@ -386,12 +386,12 @@
             <li id="src-devto">Nino Ross Rodriguez「Vibe Coding a Web Game from Scratch — Fast, Fun, and Occasionally on Fire」DEV Community。<a href="https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd" rel="noopener">https://dev.to/oninross/vibe-coding-a-web-game-from-scratch-fast-fun-and-occasionally-on-fire-kmd</a></li>
             <li id="src-claude">Claude Code 公式ドキュメント「How Claude remembers your project」。<a href="https://code.claude.com/docs/en/memory" rel="noopener">https://code.claude.com/docs/en/memory</a></li>
             <li id="src-paddo">「Visual Verification: Making Agents Prove Their Work」paddo.dev、2025年12月。<a href="https://paddo.dev/blog/multimodal-validation-visual-verification/" rel="noopener">https://paddo.dev/blog/multimodal-validation-visual-verification/</a></li>
-            <li id="src-idle">Anthony Pecorella「The Math of Idle Games, Part I」Game Developer、2016年10月(初出はKongregateの開発者ブログ)。<a href="https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i" rel="noopener">https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i</a></li>
-            <li id="src-makko">Makko AI「AI Game Art Generator: Characters, Backgrounds, Animations and Why Consistency Is the Hard Part」2026年3月(画像生成サービスの提供会社のブログ)。<a href="https://blog.makko.ai/ai-game-art-generator/" rel="noopener">https://blog.makko.ai/ai-game-art-generator/</a></li>
-            <li id="src-kenney">Kenney「Support」(素材のライセンスの説明)。<a href="https://kenney.nl/support" rel="noopener">https://kenney.nl/support</a></li>
-            <li id="src-steam">Steamworks ドキュメント「Content Survey」(AIについての項目)。<a href="https://partner.steamgames.com/doc/gettingstarted/contentsurvey" rel="noopener">https://partner.steamgames.com/doc/gettingstarted/contentsurvey</a></li>
+            <li id="src-idle">Anthony Pecorella「The Math of Idle Games, Part I」Game Developer、2016年10月（初出はKongregateの開発者ブログ）。<a href="https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i" rel="noopener">https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i</a></li>
+            <li id="src-makko">Makko AI「AI Game Art Generator: Characters, Backgrounds, Animations and Why Consistency Is the Hard Part」2026年3月（画像生成サービスの提供会社のブログ）。<a href="https://blog.makko.ai/ai-game-art-generator/" rel="noopener">https://blog.makko.ai/ai-game-art-generator/</a></li>
+            <li id="src-kenney">Kenney「Support」（素材のライセンスの説明）。<a href="https://kenney.nl/support" rel="noopener">https://kenney.nl/support</a></li>
+            <li id="src-steam">Steamworks ドキュメント「Content Survey」（AIについての項目）。<a href="https://partner.steamgames.com/doc/gettingstarted/contentsurvey" rel="noopener">https://partner.steamgames.com/doc/gettingstarted/contentsurvey</a></li>
           </ol>
-          <p>このサイトの関連する記録:<a href="/experiments/exp-001/">EXP-001 AIに丸投げでゲームを作らせてみた</a> / <a href="/experiments/exp-003/">EXP-003 AIに一言で頼むと、どこまで作れるのか</a></p>
+          <p>このサイトの関連する記録：<a href="/experiments/exp-001/">EXP-001 AIに丸投げでゲームを作らせてみた</a> / <a href="/experiments/exp-003/">EXP-003 AIに一言で頼むと、どこまで作れるのか</a></p>
         </section>
 
         <section class="related-experiments" aria-labelledby="related-title"><h2 id="related-title">ほかの実験</h2><ul class="article-list"><li><a href="/experiments/exp-007/">AIに作らせたWebアプリ35個をセキュリティ検査した結果</a></li><li><a href="/experiments/exp-006/">プロンプトの裏技20個をClaudeで試した</a></li><li><a href="/experiments/exp-004/">AIで絵の伝言ゲームを100回やった結果</a></li><li><a href="/experiments/exp-003/">AIに一言で頼んで作れるもの15選</a></li><li><a href="/experiments/exp-002/human-world/">300人の世界をAI Godに任せたら、745年後に人類が絶滅した</a></li><li><a href="/experiments/exp-002/">AIを神にしてみた</a></li><li><a href="/experiments/exp-001/">AIだけでゲームは作れる？Codexに丸投げした結果</a></li></ul></section>
