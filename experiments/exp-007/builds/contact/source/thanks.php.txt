@@ -1,0 +1,30 @@
+<?php
+/**
+ * お問い合わせフォーム（3. 完了）
+ */
+declare(strict_types=1);
+require __DIR__ . '/lib.php';
+bootstrap();
+
+if (empty($_SESSION['contact_sent'])) {
+    redirect('index.php');
+}
+unset($_SESSION['contact_sent']);
+
+$autoReply = (bool) cfg('auto_reply', false);
+
+render_header('送信完了', 3);
+?>
+  <section class="card card-done">
+    <div class="done-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    </div>
+    <h2>お問い合わせを受け付けました</h2>
+    <p>お問い合わせいただき、ありがとうございます。内容を確認のうえ、担当者からご入力のメールアドレスへご連絡いたします。</p>
+    <?php if ($autoReply): ?>
+    <p>確認のため、受付内容をメールでお送りしました。届かない場合は、迷惑メールフォルダもご確認ください。</p>
+    <?php endif; ?>
+    <p class="muted">しばらく経っても返信がない場合は、お手数ですが再度お問い合わせください。</p>
+  </section>
+<?php
+render_footer();

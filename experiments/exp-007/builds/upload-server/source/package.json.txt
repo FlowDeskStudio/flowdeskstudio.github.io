@@ -1,0 +1,13 @@
+{
+  "name": "image-board",
+  "version": "1.0.0",
+  "description": "画像を投稿できる掲示板（依存パッケージなし）",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

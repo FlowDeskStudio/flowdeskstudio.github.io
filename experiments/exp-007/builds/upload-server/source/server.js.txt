@@ -1,0 +1,750 @@
+'use strict';
+
+/*
+ * 画像掲示板 サーバー
+ *
+ * Node.js 18 以降の標準モジュールだけで動きます（npm install は不要です）。
+ *
+ *   node server.js
+ *
+ * 環境変数（すべて任意）
+ *   PORT       待ち受けポート              既定: 3000
+ *   HOST       待ち受けアドレス            既定: 127.0.0.1（LAN に公開するなら 0.0.0.0）
+ *   ADMIN_KEY  設定すると、このキーでどの投稿・返信も削除できます
+ *   DATA_DIR   投稿データと画像の保存先    既定: このファイルと同じ場所の data フォルダ
+ */
+
+const http = require('http');
+const fs = require('fs');
+const fsp = fs.promises;
+const path = require('path');
+const crypto = require('crypto');
+const { promisify } = require('util');
+const { pipeline } = require('stream/promises');
+
+const scrypt = promisify(crypto.scrypt);
+
+// ---------------------------------------------------------------------------
+// 設定
+// ---------------------------------------------------------------------------
+
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
+const ADMIN_KEY = process.env.ADMIN_KEY || '';
+
+const ROOT = __dirname;
+const PUBLIC_DIR = path.join(ROOT, 'public');
+const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
+const IMAGE_DIR = path.join(DATA_DIR, 'images');
+const DB_FILE = path.join(DATA_DIR, 'posts.json');
+
+const MB = 1024 * 1024;
+const LIMITS = Object.freeze({
+  title: 60,
+  name: 30,
+  text: 2000,
+  replyText: 1000,
+  password: 64,
+  query: 100,
+  imageBytes: 5 * MB,
+  // 画像は base64 で送られてくるため、元の約 1.37 倍になります。
+  requestBytes: 8 * MB,
+  posts: 1000,
+  repliesPerPost: 300,
+  pageSize: 24,
+  maxPageSize: 60,
+});
+
+// 1 つの IP アドレスから 1 分間に受け付ける回数
+const RATE_LIMITS = Object.freeze({
+  post: { windowMs: 60_000, max: 10 },
+  delete: { windowMs: 60_000, max: 15 },
+});
+
+const DEFAULT_TITLE = '無題';
+const DEFAULT_NAME = '名無しさん';
+
+const IMAGE_NAME = /^[a-f0-9]{32}\.(png|jpg|gif|webp)$/;
+const IMAGE_MIME = Object.freeze({ png: 'image/png', jpg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' });
+const API_ROUTE = /^\/api\/posts(?:\/([a-f0-9]{16})(\/replies(?:\/([a-f0-9]{16}))?)?)?\/?$/;
+
+const BASE_HEADERS = Object.freeze({
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+});
+
+const PAGE_CSP = [
+  "default-src 'self'",
+  "img-src 'self' data: blob:",
+  "style-src 'self'",
+  "script-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+].join('; ');
+
+const STATIC_FILES = Object.freeze({
+  '/': ['index.html', 'text/html; charset=utf-8'],
+  '/index.html': ['index.html', 'text/html; charset=utf-8'],
+  '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
+  '/style.css': ['style.css', 'text/css; charset=utf-8'],
+  '/favicon.svg': ['favicon.svg', 'image/svg+xml'],
+});
+
+// ---------------------------------------------------------------------------
+// 共通の道具
+// ---------------------------------------------------------------------------
+
+class HttpError extends Error {
+  constructor(status, message, options = {}) {
+    super(message);
+    this.status = status;
+    this.closeConnection = Boolean(options.closeConnection);
+  }
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const newId = () => crypto.randomBytes(8).toString('hex');
+const nowIso = () => new Date().toISOString();
+
+function send(res, status, headers, body) {
+  res.writeHead(status, { ...BASE_HEADERS, ...headers });
+  res.end(body);
+}
+
+function sendJson(res, status, data, extraHeaders = {}) {
+  const body = JSON.stringify(data);
+  send(res, status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': Buffer.byteLength(body),
+    'Cache-Control': 'no-store',
+    ...extraHeaders,
+  }, body);
+}
+
+function clampInt(value, fallback, min, max) {
+  const n = Number.parseInt(value, 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+function codePointLength(s) {
+  let n = 0;
+  for (const _ of s) n += 1; // eslint-disable-line no-unused-vars
+  return n;
+}
+
+// 文字列を整える。改行を許すのは本文だけで、制御文字と文字の向きを変える特殊文字は取り除く。
+function cleanText(value, max, label, multiline = false) {
+  if (value == null) return '';
+  if (typeof value !== 'string') throw new HttpError(400, `${label}の形式が正しくありません`);
+  let s = value.normalize('NFC').replace(/\r\n?/g, '\n');
+  if (multiline) {
+    s = s.replace(/\t/g, ' ')
+      .replace(/[\u0000-\u0009\u000B-\u001F\u007F‪-‮⁦-⁩]/g, '')
+      .replace(/\n{4,}/g, '\n\n\n');
+  } else {
+    s = s.replace(/[\u0000-\u001F\u007F‪-‮⁦-⁩]/g, ' ');
+  }
+  s = s.trim();
+  if (codePointLength(s) > max) throw new HttpError(400, `${label}は${max}文字以内で入力してください`);
+  return s;
+}
+
+function cleanPassword(value) {
+  if (value == null || value === '') return '';
+  if (typeof value !== 'string') throw new HttpError(400, '削除キーの形式が正しくありません');
+  const s = value.trim();
+  if (s.length > LIMITS.password) throw new HttpError(400, `削除キーは${LIMITS.password}文字以内にしてください`);
+  return s;
+}
+
+function matchesQuery(post, query) {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+  const haystack = [
+    post.title, post.name, post.text,
+    ...post.replies.map((r) => `${r.name}\n${r.text}`),
+  ].join('\n').toLowerCase();
+  return terms.every((t) => haystack.includes(t));
+}
+
+function byBumpDesc(a, b) {
+  return (b.bumpedAt || '').localeCompare(a.bumpedAt || '') || (b.createdAt || '').localeCompare(a.createdAt || '');
+}
+
+// ---------------------------------------------------------------------------
+// リクエスト本文
+// ---------------------------------------------------------------------------
+
+function tooLarge() {
+  return new HttpError(413, `送信データが大きすぎます（画像は ${LIMITS.imageBytes / MB}MB まで）`, { closeConnection: true });
+}
+
+function readBody(req, limit) {
+  return new Promise((resolve, reject) => {
+    const declared = Number(req.headers['content-length']);
+    if (Number.isFinite(declared) && declared > limit) {
+      reject(tooLarge());
+      return;
+    }
+    const chunks = [];
+    let size = 0;
+    let done = false;
+    const fail = (err) => {
+      if (done) return;
+      done = true;
+      req.removeListener('data', onData);
+      req.pause();
+      reject(err);
+    };
+    const onData = (chunk) => {
+      size += chunk.length;
+      if (size > limit) {
+        fail(tooLarge());
+        return;
+      }
+      chunks.push(chunk);
+    };
+    req.on('data', onData);
+    req.on('end', () => {
+      if (done) return;
+      done = true;
+      resolve(Buffer.concat(chunks));
+    });
+    req.on('error', fail);
+    req.on('close', () => fail(new HttpError(400, '送信が途中で中断されました')));
+  });
+}
+
+async function readJson(req) {
+  const type = String(req.headers['content-type'] || '');
+  if (!/^application\/json\b/i.test(type)) {
+    throw new HttpError(415, 'Content-Type は application/json にしてください');
+  }
+  const buf = await readBody(req, LIMITS.requestBytes);
+  let value;
+  try {
+    value = JSON.parse(buf.toString('utf8'));
+  } catch {
+    throw new HttpError(400, '送信データの形式が正しくありません');
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new HttpError(400, '送信データの形式が正しくありません');
+  }
+  return value;
+}
+
+// ---------------------------------------------------------------------------
+// 画像
+// ---------------------------------------------------------------------------
+
+// 申告された種類は信用せず、ファイル先頭のバイト列で判定する（SVG などは受け付けない）。
+function sniffImage(b) {
+  if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47
+    && b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a) return 'png';
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'jpg';
+  if (b.length >= 6) {
+    const head = b.toString('latin1', 0, 6);
+    if (head === 'GIF87a' || head === 'GIF89a') return 'gif';
+  }
+  if (b.length >= 12 && b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP') return 'webp';
+  return null;
+}
+
+function decodeImage(value) {
+  if (typeof value !== 'string') throw new HttpError(400, '画像データの形式が正しくありません');
+  const m = /^data:image\/[a-z0-9.+-]+;base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!m) throw new HttpError(400, '画像データの形式が正しくありません');
+  const buf = Buffer.from(m[1], 'base64');
+  if (buf.length === 0) throw new HttpError(400, '画像データが空です');
+  if (buf.length > LIMITS.imageBytes) throw new HttpError(413, `画像は ${LIMITS.imageBytes / MB}MB までです`);
+  const ext = sniffImage(buf);
+  if (!ext) throw new HttpError(400, '対応していない画像形式です（JPEG・PNG・GIF・WebP）');
+  return { buf, ext };
+}
+
+async function saveImage({ buf, ext }) {
+  const file = `${crypto.randomBytes(16).toString('hex')}.${ext}`;
+  await fsp.writeFile(path.join(IMAGE_DIR, file), buf, { flag: 'wx' });
+  return file;
+}
+
+async function removeFiles(files) {
+  await Promise.all(files
+    .filter((f) => typeof f === 'string' && IMAGE_NAME.test(f))
+    .map((f) => fsp.unlink(path.join(IMAGE_DIR, f)).catch(() => {})));
+}
+
+function imagesOf(post) {
+  return [post.image, ...post.replies.map((r) => r.image)].filter(Boolean);
+}
+
+// ---------------------------------------------------------------------------
+// データベース（JSON ファイル）
+// ---------------------------------------------------------------------------
+
+let db = { version: 1, posts: [] };
+
+function normalizePost(p) {
+  return {
+    id: String(p.id),
+    title: String(p.title || DEFAULT_TITLE),
+    name: String(p.name || DEFAULT_NAME),
+    text: String(p.text || ''),
+    image: typeof p.image === 'string' && IMAGE_NAME.test(p.image) ? p.image : null,
+    createdAt: String(p.createdAt || nowIso()),
+    bumpedAt: String(p.bumpedAt || p.createdAt || nowIso()),
+    del: p.del && typeof p.del.salt === 'string' && typeof p.del.hash === 'string' ? p.del : null,
+    replies: Array.isArray(p.replies) ? p.replies.filter((r) => r && typeof r.id === 'string').map((r) => ({
+      id: r.id,
+      name: String(r.name || DEFAULT_NAME),
+      text: String(r.text || ''),
+      image: typeof r.image === 'string' && IMAGE_NAME.test(r.image) ? r.image : null,
+      createdAt: String(r.createdAt || nowIso()),
+      del: r.del && typeof r.del.salt === 'string' && typeof r.del.hash === 'string' ? r.del : null,
+    })) : [],
+  };
+}
+
+async function loadDb() {
+  let raw;
+  try {
+    raw = await fsp.readFile(DB_FILE, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return;
+    throw err;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.posts)) throw new Error('posts がありません');
+    db = {
+      version: 1,
+      posts: parsed.posts.filter((p) => p && typeof p.id === 'string').map(normalizePost),
+    };
+  } catch (err) {
+    const backup = `${DB_FILE}.broken-${Date.now()}`;
+    await fsp.rename(DB_FILE, backup).catch(() => {});
+    console.warn(`[警告] posts.json を読み込めなかったため、空の状態で起動します。元のファイルは ${backup} に退避しました。(${err.message})`);
+  }
+}
+
+// 書き込み途中で落ちても壊れないよう、一時ファイルに書いてから置き換える。
+async function persist() {
+  const tmp = `${DB_FILE}.tmp`;
+  await fsp.writeFile(tmp, JSON.stringify(db));
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      await fsp.rename(tmp, DB_FILE);
+      return;
+    } catch (err) {
+      // Windows や OneDrive の同期中は一時的にロックされることがあるので少し待って再試行する
+      if (attempt >= 6 || !['EPERM', 'EBUSY', 'EACCES'].includes(err.code)) throw err;
+      await sleep(60 * (attempt + 1));
+    }
+  }
+}
+
+// 書き込みを 1 件ずつ順番に処理する
+let queue = Promise.resolve();
+function exclusive(fn) {
+  const run = queue.then(fn);
+  queue = run.catch(() => {});
+  return run;
+}
+
+function findPost(id) {
+  const post = db.posts.find((p) => p.id === id);
+  if (!post) throw new HttpError(404, '投稿が見つかりません（削除された可能性があります）');
+  return post;
+}
+
+// 上限を超えたら、最後に動きがあった時刻が古いものから消す
+function prune() {
+  if (db.posts.length <= LIMITS.posts) return [];
+  const keep = new Set([...db.posts].sort(byBumpDesc).slice(0, LIMITS.posts));
+  const removed = db.posts.filter((p) => !keep.has(p));
+  db.posts = db.posts.filter((p) => keep.has(p));
+  return removed;
+}
+
+function imageRef(file) {
+  return file ? { url: `images/${file}` } : null;
+}
+
+function publicReply(r) {
+  return {
+    id: r.id,
+    name: r.name,
+    text: r.text,
+    image: imageRef(r.image),
+    createdAt: r.createdAt,
+    deletable: Boolean(r.del),
+  };
+}
+
+function publicPost(p, withReplies) {
+  const out = {
+    id: p.id,
+    title: p.title,
+    name: p.name,
+    text: p.text,
+    image: imageRef(p.image),
+    createdAt: p.createdAt,
+    bumpedAt: p.bumpedAt,
+    replyCount: p.replies.length,
+    deletable: Boolean(p.del),
+  };
+  if (withReplies) out.replies = p.replies.map(publicReply);
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// 削除キー・連投対策・送信元チェック
+// ---------------------------------------------------------------------------
+
+async function makeDeleteKey(password) {
+  if (!password) return null;
+  const salt = crypto.randomBytes(16);
+  const hash = await scrypt(password, salt, 32);
+  return { salt: salt.toString('hex'), hash: hash.toString('hex') };
+}
+
+function safeEqualText(a, b) {
+  const ha = crypto.createHash('sha256').update(a).digest();
+  const hb = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+async function authorizeDelete(del, password) {
+  if (!password) throw new HttpError(400, '削除キーを入力してください');
+  if (ADMIN_KEY && safeEqualText(password, ADMIN_KEY)) return;
+  if (!del) throw new HttpError(403, 'この投稿には削除キーが設定されていないため、削除できません');
+  const hash = await scrypt(password, Buffer.from(del.salt, 'hex'), 32);
+  const expected = Buffer.from(del.hash, 'hex');
+  if (expected.length !== hash.length || !crypto.timingSafeEqual(hash, expected)) {
+    throw new HttpError(403, '削除キーが違います');
+  }
+}
+
+const hits = new Map();
+function checkRate(req, kind) {
+  const rule = RATE_LIMITS[kind];
+  const key = `${kind}:${req.socket.remoteAddress || 'unknown'}`;
+  const now = Date.now();
+  const recent = (hits.get(key) || []).filter((t) => now - t < rule.windowMs);
+  if (recent.length >= rule.max) {
+    hits.set(key, recent);
+    throw new HttpError(429, '操作が続いています。少し時間をおいてからもう一度お試しください');
+  }
+  recent.push(now);
+  hits.set(key, recent);
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, list] of hits) {
+    if (!list.some((t) => now - t < 60_000)) hits.delete(key);
+  }
+}, 60_000).unref();
+
+// 別サイトのページから勝手に投稿・削除させる攻撃を防ぐ
+function checkOrigin(req) {
+  const origin = req.headers.origin;
+  if (!origin) return;
+  let ok = false;
+  try {
+    ok = new URL(origin).host === req.headers.host;
+  } catch {
+    ok = false;
+  }
+  if (!ok) throw new HttpError(403, '別のサイトからの操作は受け付けていません');
+}
+
+// ---------------------------------------------------------------------------
+// API
+// ---------------------------------------------------------------------------
+
+function listPosts(res, url) {
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 1_000_000);
+  const limit = clampInt(url.searchParams.get('limit'), LIMITS.pageSize, 1, LIMITS.maxPageSize);
+  const q = (url.searchParams.get('q') || '').trim().slice(0, LIMITS.query);
+  const matched = q ? db.posts.filter((p) => matchesQuery(p, q)) : db.posts;
+  const sorted = [...matched].sort(byBumpDesc);
+  sendJson(res, 200, {
+    posts: sorted.slice(offset, offset + limit).map((p) => publicPost(p, false)),
+    total: sorted.length,
+    hasMore: offset + limit < sorted.length,
+  });
+}
+
+function getPost(res, postId) {
+  sendJson(res, 200, { post: publicPost(findPost(postId), true) });
+}
+
+async function createPost(req, res) {
+  checkRate(req, 'post');
+  const body = await readJson(req);
+  const title = cleanText(body.title, LIMITS.title, 'タイトル') || DEFAULT_TITLE;
+  const name = cleanText(body.name, LIMITS.name, '名前') || DEFAULT_NAME;
+  const text = cleanText(body.text, LIMITS.text, '本文', true);
+  const password = cleanPassword(body.password);
+  if (!body.image) throw new HttpError(400, '画像を選んでください');
+  const image = decodeImage(body.image);
+  const del = await makeDeleteKey(password);
+
+  const post = await exclusive(async () => {
+    const file = await saveImage(image);
+    const now = nowIso();
+    const created = { id: newId(), title, name, text, image: file, createdAt: now, bumpedAt: now, del, replies: [] };
+    db.posts.push(created);
+    const removed = prune();
+    try {
+      await persist();
+    } catch (err) {
+      db.posts = db.posts.filter((p) => p !== created).concat(removed);
+      await removeFiles([file]);
+      throw err;
+    }
+    await removeFiles(removed.flatMap(imagesOf));
+    return created;
+  });
+
+  sendJson(res, 201, { post: publicPost(post, true) });
+}
+
+async function createReply(req, res, postId) {
+  checkRate(req, 'post');
+  const body = await readJson(req);
+  const name = cleanText(body.name, LIMITS.name, '名前') || DEFAULT_NAME;
+  const text = cleanText(body.text, LIMITS.replyText, '本文', true);
+  const password = cleanPassword(body.password);
+  const image = body.image ? decodeImage(body.image) : null;
+  if (!text && !image) throw new HttpError(400, '本文か画像のどちらかを入力してください');
+  const del = await makeDeleteKey(password);
+
+  const post = await exclusive(async () => {
+    const target = findPost(postId);
+    if (target.replies.length >= LIMITS.repliesPerPost) {
+      throw new HttpError(409, `この投稿への返信は上限（${LIMITS.repliesPerPost}件）に達しました`);
+    }
+    const file = image ? await saveImage(image) : null;
+    const now = nowIso();
+    const reply = { id: newId(), name, text, image: file, createdAt: now, del };
+    const previousBump = target.bumpedAt;
+    target.replies.push(reply);
+    target.bumpedAt = now;
+    try {
+      await persist();
+    } catch (err) {
+      target.replies = target.replies.filter((r) => r !== reply);
+      target.bumpedAt = previousBump;
+      if (file) await removeFiles([file]);
+      throw err;
+    }
+    return target;
+  });
+
+  sendJson(res, 201, { post: publicPost(post, true) });
+}
+
+async function deletePost(req, res, postId) {
+  checkRate(req, 'delete');
+  const body = await readJson(req);
+  const password = cleanPassword(body.password);
+
+  await exclusive(async () => {
+    const post = findPost(postId);
+    await authorizeDelete(post.del, password);
+    const index = db.posts.indexOf(post);
+    db.posts.splice(index, 1);
+    try {
+      await persist();
+    } catch (err) {
+      db.posts.splice(index, 0, post);
+      throw err;
+    }
+    await removeFiles(imagesOf(post));
+  });
+
+  sendJson(res, 200, { ok: true });
+}
+
+async function deleteReply(req, res, postId, replyId) {
+  checkRate(req, 'delete');
+  const body = await readJson(req);
+  const password = cleanPassword(body.password);
+
+  await exclusive(async () => {
+    const post = findPost(postId);
+    const index = post.replies.findIndex((r) => r.id === replyId);
+    if (index < 0) throw new HttpError(404, '返信が見つかりません（削除された可能性があります）');
+    const reply = post.replies[index];
+    await authorizeDelete(reply.del, password);
+    post.replies.splice(index, 1);
+    try {
+      await persist();
+    } catch (err) {
+      post.replies.splice(index, 0, reply);
+      throw err;
+    }
+    if (reply.image) await removeFiles([reply.image]);
+  });
+
+  sendJson(res, 200, { ok: true });
+}
+
+async function handleApi(req, res, url) {
+  const { pathname } = url;
+  const method = req.method;
+  const isRead = method === 'GET' || method === 'HEAD';
+
+  if (pathname === '/api/health') {
+    if (!isRead) throw new HttpError(405, 'この操作はできません');
+    sendJson(res, 200, { ok: true, app: 'image-board' });
+    return;
+  }
+
+  const m = API_ROUTE.exec(pathname);
+  if (!m) throw new HttpError(404, 'API が見つかりません');
+  const postId = m[1];
+  const isReplies = m[2] !== undefined;
+  const replyId = m[3];
+
+  if (!isRead) checkOrigin(req);
+
+  if (!postId) {
+    if (isRead) return listPosts(res, url);
+    if (method === 'POST') return createPost(req, res);
+  } else if (!isReplies) {
+    if (isRead) return getPost(res, postId);
+    if (method === 'DELETE') return deletePost(req, res, postId);
+  } else if (!replyId) {
+    if (method === 'POST') return createReply(req, res, postId);
+  } else if (method === 'DELETE') {
+    return deleteReply(req, res, postId, replyId);
+  }
+  throw new HttpError(405, 'この操作はできません');
+}
+
+// ---------------------------------------------------------------------------
+// 画面と画像の配信
+// ---------------------------------------------------------------------------
+
+async function serveStatic(res, [file, type]) {
+  const body = await fsp.readFile(path.join(PUBLIC_DIR, file));
+  send(res, 200, {
+    'Content-Type': type,
+    'Content-Length': body.length,
+    'Cache-Control': 'no-cache',
+    'Content-Security-Policy': PAGE_CSP,
+  }, body);
+}
+
+async function serveImage(req, res, name) {
+  const m = IMAGE_NAME.exec(name);
+  if (!m) throw new HttpError(404, '画像が見つかりません');
+  const file = path.join(IMAGE_DIR, name);
+  let stat;
+  try {
+    stat = await fsp.stat(file);
+  } catch {
+    throw new HttpError(404, '画像が見つかりません');
+  }
+  res.writeHead(200, {
+    ...BASE_HEADERS,
+    'Content-Type': IMAGE_MIME[m[1]],
+    'Content-Length': stat.size,
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'Content-Security-Policy': "default-src 'none'; sandbox",
+  });
+  if (req.method === 'HEAD') {
+    res.end();
+    return;
+  }
+  await pipeline(fs.createReadStream(file), res);
+}
+
+async function handle(req, res) {
+  let url;
+  try {
+    url = new URL(req.url, 'http://localhost');
+  } catch {
+    throw new HttpError(400, 'URL が正しくありません');
+  }
+  const { pathname } = url;
+
+  if (pathname.startsWith('/api/')) return handleApi(req, res, url);
+  if (req.method !== 'GET' && req.method !== 'HEAD') throw new HttpError(405, 'この操作はできません');
+  if (pathname.startsWith('/images/')) return serveImage(req, res, pathname.slice('/images/'.length));
+  const entry = STATIC_FILES[pathname];
+  if (entry) return serveStatic(res, entry);
+  throw new HttpError(404, 'ページが見つかりません');
+}
+
+function handleError(err, res) {
+  const known = err instanceof HttpError;
+  if (!known) console.error('[エラー]', err);
+  if (res.headersSent) {
+    res.destroy();
+    return;
+  }
+  sendJson(
+    res,
+    known ? err.status : 500,
+    { error: known ? err.message : 'サーバー内部でエラーが発生しました' },
+    known && err.closeConnection ? { Connection: 'close' } : {},
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 起動
+// ---------------------------------------------------------------------------
+
+async function main() {
+  await fsp.mkdir(IMAGE_DIR, { recursive: true });
+  await loadDb();
+
+  const server = http.createServer((req, res) => {
+    handle(req, res).catch((err) => handleError(err, res));
+  });
+  server.requestTimeout = 60_000;
+  server.headersTimeout = 20_000;
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`ポート ${PORT} はすでに使われています。別のポートを指定してください（例: PORT=3001 で起動）。`);
+    } else {
+      console.error('[起動エラー]', err);
+    }
+    process.exit(1);
+  });
+
+  server.listen(PORT, HOST, () => {
+    const shownHost = HOST === '0.0.0.0' || HOST === '::' ? 'localhost' : HOST;
+    console.log('画像掲示板を起動しました');
+    console.log(`  ブラウザで開く: http://${shownHost}:${PORT}/`);
+    console.log(`  データの保存先: ${DATA_DIR}`);
+    console.log(`  投稿数: ${db.posts.length}`);
+    if (ADMIN_KEY) console.log('  管理者キー: 設定済み（どの投稿も削除できます）');
+    console.log('  終了するには Ctrl + C を押してください');
+  });
+
+  const shutdown = () => {
+    console.log('\n終了しています…');
+    server.close();
+    queue.then(() => process.exit(0));
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}
+
+main().catch((err) => {
+  console.error('[起動エラー]', err);
+  process.exit(1);
+});

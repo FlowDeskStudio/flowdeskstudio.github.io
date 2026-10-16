@@ -1,0 +1,152 @@
+<?php
+/**
+ * お問い合わせフォーム（1. 入力）
+ */
+declare(strict_types=1);
+require __DIR__ . '/lib.php';
+bootstrap();
+
+$errors = [];
+$input = default_input();
+if (isset($_SESSION['contact_input']) && is_array($_SESSION['contact_input'])) {
+    // 確認画面から「修正する」で戻ってきたとき
+    $input = array_merge($input, $_SESSION['contact_input']);
+}
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    $input = collect_input();
+
+    if (!csrf_valid()) {
+        $errors['_form'] = 'ページの有効期限が切れました。お手数ですが、内容をご確認のうえ、もう一度「確認画面へ進む」を押してください。';
+    } elseif (honeypot_filled()) {
+        // ボットと判断。送信はせず、完了したように見せる
+        unset($_SESSION['contact_input']);
+        $_SESSION['contact_sent'] = true;
+        redirect('thanks.php');
+    } elseif (submitted_too_fast()) {
+        $errors['_form'] = '送信が早すぎます。内容をご確認のうえ、数秒おいてからもう一度お試しください。';
+    } else {
+        $errors = validate_input($input);
+        if (!$errors) {
+            $_SESSION['contact_input'] = $input;
+            redirect('confirm.php');
+        }
+    }
+}
+
+if (empty($_SESSION['form_started_at'])) {
+    $_SESSION['form_started_at'] = time();
+}
+
+$categories = (array) cfg('categories', []);
+$maxMessage = (int) cfg('max_message_length', 3000);
+$privacyUrl = (string) cfg('privacy_policy_url', '');
+$fieldErrorCount = count(array_diff_key($errors, ['_form' => true]));
+
+render_header('お問い合わせ', 1);
+?>
+  <section class="card">
+    <?php if (!config_is_ready()): ?>
+    <div class="notice notice-warn" role="note">
+      <strong>管理者の方へ:</strong> config.php の送信先（to）と送信元（from_address）が未設定です。設定するまでフォームは送信できません。
+    </div>
+    <?php endif; ?>
+
+    <?php if ($errors): ?>
+    <div class="notice notice-error" role="alert">
+      <?php if (isset($errors['_form'])): ?>
+      <p><?= h($errors['_form']) ?></p>
+      <?php endif; ?>
+      <?php if ($fieldErrorCount > 0): ?>
+      <p>入力内容に<?= $fieldErrorCount ?>件の誤りがあります。赤字の項目をご確認ください。</p>
+      <?php endif; ?>
+    </div>
+    <?php else: ?>
+    <p class="lead">下記の項目をご入力のうえ、「確認画面へ進む」を押してください。内容を確認のうえ、担当者からメールでご連絡いたします。</p>
+    <?php endif; ?>
+
+    <form class="form" method="post" action="index.php">
+      <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+
+      <div class="hp" aria-hidden="true">
+        <label for="hp_check">この欄は空のままにしてください</label>
+        <input type="text" id="hp_check" name="hp_check" value="" tabindex="-1" autocomplete="off">
+      </div>
+
+      <div class="field<?= isset($errors['name']) ? ' has-error' : '' ?>">
+        <label for="name">お名前 <span class="badge badge-req">必須</span></label>
+        <input type="text" id="name" name="name" value="<?= h($input['name']) ?>"
+               maxlength="50" required autocomplete="name" placeholder="例）山田 太郎"<?= field_attrs($errors, 'name') ?>>
+        <?= field_error($errors, 'name') ?>
+      </div>
+
+      <div class="field<?= isset($errors['company']) ? ' has-error' : '' ?>">
+        <label for="company">会社名・団体名 <span class="badge">任意</span></label>
+        <input type="text" id="company" name="company" value="<?= h($input['company']) ?>"
+               maxlength="100" autocomplete="organization" placeholder="例）株式会社サンプル"<?= field_attrs($errors, 'company') ?>>
+        <?= field_error($errors, 'company') ?>
+      </div>
+
+      <div class="field<?= isset($errors['email']) ? ' has-error' : '' ?>">
+        <label for="email">メールアドレス <span class="badge badge-req">必須</span></label>
+        <input type="email" id="email" name="email" value="<?= h($input['email']) ?>"
+               maxlength="254" required autocomplete="email" inputmode="email" placeholder="例）taro@example.jp"<?= field_attrs($errors, 'email') ?>>
+        <?= field_error($errors, 'email') ?>
+      </div>
+
+      <div class="field<?= isset($errors['email_confirm']) ? ' has-error' : '' ?>">
+        <label for="email_confirm">メールアドレス（確認用） <span class="badge badge-req">必須</span></label>
+        <input type="email" id="email_confirm" name="email_confirm" value="<?= h($input['email_confirm']) ?>"
+               maxlength="254" required autocomplete="email" inputmode="email"<?= field_attrs($errors, 'email_confirm') ?>>
+        <?= field_error($errors, 'email_confirm') ?>
+      </div>
+
+      <div class="field<?= isset($errors['tel']) ? ' has-error' : '' ?>">
+        <label for="tel">電話番号 <span class="badge">任意</span></label>
+        <input type="tel" id="tel" name="tel" value="<?= h($input['tel']) ?>"
+               maxlength="20" autocomplete="tel" inputmode="tel" placeholder="例）03-1234-5678"<?= field_attrs($errors, 'tel') ?>>
+        <?= field_error($errors, 'tel') ?>
+      </div>
+
+      <div class="field<?= isset($errors['category']) ? ' has-error' : '' ?>">
+        <label for="category">お問い合わせ種別 <span class="badge badge-req">必須</span></label>
+        <div class="select-wrap">
+          <select id="category" name="category" required<?= field_attrs($errors, 'category') ?>>
+            <option value="">選択してください</option>
+            <?php foreach ($categories as $cat): ?>
+            <option value="<?= h((string) $cat) ?>"<?= $input['category'] === (string) $cat ? ' selected' : '' ?>><?= h((string) $cat) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <?= field_error($errors, 'category') ?>
+      </div>
+
+      <div class="field<?= isset($errors['message']) ? ' has-error' : '' ?>">
+        <label for="message">お問い合わせ内容 <span class="badge badge-req">必須</span></label>
+        <textarea id="message" name="message" rows="8" maxlength="<?= $maxMessage ?>" required
+                  data-counter="message-counter"<?= field_attrs($errors, 'message') ?>><?= h($input['message']) ?></textarea>
+        <p class="counter" id="message-counter" aria-live="polite" data-max="<?= $maxMessage ?>"><?= number_format($maxMessage) ?>文字まで入力できます</p>
+        <?= field_error($errors, 'message') ?>
+      </div>
+
+      <div class="field field-agree<?= isset($errors['agree']) ? ' has-error' : '' ?>">
+        <p class="privacy-note">
+          ご入力いただいた個人情報は、お問い合わせへの回答とご連絡のためにのみ利用し、ご本人の同意なく第三者に提供することはありません。
+          <?php if ($privacyUrl !== ''): ?>
+          詳しくは<a href="<?= h($privacyUrl) ?>" target="_blank" rel="noopener">プライバシーポリシー</a>をご覧ください。
+          <?php endif; ?>
+        </p>
+        <label class="check">
+          <input type="checkbox" name="agree" value="1" required<?= $input['agree'] === '1' ? ' checked' : '' ?><?= field_attrs($errors, 'agree') ?>>
+          <span>個人情報の取り扱いに同意する</span>
+        </label>
+        <?= field_error($errors, 'agree') ?>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">確認画面へ進む</button>
+      </div>
+    </form>
+  </section>
+<?php
+render_footer();

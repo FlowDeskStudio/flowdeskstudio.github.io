@@ -1,0 +1,2964 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ADYF+NECpLolt2+8sbqtU5vO6D9mi3rEshc7Nr8wmwc='; script-src-attr 'none'; style-src 'sha256-btJgmfhfAJMH83Ne4917j6brmoJMRPAi/UXqvNejeJA='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="画像を投稿して、返信で会話できる掲示板です。">
+  <title>画像掲示板</title>
+  <style>
+/* 画像掲示板 スタイル */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #f3efe7;
+  --dot: rgb(60 45 30 / 0.07);
+  --surface: #fffdf8;
+  --surface-2: #f1ece2;
+  --surface-3: #e8e1d3;
+  --ink: #221f1a;
+  --ink-2: #5a544a;
+  --ink-3: #847d71;
+  --line: #e1d9ca;
+  --line-strong: #cbc1ae;
+  --accent: #c6412a;
+  --accent-hover: #a93521;
+  --accent-ink: #ffffff;
+  --accent-soft: #f7e2da;
+  --danger: #b42318;
+  --danger-strong: #b42318;
+  --danger-soft: #fde8e6;
+  --focus: #2563eb;
+  --header-bg: rgb(243 239 231 / 0.86);
+  --figure-bg: #14110e;
+
+  --shadow-sm: 0 1px 2px rgb(50 35 20 / 0.06);
+  --shadow-md: 0 2px 4px rgb(50 35 20 / 0.05), 0 16px 32px -18px rgb(50 35 20 / 0.32);
+  --shadow-lg: 0 28px 70px -24px rgb(20 12 4 / 0.5);
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --font: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151311;
+    --dot: rgb(255 240 220 / 0.045);
+    --surface: #1f1c19;
+    --surface-2: #29251f;
+    --surface-3: #342f28;
+    --ink: #f1ece4;
+    --ink-2: #c4bcb0;
+    --ink-3: #91897d;
+    --line: #38322b;
+    --line-strong: #4e463d;
+    --accent: #d24d36;
+    --accent-hover: #e0614a;
+    --accent-ink: #ffffff;
+    --accent-soft: rgb(210 77 54 / 0.18);
+    --danger: #ff9b8f;
+    --danger-strong: #c0392b;
+    --danger-soft: rgb(255 155 143 / 0.12);
+    --focus: #7aa2ff;
+    --header-bg: rgb(21 19 17 / 0.84);
+    --figure-bg: #0b0a08;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 2px 4px rgb(0 0 0 / 0.25), 0 16px 32px -18px rgb(0 0 0 / 0.7);
+  }
+}
+
+/* ---------- 基本 ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.4px);
+  background-size: 20px 20px;
+}
+
+main {
+  flex: 1;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 50;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.wrap {
+  width: min(1240px, 100% - 32px);
+  margin-inline: auto;
+}
+
+/* ---------- ヘッダー ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--header-bg);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-block: 12px;
+}
+
+.brand-heading {
+  margin: 0;
+  font-size: inherit;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1;
+  transform: rotate(-5deg);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.25), var(--shadow-sm);
+  transition: transform 0.2s ease;
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(0deg);
+}
+
+.brand-words {
+  display: block;
+}
+
+.brand-name {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.brand-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+  line-height: 1.3;
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+  margin-left: auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.search input:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent);
+}
+
+.compose-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 720px) {
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+
+  .compose-btn {
+    margin-left: auto;
+  }
+}
+
+/* ---------- ボタン ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn-danger {
+  background: var(--danger-strong);
+  color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-sm {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.btn-text-danger {
+  color: var(--danger);
+}
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--ink);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- 一覧 ---------- */
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 28px;
+  padding: 22px 0 14px;
+}
+
+.result-summary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.mode-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.mode-badge strong {
+  color: var(--accent);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 540px) {
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:not(.skeleton):hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.card.is-new {
+  animation: pop 0.5s ease;
+}
+
+.card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-link:focus-visible {
+  outline-offset: -3px;
+  border-radius: var(--radius);
+}
+
+.card-media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--surface-3);
+  color: var(--ink-3);
+}
+
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.card-media svg {
+  width: 40px;
+  height: 40px;
+}
+
+.card:hover .card-media img {
+  transform: scale(1.03);
+}
+
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 14px;
+  min-width: 0;
+}
+
+.card-title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-text {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: auto 0 0;
+  padding-top: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.card-name {
+  max-width: 10em;
+  overflow: hidden;
+  color: var(--ink-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-replies {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.skeleton .card-media,
+.skeleton-line {
+  background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-line {
+  height: 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+}
+
+.skeleton-line.short {
+  width: 55%;
+}
+
+.empty,
+.error-box {
+  padding: 64px 16px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.empty-art {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 14px;
+  color: var(--accent);
+}
+
+.empty h2,
+.error-box h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.empty p,
+.error-box p {
+  margin: 0 0 20px;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 8px;
+}
+
+#sentinel {
+  height: 1px;
+}
+
+.site-footer {
+  margin-top: 48px;
+  padding: 22px 0 32px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ---------- ダイアログ ---------- */
+
+dialog {
+  color: var(--ink);
+}
+
+.sheet {
+  width: min(580px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.sheet::backdrop {
+  background: rgb(18 14 10 / 0.58);
+}
+
+.sheet[open] {
+  animation: rise 0.22s ease;
+}
+
+.sheet-small {
+  width: min(420px, calc(100vw - 32px));
+}
+
+.sheet-body {
+  padding: 22px 24px 24px;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet-head h2,
+.sheet-title {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+.dialog-text {
+  margin: 0;
+  color: var(--ink-2);
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .sheet:not(.sheet-small) {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .sheet-body {
+    padding: 18px 16px 28px;
+  }
+}
+
+/* ---------- フォーム ---------- */
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  align-content: start;
+}
+
+.field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.optional {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.counter {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter.is-near {
+  color: var(--accent);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent);
+}
+
+textarea.input {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.65;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.field-help {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ローカルモードでは削除キーを使わない */
+.is-local .key-field {
+  display: none;
+}
+
+/* ---------- 画像選択 ---------- */
+
+.picker {
+  display: grid;
+  gap: 8px;
+}
+
+.picker-drop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 190px;
+  padding: 16px;
+  overflow: hidden;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.picker-drop:hover,
+.picker-drop.is-over {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.picker-input:focus-visible + .picker-drop {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.picker-empty {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.picker-empty svg {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.picker-empty strong {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.picker-hint {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.picker-preview {
+  width: auto;
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.picker.has-image .picker-empty {
+  display: none;
+}
+
+.picker.has-image .picker-drop {
+  padding: 10px;
+  border-style: solid;
+  background: var(--surface-3);
+}
+
+.picker-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.picker-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.picker.compact .picker-drop {
+  min-height: 72px;
+  padding: 10px 14px;
+}
+
+.picker.compact .picker-empty {
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.picker.compact .picker-empty svg {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+}
+
+.picker.compact .picker-empty strong {
+  font-size: 14px;
+}
+
+.picker.compact .picker-preview {
+  max-height: 160px;
+}
+
+@media (max-width: 420px) {
+  .picker.compact .picker-hint {
+    display: none;
+  }
+}
+
+/* ---------- 投稿の詳細 ---------- */
+
+.thread-dialog {
+  position: relative;
+  width: min(1200px, calc(100vw - 32px));
+  overflow: hidden;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  box-shadow: var(--shadow-sm);
+}
+
+.thread-content {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.thread-figure {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  background: var(--figure-bg);
+}
+
+.thread-zoom {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.thread-zoom img {
+  width: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.thread-side {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 22px 24px 28px;
+  min-width: 0;
+}
+
+.thread-title {
+  margin: 0;
+  padding-right: 44px;
+  font-size: 21px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.thread-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.thread-name {
+  font-weight: 700;
+  color: var(--ink-2);
+  word-break: break-word;
+}
+
+.thread-text {
+  margin: 0;
+  font-size: 15px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.thread-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.thread-loading,
+.thread-error {
+  padding: 96px 24px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+@media (max-width: 600px) {
+  .thread-content {
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+
+  .thread-side {
+    padding: 20px 16px 32px;
+  }
+}
+
+.thread-error p {
+  margin: 0 0 16px;
+}
+
+@media (min-width: 900px) {
+  .thread-content {
+    height: min(880px, calc(100vh - 32px));
+    height: min(880px, calc(100dvh - 32px));
+    overflow: hidden;
+  }
+
+  .thread-loading,
+  .thread-error {
+    height: 100%;
+    display: grid;
+    place-content: center;
+  }
+
+  .thread {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(340px, 1fr);
+    height: 100%;
+  }
+
+  .thread.no-image {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .thread-figure {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .thread-zoom {
+    height: 100%;
+  }
+
+  .thread-zoom img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+
+  .thread-side {
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding-top: 26px;
+  }
+}
+
+/* 返信 */
+
+.replies {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.replies-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.reply-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reply {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.reply.is-new {
+  animation: pop 0.4s ease;
+}
+
+.reply-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.reply-no {
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.reply-name {
+  max-width: 12em;
+  overflow: hidden;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-delete {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.reply-text {
+  margin: 4px 0 0;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.reply-thumb {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: zoom-in;
+}
+
+.reply-thumb img {
+  width: auto;
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 8px;
+}
+
+.reply-empty {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.reply-form {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.reply-form-title {
+  margin: 0;
+  font-size: 14px;
+}
+
+.reply-form textarea.input {
+  min-height: 76px;
+}
+
+/* ---------- 拡大表示 ---------- */
+
+.viewer {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.viewer::backdrop {
+  background: rgb(8 6 4 / 0.93);
+}
+
+.viewer-inner {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 60px 16px 16px;
+  cursor: zoom-out;
+}
+
+.viewer-inner img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.viewer-bar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+}
+
+.viewer .icon-btn {
+  background: rgb(255 255 255 / 0.14);
+  color: #ffffff;
+}
+
+.viewer .icon-btn:hover {
+  background: rgb(255 255 255 / 0.26);
+}
+
+/* ---------- お知らせ ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 100;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 16px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- 動き ---------- */
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+  
+</head>
+<body>
+  <a class="skip-link" href="#board-heading">投稿一覧へ移動</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <h1 class="brand-heading">
+        <a id="brand" class="brand" href="index.html">
+          <span class="brand-mark" aria-hidden="true">画</span>
+          <span class="brand-words">
+            <span class="brand-name">画像掲示板</span>
+            <span class="brand-sub">写真やイラストを気軽に貼れる場所</span>
+          </span>
+        </a>
+      </h1>
+
+      <form id="search-form" class="search" role="search">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <label for="search-input" class="visually-hidden">投稿を検索</label>
+        <input id="search-input" type="search" placeholder="タイトル・本文・名前で検索" maxlength="100" autocomplete="off" enterkeyhint="search">
+      </form>
+
+      <button id="open-compose" class="btn btn-primary compose-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span>投稿する</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h2 id="board-heading" class="visually-hidden" tabindex="-1">投稿一覧</h2>
+
+    <div class="status-row">
+      <p id="result-summary" class="result-summary" aria-live="polite"></p>
+      <p id="mode-badge" class="mode-badge" hidden></p>
+    </div>
+
+    <div id="board" class="board" aria-busy="true"></div>
+
+    <section id="empty" class="empty" hidden>
+      <svg class="empty-art" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="14" y="20" width="68" height="56" rx="8"/>
+        <path d="M14 64l18-18 14 14 10-10 26 22"/>
+        <circle cx="62" cy="38" r="6"/>
+      </svg>
+      <h2 id="empty-title">まだ投稿がありません</h2>
+      <p id="empty-text">最初の1枚を貼ってみましょう。</p>
+      <button id="empty-compose" class="btn btn-primary" type="button">画像を投稿する</button>
+      <button id="empty-clear" class="btn btn-ghost" type="button" hidden>検索をやめる</button>
+    </section>
+
+    <section id="error-box" class="error-box" role="alert" hidden>
+      <h2>読み込めませんでした</h2>
+      <p id="error-text"></p>
+      <button id="retry" class="btn btn-ghost" type="button">もう一度読み込む</button>
+    </section>
+
+    <div class="more">
+      <button id="load-more" class="btn btn-ghost" type="button" hidden>もっと見る</button>
+    </div>
+    <div id="sentinel" aria-hidden="true"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>投稿した内容は、この掲示板を見る人すべてに公開されます。個人情報や、他の人の権利を侵害する画像は投稿しないでください。</p>
+    </div>
+  </footer>
+
+  <!-- 新規投稿 -->
+  <dialog id="compose-dialog" class="sheet" aria-labelledby="compose-heading">
+    <form id="compose-form" class="sheet-body form-grid" novalidate>
+      <div class="sheet-head">
+        <h2 id="compose-heading">新しく投稿する</h2>
+        <button type="button" class="icon-btn" data-close aria-label="閉じる">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div id="compose-picker"></div>
+      <p class="field-help">JPEG・PNG・GIF・WebP に対応しています（5MB まで）。大きな画像は自動で縮小し、撮影場所などの情報（メタデータ）は取り除いてから送ります。GIF はアニメーションを保つため、そのまま送ります。</p>
+
+      <div class="field">
+        <div class="field-label">
+          <label for="compose-title">タイトル <span class="optional">任意</span></label>
+        </div>
+        <input id="compose-title" class="input" type="text" maxlength="60" placeholder="無題" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <label for="compose-text">本文 <span class="optional">任意</span></label>
+          <span id="compose-text-count" class="counter"></span>
+        </div>
+        <textarea id="compose-text" class="input" rows="4" maxlength="2000" placeholder="画像についてひとこと"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">
+            <label for="compose-name">名前 <span class="optional">任意</span></label>
+          </div>
+          <input id="compose-name" class="input" type="text" maxlength="30" placeholder="名無しさん" autocomplete="nickname">
+        </div>
+        <div class="field key-field">
+          <div class="field-label">
+            <label for="compose-key">削除キー</label>
+          </div>
+          <input id="compose-key" class="input" type="text" maxlength="64" autocomplete="off" spellcheck="false">
+          <p class="field-help">あとで自分の投稿を消すときに使います。空欄だと削除できません。</p>
+        </div>
+      </div>
+
+      <p id="compose-error" class="form-error" role="alert" hidden></p>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" data-close>キャンセル</button>
+        <button id="compose-submit" type="submit" class="btn btn-primary">投稿する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 投稿の詳細と返信 -->
+  <dialog id="thread-dialog" class="sheet thread-dialog">
+    <button type="button" class="icon-btn dialog-close" data-close aria-label="閉じる">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div id="thread-content" class="thread-content"></div>
+  </dialog>
+
+  <!-- 削除の確認 -->
+  <dialog id="delete-dialog" class="sheet sheet-small" aria-labelledby="delete-heading">
+    <form id="delete-form" class="sheet-body form-grid" novalidate>
+      <h2 id="delete-heading" class="sheet-title">削除の確認</h2>
+      <p id="delete-message" class="dialog-text"></p>
+      <div id="delete-key-field" class="field">
+        <div class="field-label">
+          <label for="delete-key">削除キー</label>
+        </div>
+        <input id="delete-key" class="input" type="text" maxlength="64" autocomplete="off" spellcheck="false">
+        <p class="field-help">投稿したときに設定した削除キーを入力してください。</p>
+      </div>
+      <p id="delete-error" class="form-error" role="alert" hidden></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" data-close>やめる</button>
+        <button id="delete-submit" type="submit" class="btn btn-danger">削除する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 画像の拡大表示 -->
+  <dialog id="viewer-dialog" class="viewer" aria-label="画像の拡大表示">
+    <div class="viewer-bar">
+      <a id="viewer-link" class="icon-btn" href="#" target="_blank" rel="noopener noreferrer" aria-label="元の画像を新しいタブで開く" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+      </a>
+      <button type="button" class="icon-btn" data-close aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="viewer-inner" class="viewer-inner">
+      <img id="viewer-img" alt="">
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+/*
+ * 画像掲示板 クライアント
+ *
+ * server.js が動いていればサーバーに保存し（みんなで共有）、
+ * このファイルを直接開いた場合などはブラウザ内（IndexedDB）に保存します。
+ */
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // 設定
+  // ---------------------------------------------------------------------------
+
+  const MB = 1024 * 1024;
+  const LIMITS = {
+    title: 60,
+    name: 30,
+    text: 2000,
+    replyText: 1000,
+    password: 64,
+    query: 100,
+    imageBytes: 5 * MB, // 送信する画像の上限（サーバーと同じ）
+    sourceBytes: 40 * MB, // 縮小前に受け付ける元画像の上限
+    maxDim: 2048, // 長い辺をこのピクセル数までに縮小する
+    repliesPerPost: 300,
+  };
+  const PAGE_SIZE = 24;
+  const ACCEPT = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const ID_RE = /^[a-f0-9]{16}$/;
+  const HASH_RE = /^#post\/([a-f0-9]{16})$/;
+  const DEFAULT_TITLE = '無題';
+  const DEFAULT_NAME = '名無しさん';
+  const PREFS_KEY = 'image-board:prefs';
+
+  // ---------------------------------------------------------------------------
+  // 小さな道具
+  // ---------------------------------------------------------------------------
+
+  const byId = (id) => document.getElementById(id);
+
+  // 要素を作る。文字列は必ずテキストとして入れるので HTML として解釈されない。
+  function el(tag, props, ...children) {
+    const node = document.createElement(tag);
+    if (props) {
+      for (const key of Object.keys(props)) {
+        const value = props[key];
+        if (value == null || value === false) continue;
+        if (key === 'className') node.className = value;
+        else if (key === 'dataset') Object.assign(node.dataset, value);
+        else if (key.startsWith('on') && typeof value === 'function') node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value === true ? '' : String(value));
+      }
+    }
+    for (const child of children.flat(Infinity)) {
+      if (child == null || child === false) continue;
+      node.append(child);
+    }
+    return node;
+  }
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function icon(paths) {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    for (const d of paths) {
+      const p = document.createElementNS(SVG_NS, 'path');
+      p.setAttribute('d', d);
+      svg.append(p);
+    }
+    return svg;
+  }
+  const ICON_IMAGE = ['M4 5h16v14H4z', 'M4 16l5-5 4 4 3-3 4 4', 'M15.5 8.2a1.3 1.3 0 1 0 0 2.6a1.3 1.3 0 1 0 0-2.6'];
+
+  function randomHex(bytes) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function randomKey(length = 8) {
+    const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+    const arr = new Uint8Array(length);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (b) => chars[b % chars.length]).join('');
+  }
+
+  const fmtDay = new Intl.DateTimeFormat('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+  const fmtFull = new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+
+  function formatFull(iso) {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? '' : fmtFull.format(d);
+  }
+
+  function relTime(iso) {
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return '';
+    const sec = (Date.now() - t) / 1000;
+    if (sec < 60) return 'たった今';
+    if (sec < 3600) return `${Math.floor(sec / 60)}分前`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)}時間前`;
+    if (sec < 86400 * 7) return `${Math.floor(sec / 86400)}日前`;
+    return fmtDay.format(new Date(t));
+  }
+
+  function formatBytes(bytes) {
+    if (bytes < MB) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+    return `${(bytes / MB).toFixed(1)}MB`;
+  }
+
+  function showError(node, message) {
+    node.textContent = message;
+    node.hidden = false;
+  }
+
+  function hideError(node) {
+    node.hidden = true;
+    node.textContent = '';
+  }
+
+  function setBusy(button, busy, label) {
+    if (busy) {
+      button.dataset.label = button.textContent;
+      button.textContent = label;
+      button.disabled = true;
+    } else {
+      if (button.dataset.label) button.textContent = button.dataset.label;
+      delete button.dataset.label;
+      button.disabled = false;
+    }
+  }
+
+  function bindCounter(input, output, max) {
+    const update = () => {
+      const n = input.value.length;
+      output.textContent = `${n} / ${max}`;
+      output.classList.toggle('is-near', n > max * 0.9);
+    };
+    input.addEventListener('input', update);
+    update();
+    return update;
+  }
+
+  function hasFiles(event) {
+    const dt = event.dataTransfer;
+    return Boolean(dt && Array.from(dt.types || []).includes('Files'));
+  }
+
+  function isModifiedClick(e) {
+    return e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+  }
+
+  // 本文などを整える（ローカル保存用。サーバーでも同じ処理をしています）
+  function cleanLocal(value, max, multiline) {
+    let s = String(value || '').replace(/\r\n?/g, '\n');
+    s = multiline
+      ? s.replace(/\t/g, ' ').replace(/[\u0000-\u0009\u000B-\u001F\u007F‪-‮⁦-⁩]/g, '').replace(/\n{4,}/g, '\n\n\n')
+      : s.replace(/[\u0000-\u001F\u007F‪-‮⁦-⁩]/g, ' ');
+    return Array.from(s.trim()).slice(0, max).join('').trim();
+  }
+
+  function matchesQuery(post, query) {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return true;
+    const haystack = [
+      post.title, post.name, post.text,
+      ...(post.replies || []).map((r) => `${r.name}\n${r.text}`),
+    ].join('\n').toLowerCase();
+    return terms.every((t) => haystack.includes(t));
+  }
+
+  function byBumpDesc(a, b) {
+    return (b.bumpedAt || '').localeCompare(a.bumpedAt || '') || (b.createdAt || '').localeCompare(a.createdAt || '');
+  }
+
+  // ---------------------------------------------------------------------------
+  // 設定の記憶（名前と削除キー）
+  // ---------------------------------------------------------------------------
+
+  function loadPrefs() {
+    try {
+      const value = JSON.parse(localStorage.getItem(PREFS_KEY));
+      return value && typeof value === 'object' ? value : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  let prefs = loadPrefs();
+
+  function savePrefs(patch) {
+    prefs = { ...prefs, ...patch };
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch (_) {
+      /* 保存できない環境では記憶しない */
+    }
+  }
+
+  if (!prefs.deleteKey) savePrefs({ deleteKey: randomKey() });
+
+  // ---------------------------------------------------------------------------
+  // 画像の下ごしらえ
+  //   - 長い辺を 2048px までに縮小
+  //   - 描き直すことで撮影場所などのメタデータを取り除く
+  //   - 5MB を超えるときは画質や大きさを下げて収める
+  //   - GIF はアニメーションを保つため、そのまま使う
+  // ---------------------------------------------------------------------------
+
+  function loadImage(blob) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => resolve({ img, release: () => URL.revokeObjectURL(url) });
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('画像を読み込めませんでした。ファイルが壊れているか、対応していない形式です'));
+      };
+      img.src = url;
+    });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve) => {
+      try {
+        canvas.toBlob((blob) => resolve(blob), type, quality);
+      } catch (_) {
+        resolve(null);
+      }
+    });
+  }
+
+  async function prepareImage(file) {
+    if (!file) throw new Error('画像が選ばれていません');
+    const type = String(file.type || '').toLowerCase();
+    if (!ACCEPT.includes(type)) throw new Error('JPEG・PNG・GIF・WebP の画像を選んでください');
+    if (file.size > LIMITS.sourceBytes) throw new Error(`画像が大きすぎます（${formatBytes(LIMITS.sourceBytes)}まで）`);
+
+    const { img, release } = await loadImage(file);
+    try {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      if (!width || !height) throw new Error('画像を読み込めませんでした');
+
+      if (type === 'image/gif') {
+        if (file.size > LIMITS.imageBytes) {
+          throw new Error(`GIF は ${formatBytes(LIMITS.imageBytes)} までです（アニメーションを保つため縮小しません）`);
+        }
+        return { blob: file, width, height };
+      }
+
+      let scale = Math.min(1, LIMITS.maxDim / Math.max(width, height));
+      const candidates = [[type, 0.9], ['image/webp', 0.86], ['image/jpeg', 0.86]]
+        .filter((c, i, list) => list.findIndex((x) => x[0] === c[0]) === i);
+
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        const w = Math.max(1, Math.round(width * scale));
+        const h = Math.max(1, Math.round(height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('画像を処理できませんでした');
+
+        for (const [outType, quality] of candidates) {
+          ctx.clearRect(0, 0, w, h);
+          if (outType === 'image/jpeg') {
+            // JPEG は透明を扱えないので白で塗っておく
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+          }
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+          const blob = await canvasToBlob(canvas, outType, quality);
+          if (blob && blob.size > 0 && blob.size <= LIMITS.imageBytes && ACCEPT.includes(blob.type)) {
+            return { blob, width: w, height: h };
+          }
+        }
+        scale *= 0.75;
+      }
+      throw new Error(`画像を ${formatBytes(LIMITS.imageBytes)} 以下に縮小できませんでした`);
+    } finally {
+      release();
+    }
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 画像選択パーツ（クリック・ドラッグ＆ドロップ・貼り付け）
+  // ---------------------------------------------------------------------------
+
+  let pickerSeq = 0;
+
+  function createPicker({ compact = false, onError, onChange } = {}) {
+    pickerSeq += 1;
+    const inputId = `picker-input-${pickerSeq}`;
+    const input = el('input', {
+      type: 'file',
+      id: inputId,
+      className: 'visually-hidden picker-input',
+      accept: ACCEPT.join(','),
+    });
+    const preview = el('img', { className: 'picker-preview', alt: '選んだ画像のプレビュー', hidden: true });
+    const status = el('span', { className: 'picker-status', hidden: true }, '画像を準備しています…');
+    const emptyView = el('span', { className: 'picker-empty' },
+      icon(ICON_IMAGE),
+      el('strong', null, compact ? '画像を添付（任意）' : '画像を選ぶ'),
+      el('span', { className: 'picker-hint' }, 'クリック・ドラッグ＆ドロップ・貼り付け'));
+    const drop = el('label', { className: 'picker-drop', for: inputId }, emptyView, preview, status);
+    const info = el('span', { className: 'picker-info' });
+    const clear = el('button', { type: 'button', className: 'link-btn' }, '画像を外す');
+    const meta = el('div', { className: 'picker-meta', hidden: true }, info, clear);
+    const root = el('div', { className: compact ? 'picker compact' : 'picker' }, input, drop, meta);
+
+    let current = null;
+    let previewUrl = null;
+    let busy = false;
+    let token = 0;
+
+    function clearPreview() {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+      current = null;
+      preview.removeAttribute('src');
+      preview.hidden = true;
+      meta.hidden = true;
+      root.classList.remove('has-image');
+    }
+
+    function setBusyState(value) {
+      busy = value;
+      status.hidden = !value;
+      root.classList.toggle('is-busy', value);
+    }
+
+    async function setFile(file) {
+      token += 1;
+      const mine = token;
+      setBusyState(true);
+      try {
+        const prepared = await prepareImage(file);
+        if (mine !== token) return;
+        clearPreview();
+        current = prepared;
+        previewUrl = URL.createObjectURL(prepared.blob);
+        preview.src = previewUrl;
+        preview.hidden = false;
+        info.textContent = `${prepared.width}×${prepared.height} ・ ${formatBytes(prepared.blob.size)}`;
+        meta.hidden = false;
+        root.classList.add('has-image');
+        if (onChange) onChange(prepared);
+      } catch (err) {
+        if (mine === token && onError) onError(err.message || '画像を読み込めませんでした');
+      } finally {
+        if (mine === token) setBusyState(false);
+        input.value = '';
+      }
+    }
+
+    function reset() {
+      token += 1;
+      setBusyState(false);
+      clearPreview();
+      input.value = '';
+    }
+
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (file) setFile(file);
+    });
+    for (const type of ['dragenter', 'dragover']) {
+      drop.addEventListener(type, (e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        drop.classList.add('is-over');
+      });
+    }
+    drop.addEventListener('dragleave', (e) => {
+      if (!drop.contains(e.relatedTarget)) drop.classList.remove('is-over');
+    });
+    drop.addEventListener('drop', (e) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      drop.classList.remove('is-over');
+      const file = e.dataTransfer.files[0];
+      if (file) setFile(file);
+    });
+    clear.addEventListener('click', () => {
+      reset();
+      if (onChange) onChange(null);
+    });
+
+    return {
+      root,
+      setFile,
+      reset,
+      get value() { return current; },
+      get busy() { return busy; },
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 保存先 1: サーバー（server.js）
+  // ---------------------------------------------------------------------------
+
+  async function request(method, url, body) {
+    const init = { method, headers: { Accept: 'application/json' }, cache: 'no-store' };
+    if (body !== undefined) {
+      init.headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(body);
+    }
+    let res;
+    try {
+      res = await fetch(url, init);
+    } catch (_) {
+      throw new Error('サーバーに接続できませんでした。サーバーが動いているか、通信状況を確認してください');
+    }
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (_) {
+      data = null;
+    }
+    if (!res.ok) {
+      const message = data && typeof data.error === 'string' && data.error;
+      throw new Error(message || `エラーが発生しました（${res.status}）`);
+    }
+    return data || {};
+  }
+
+  class ServerBackend {
+    constructor() {
+      this.kind = 'server';
+      this.needsKey = true;
+    }
+
+    list({ offset, limit, q }) {
+      const params = new URLSearchParams({ offset: String(offset), limit: String(limit) });
+      if (q) params.set('q', q);
+      return request('GET', `api/posts?${params}`);
+    }
+
+    async get(id) {
+      return (await request('GET', `api/posts/${id}`)).post;
+    }
+
+    async create(data) {
+      return (await request('POST', 'api/posts', data)).post;
+    }
+
+    async reply(id, data) {
+      return (await request('POST', `api/posts/${id}/replies`, data)).post;
+    }
+
+    async removePost(id, password) {
+      await request('DELETE', `api/posts/${id}`, { password });
+    }
+
+    async removeReply(id, replyId, password) {
+      await request('DELETE', `api/posts/${id}/replies/${replyId}`, { password });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 保存先 2: このブラウザの中（IndexedDB）
+  // ---------------------------------------------------------------------------
+
+  const NOT_FOUND = '投稿が見つかりません（削除された可能性があります）';
+
+  function idbRequest(req) {
+    return new Promise((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function idbDone(tx) {
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error('保存に失敗しました'));
+    });
+  }
+
+  function storageError(err) {
+    if (err && err.name === 'QuotaExceededError') {
+      return new Error('ブラウザの保存容量が足りません。古い投稿を削除してからもう一度お試しください');
+    }
+    return err instanceof Error ? err : new Error('保存に失敗しました');
+  }
+
+  function localPublic(p, withReplies) {
+    const out = {
+      id: p.id,
+      title: p.title,
+      name: p.name,
+      text: p.text,
+      image: p.image ? { url: p.image } : null,
+      createdAt: p.createdAt,
+      bumpedAt: p.bumpedAt,
+      replyCount: p.replies.length,
+      deletable: true,
+    };
+    if (withReplies) {
+      out.replies = p.replies.map((r) => ({
+        id: r.id,
+        name: r.name,
+        text: r.text,
+        image: r.image ? { url: r.image } : null,
+        createdAt: r.createdAt,
+        deletable: true,
+      }));
+    }
+    return out;
+  }
+
+  class LocalBackend {
+    constructor() {
+      this.kind = 'local';
+      this.needsKey = false;
+      this.dbPromise = null;
+    }
+
+    open() {
+      if (!this.dbPromise) {
+        this.dbPromise = new Promise((resolve, reject) => {
+          if (!window.indexedDB) {
+            reject(new Error('このブラウザではデータを保存できません'));
+            return;
+          }
+          const req = indexedDB.open('image-board-local', 1);
+          req.onupgradeneeded = () => {
+            req.result.createObjectStore('posts', { keyPath: 'id' });
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(new Error('ブラウザのデータベースを開けませんでした（プライベートモードでは使えないことがあります）'));
+        });
+        this.dbPromise.catch(() => { this.dbPromise = null; });
+      }
+      return this.dbPromise;
+    }
+
+    async all() {
+      const db = await this.open();
+      return idbRequest(db.transaction('posts', 'readonly').objectStore('posts').getAll());
+    }
+
+    async raw(id) {
+      const db = await this.open();
+      const post = await idbRequest(db.transaction('posts', 'readonly').objectStore('posts').get(id));
+      if (!post) throw new Error(NOT_FOUND);
+      return post;
+    }
+
+    async put(post) {
+      const db = await this.open();
+      try {
+        const tx = db.transaction('posts', 'readwrite');
+        tx.objectStore('posts').put(post);
+        await idbDone(tx);
+      } catch (err) {
+        throw storageError(err);
+      }
+    }
+
+    async drop(id) {
+      const db = await this.open();
+      const tx = db.transaction('posts', 'readwrite');
+      tx.objectStore('posts').delete(id);
+      await idbDone(tx);
+    }
+
+    async list({ offset, limit, q }) {
+      let posts = await this.all();
+      if (q) posts = posts.filter((p) => matchesQuery(p, q));
+      posts.sort(byBumpDesc);
+      return {
+        posts: posts.slice(offset, offset + limit).map((p) => localPublic(p, false)),
+        total: posts.length,
+        hasMore: offset + limit < posts.length,
+      };
+    }
+
+    async get(id) {
+      return localPublic(await this.raw(id), true);
+    }
+
+    async create(data) {
+      if (!data.image) throw new Error('画像を選んでください');
+      const now = new Date().toISOString();
+      const post = {
+        id: randomHex(8),
+        title: cleanLocal(data.title, LIMITS.title, false) || DEFAULT_TITLE,
+        name: cleanLocal(data.name, LIMITS.name, false) || DEFAULT_NAME,
+        text: cleanLocal(data.text, LIMITS.text, true),
+        image: data.image,
+        createdAt: now,
+        bumpedAt: now,
+        replies: [],
+      };
+      await this.put(post);
+      return localPublic(post, true);
+    }
+
+    async reply(id, data) {
+      const post = await this.raw(id);
+      if (post.replies.length >= LIMITS.repliesPerPost) {
+        throw new Error(`この投稿への返信は上限（${LIMITS.repliesPerPost}件）に達しました`);
+      }
+      const text = cleanLocal(data.text, LIMITS.replyText, true);
+      if (!text && !data.image) throw new Error('本文か画像のどちらかを入力してください');
+      const now = new Date().toISOString();
+      post.replies.push({
+        id: randomHex(8),
+        name: cleanLocal(data.name, LIMITS.name, false) || DEFAULT_NAME,
+        text,
+        image: data.image || null,
+        createdAt: now,
+      });
+      post.bumpedAt = now;
+      await this.put(post);
+      return localPublic(post, true);
+    }
+
+    async removePost(id) {
+      await this.raw(id);
+      await this.drop(id);
+    }
+
+    async removeReply(id, replyId) {
+      const post = await this.raw(id);
+      const before = post.replies.length;
+      post.replies = post.replies.filter((r) => r.id !== replyId);
+      if (post.replies.length === before) throw new Error('返信が見つかりません（削除された可能性があります）');
+      await this.put(post);
+    }
+  }
+
+  async function pickBackend() {
+    if (location.protocol === 'http:' || location.protocol === 'https:') {
+      try {
+        const res = await fetch('api/health', { cache: 'no-store', headers: { Accept: 'application/json' } });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ok && data.app === 'image-board') return new ServerBackend();
+        }
+      } catch (_) {
+        /* サーバーが無ければブラウザ内保存に切り替える */
+      }
+    }
+    return new LocalBackend();
+  }
+
+  // ---------------------------------------------------------------------------
+  // 画面の部品
+  // ---------------------------------------------------------------------------
+
+  const ui = {
+    brand: byId('brand'),
+    board: byId('board'),
+    summary: byId('result-summary'),
+    modeBadge: byId('mode-badge'),
+    empty: byId('empty'),
+    emptyTitle: byId('empty-title'),
+    emptyText: byId('empty-text'),
+    emptyCompose: byId('empty-compose'),
+    emptyClear: byId('empty-clear'),
+    errorBox: byId('error-box'),
+    errorText: byId('error-text'),
+    retry: byId('retry'),
+    loadMore: byId('load-more'),
+    sentinel: byId('sentinel'),
+    searchForm: byId('search-form'),
+    search: byId('search-input'),
+    openCompose: byId('open-compose'),
+
+    composeDialog: byId('compose-dialog'),
+    composeForm: byId('compose-form'),
+    composePickerSlot: byId('compose-picker'),
+    composeTitle: byId('compose-title'),
+    composeText: byId('compose-text'),
+    composeTextCount: byId('compose-text-count'),
+    composeName: byId('compose-name'),
+    composeKey: byId('compose-key'),
+    composeError: byId('compose-error'),
+    composeSubmit: byId('compose-submit'),
+
+    threadDialog: byId('thread-dialog'),
+    threadContent: byId('thread-content'),
+
+    deleteDialog: byId('delete-dialog'),
+    deleteForm: byId('delete-form'),
+    deleteMessage: byId('delete-message'),
+    deleteKeyField: byId('delete-key-field'),
+    deleteKey: byId('delete-key'),
+    deleteError: byId('delete-error'),
+    deleteSubmit: byId('delete-submit'),
+
+    viewerDialog: byId('viewer-dialog'),
+    viewerInner: byId('viewer-inner'),
+    viewerImg: byId('viewer-img'),
+    viewerLink: byId('viewer-link'),
+
+    toast: byId('toast'),
+  };
+
+  const state = {
+    backend: null,
+    posts: [],
+    offset: 0,
+    total: 0,
+    hasMore: false,
+    loading: false,
+    error: null,
+    autoPaused: false,
+    q: '',
+    seq: 0,
+    openId: null,
+    current: null,
+    replyPicker: null,
+    repliesTitle: null,
+    replyList: null,
+  };
+
+  // ---------------------------------------------------------------------------
+  // ダイアログ
+  // ---------------------------------------------------------------------------
+
+  const dialogStack = [];
+
+  function openDialog(dialog) {
+    if (!dialog.open) dialog.showModal();
+    const i = dialogStack.indexOf(dialog);
+    if (i >= 0) dialogStack.splice(i, 1);
+    dialogStack.push(dialog);
+  }
+
+  function topDialog() {
+    return dialogStack[dialogStack.length - 1] || null;
+  }
+
+  for (const dialog of [ui.composeDialog, ui.threadDialog, ui.deleteDialog, ui.viewerDialog]) {
+    let pressedOnBackdrop = false;
+    dialog.addEventListener('pointerdown', (e) => { pressedOnBackdrop = e.target === dialog; });
+    dialog.addEventListener('click', (e) => {
+      if (pressedOnBackdrop && e.target === dialog) dialog.close();
+      pressedOnBackdrop = false;
+    });
+    dialog.addEventListener('close', () => {
+      const i = dialogStack.indexOf(dialog);
+      if (i >= 0) dialogStack.splice(i, 1);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const closer = e.target.closest('[data-close]');
+    if (!closer) return;
+    const dialog = closer.closest('dialog');
+    if (dialog) dialog.close();
+  });
+
+  // ---------------------------------------------------------------------------
+  // お知らせ
+  // ---------------------------------------------------------------------------
+
+  let toastTimer = 0;
+  function toast(message) {
+    // モーダルの上に出すため、いちばん手前のダイアログの中に置く
+    const host = topDialog() || document.body;
+    if (ui.toast.parentNode !== host) host.append(ui.toast);
+    ui.toast.textContent = message;
+    ui.toast.classList.remove('show');
+    void ui.toast.offsetWidth;
+    ui.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => ui.toast.classList.remove('show'), 2800);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 一覧
+  // ---------------------------------------------------------------------------
+
+  function skeletonCard() {
+    return el('div', { className: 'card skeleton', 'aria-hidden': 'true' },
+      el('div', { className: 'card-media' }),
+      el('div', { className: 'card-body' },
+        el('div', { className: 'skeleton-line' }),
+        el('div', { className: 'skeleton-line short' })));
+  }
+
+  function showSkeletons() {
+    ui.board.replaceChildren(...Array.from({ length: 8 }, skeletonCard));
+  }
+
+  function onCardClick(e, id) {
+    if (e.defaultPrevented || isModifiedClick(e)) return;
+    e.preventDefault();
+    try {
+      history.pushState(null, '', `#post/${id}`);
+    } catch (_) {
+      /* 履歴に残せない環境でもそのまま開く */
+    }
+    openThread(id);
+  }
+
+  function renderCard(post) {
+    const media = post.image
+      ? el('div', { className: 'card-media' }, el('img', { src: post.image.url, alt: '', loading: 'lazy', decoding: 'async' }))
+      : el('div', { className: 'card-media' }, icon(ICON_IMAGE));
+    const meta = el('p', { className: 'card-meta' },
+      el('span', { className: 'card-name' }, post.name),
+      el('time', { datetime: post.createdAt, title: formatFull(post.createdAt), 'data-rel': '' }, relTime(post.createdAt)),
+      post.replyCount ? el('span', { className: 'card-replies' }, `返信 ${post.replyCount}`) : null);
+    const link = el('a', { className: 'card-link', href: `#post/${post.id}`, onclick: (e) => onCardClick(e, post.id) },
+      media,
+      el('div', { className: 'card-body' },
+        el('h3', { className: 'card-title' }, post.title),
+        post.text ? el('p', { className: 'card-text' }, post.text) : null,
+        meta));
+    return el('article', { className: 'card', dataset: { id: post.id } }, link);
+  }
+
+  function findCard(id) {
+    return ui.board.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
+  }
+
+  function summaryOf(post) {
+    const { replies, ...rest } = post; // eslint-disable-line no-unused-vars
+    return rest;
+  }
+
+  function addCardToTop(post, { isNew = false } = {}) {
+    const summary = summaryOf(post);
+    const existed = state.posts.some((p) => p.id === summary.id);
+    state.posts = [summary, ...state.posts.filter((p) => p.id !== summary.id)];
+    const old = findCard(summary.id);
+    if (old) old.remove();
+    if (!existed && isNew) {
+      state.total += 1;
+      state.offset += 1;
+    }
+    const card = renderCard(summary);
+    card.classList.add('is-new');
+    ui.board.prepend(card);
+    updateChrome();
+  }
+
+  function syncCard(post, { toTop = false } = {}) {
+    if (toTop && !state.q) {
+      addCardToTop(post);
+      return;
+    }
+    const index = state.posts.findIndex((p) => p.id === post.id);
+    if (index < 0) return;
+    const summary = summaryOf(post);
+    state.posts[index] = summary;
+    const old = findCard(post.id);
+    if (old) old.replaceWith(renderCard(summary));
+  }
+
+  function removeCard(id) {
+    const before = state.posts.length;
+    state.posts = state.posts.filter((p) => p.id !== id);
+    if (state.posts.length !== before) state.offset = Math.max(0, state.offset - 1);
+    const card = findCard(id);
+    if (card) card.remove();
+    state.total = Math.max(0, state.total - 1);
+    updateChrome();
+  }
+
+  function updateChrome() {
+    const showEmpty = state.posts.length === 0 && !state.loading && !state.error;
+    ui.empty.hidden = !showEmpty;
+    if (showEmpty) {
+      if (state.q) {
+        ui.emptyTitle.textContent = '見つかりませんでした';
+        ui.emptyText.textContent = `「${state.q}」に一致する投稿はありません。`;
+        ui.emptyCompose.hidden = true;
+        ui.emptyClear.hidden = false;
+      } else {
+        ui.emptyTitle.textContent = 'まだ投稿がありません';
+        ui.emptyText.textContent = '最初の1枚を貼ってみましょう。';
+        ui.emptyCompose.hidden = false;
+        ui.emptyClear.hidden = true;
+      }
+    }
+    ui.loadMore.hidden = !state.hasMore || Boolean(state.error);
+    ui.loadMore.disabled = state.loading;
+    ui.loadMore.textContent = state.loading ? '読み込み中…' : 'もっと見る';
+
+    let summary = '';
+    if (!state.error && !(state.loading && state.posts.length === 0)) {
+      if (state.q) summary = `「${state.q}」の検索結果 ${state.total}件`;
+      else if (state.total) summary = `${state.total}件の投稿`;
+    }
+    ui.summary.textContent = summary;
+    ui.board.setAttribute('aria-busy', state.loading ? 'true' : 'false');
+  }
+
+  async function loadPosts({ reset = false } = {}) {
+    if (!reset && (state.loading || !state.hasMore)) return;
+    state.seq += 1;
+    const seq = state.seq;
+    state.loading = true;
+    state.error = null;
+    ui.errorBox.hidden = true;
+    if (reset) {
+      state.posts = [];
+      state.offset = 0;
+      state.total = 0;
+      state.hasMore = false;
+      state.autoPaused = false;
+      showSkeletons();
+    }
+    updateChrome();
+
+    try {
+      const res = await state.backend.list({ offset: state.offset, limit: PAGE_SIZE, q: state.q });
+      if (seq !== state.seq) return;
+      if (reset) ui.board.replaceChildren();
+      const known = new Set(state.posts.map((p) => p.id));
+      const fragment = document.createDocumentFragment();
+      for (const post of res.posts || []) {
+        if (known.has(post.id)) continue;
+        known.add(post.id);
+        state.posts.push(post);
+        fragment.append(renderCard(post));
+      }
+      ui.board.append(fragment);
+      state.offset += (res.posts || []).length;
+      state.total = Number(res.total) || 0;
+      state.hasMore = Boolean(res.hasMore) && (res.posts || []).length > 0;
+    } catch (err) {
+      if (seq !== state.seq) return;
+      const message = err.message || '読み込めませんでした';
+      if (reset || state.posts.length === 0) {
+        ui.board.replaceChildren();
+        state.error = err;
+        ui.errorText.textContent = message;
+        ui.errorBox.hidden = false;
+      } else {
+        state.autoPaused = true; // 自動読み込みを止め、ボタンでの再試行に任せる
+        toast(message);
+      }
+    } finally {
+      if (seq === state.seq) {
+        state.loading = false;
+        updateChrome();
+        requestAnimationFrame(maybeLoadMore);
+      }
+    }
+  }
+
+  function maybeLoadMore() {
+    if (!state.hasMore || state.loading || state.autoPaused || state.error) return;
+    const rect = ui.sentinel.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 600) loadPosts();
+  }
+
+  function applySearch() {
+    const q = ui.search.value.trim().slice(0, LIMITS.query);
+    if (q === state.q) return;
+    state.q = q;
+    loadPosts({ reset: true });
+  }
+
+  function clearSearch() {
+    ui.search.value = '';
+    state.q = '';
+    loadPosts({ reset: true });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 新規投稿
+  // ---------------------------------------------------------------------------
+
+  const composePicker = createPicker({
+    onError: (message) => showError(ui.composeError, message),
+    onChange: () => hideError(ui.composeError),
+  });
+  ui.composePickerSlot.append(composePicker.root);
+  const updateComposeCounter = bindCounter(ui.composeText, ui.composeTextCount, LIMITS.text);
+
+  function openCompose(file) {
+    hideError(ui.composeError);
+    if (!ui.composeName.value) ui.composeName.value = prefs.name || '';
+    if (!ui.composeKey.value) ui.composeKey.value = prefs.deleteKey || '';
+    openDialog(ui.composeDialog);
+    if (file) composePicker.setFile(file);
+  }
+
+  ui.composeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError(ui.composeError);
+    if (composePicker.busy) {
+      showError(ui.composeError, '画像の準備が終わるまで少しお待ちください');
+      return;
+    }
+    const prepared = composePicker.value;
+    if (!prepared) {
+      showError(ui.composeError, '画像を選んでください');
+      return;
+    }
+    const name = ui.composeName.value.trim();
+    const password = ui.composeKey.value.trim();
+
+    setBusy(ui.composeSubmit, true, '投稿中…');
+    try {
+      const image = await blobToDataUrl(prepared.blob);
+      const post = await state.backend.create({
+        title: ui.composeTitle.value,
+        name,
+        text: ui.composeText.value,
+        password: state.backend.needsKey ? password : '',
+        image,
+      });
+      savePrefs({ name, deleteKey: password || prefs.deleteKey });
+      ui.composeTitle.value = '';
+      ui.composeText.value = '';
+      updateComposeCounter();
+      composePicker.reset();
+      ui.composeDialog.close();
+      if (state.q) {
+        clearSearch();
+      } else {
+        addCardToTop(post, { isNew: true });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      toast('投稿しました');
+    } catch (err) {
+      showError(ui.composeError, err.message || '投稿できませんでした');
+    } finally {
+      setBusy(ui.composeSubmit, false);
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // 投稿の詳細と返信
+  // ---------------------------------------------------------------------------
+
+  async function openThread(id) {
+    if (!ID_RE.test(id)) return;
+    state.openId = id;
+    state.current = null;
+    if (state.replyPicker) {
+      state.replyPicker.reset();
+      state.replyPicker = null;
+    }
+    ui.threadContent.replaceChildren(el('div', { className: 'thread-loading' }, '読み込み中…'));
+    ui.threadDialog.removeAttribute('aria-labelledby');
+    ui.threadDialog.setAttribute('aria-label', '投稿の詳細');
+    openDialog(ui.threadDialog);
+    try {
+      const post = await state.backend.get(id);
+      if (state.openId !== id) return;
+      renderThread(post);
+    } catch (err) {
+      if (state.openId !== id) return;
+      ui.threadContent.replaceChildren(el('div', { className: 'thread-error' },
+        el('p', null, err.message || '読み込めませんでした'),
+        el('button', { type: 'button', className: 'btn btn-ghost', onclick: () => openThread(id) }, 'もう一度読み込む')));
+    }
+  }
+
+  function renderThread(post) {
+    state.current = post;
+    const figure = post.image
+      ? el('figure', { className: 'thread-figure' },
+        el('button', {
+          type: 'button',
+          className: 'thread-zoom',
+          'aria-label': '画像を拡大して見る',
+          onclick: () => openViewer(post.image.url, post.title),
+        }, el('img', { src: post.image.url, alt: post.title })))
+      : null;
+
+    const actions = el('div', { className: 'thread-actions' },
+      state.backend.kind === 'server'
+        ? el('button', { type: 'button', className: 'btn btn-ghost btn-sm', onclick: () => copyLink(post.id) }, 'リンクをコピー')
+        : null,
+      el('button', {
+        type: 'button',
+        className: 'btn btn-ghost btn-sm btn-text-danger',
+        onclick: () => deletePostFlow(post.id, post.title),
+      }, '投稿を削除'));
+
+    state.repliesTitle = el('h3', { className: 'replies-title', id: 'replies-title' });
+    state.replyList = el('ol', { className: 'reply-list' });
+
+    const side = el('div', { className: 'thread-side' },
+      el('h2', { className: 'thread-title', id: 'thread-title' }, post.title),
+      el('p', { className: 'thread-meta' },
+        el('span', { className: 'thread-name' }, post.name),
+        el('time', { datetime: post.createdAt }, formatFull(post.createdAt))),
+      post.text ? el('p', { className: 'thread-text' }, post.text) : null,
+      actions,
+      el('section', { className: 'replies', 'aria-labelledby': 'replies-title' }, state.repliesTitle, state.replyList),
+      buildReplyForm(post.id));
+
+    ui.threadContent.replaceChildren(el('article', { className: figure ? 'thread' : 'thread no-image' }, figure, side));
+    ui.threadDialog.removeAttribute('aria-label');
+    ui.threadDialog.setAttribute('aria-labelledby', 'thread-title');
+    ui.threadContent.scrollTop = 0;
+    renderReplies(post);
+  }
+
+  function renderReply(postId, reply, index, isNew) {
+    return el('li', { className: isNew ? 'reply is-new' : 'reply' },
+      el('div', { className: 'reply-head' },
+        el('span', { className: 'reply-no' }, String(index + 1)),
+        el('span', { className: 'reply-name' }, reply.name),
+        el('time', { datetime: reply.createdAt, title: formatFull(reply.createdAt), 'data-rel': '' }, relTime(reply.createdAt)),
+        el('button', {
+          type: 'button',
+          className: 'link-btn reply-delete',
+          onclick: () => deleteReplyFlow(postId, reply.id),
+        }, '削除')),
+      reply.text ? el('p', { className: 'reply-text' }, reply.text) : null,
+      reply.image
+        ? el('button', {
+          type: 'button',
+          className: 'reply-thumb',
+          'aria-label': '添付画像を拡大して見る',
+          onclick: () => openViewer(reply.image.url, '返信に添付された画像'),
+        }, el('img', { src: reply.image.url, alt: '', loading: 'lazy' }))
+        : null);
+  }
+
+  function renderReplies(post, newReplyId) {
+    if (!state.replyList) return;
+    const count = post.replies.length;
+    state.repliesTitle.textContent = count ? `返信 ${count}件` : '返信';
+    if (count === 0) {
+      state.replyList.replaceChildren(el('li', { className: 'reply-empty' }, 'まだ返信はありません。最初のひとことをどうぞ。'));
+      return;
+    }
+    state.replyList.replaceChildren(...post.replies.map((r, i) => renderReply(post.id, r, i, r.id === newReplyId)));
+  }
+
+  function buildReplyForm(postId) {
+    const error = el('p', { className: 'form-error', role: 'alert', hidden: true });
+    const picker = createPicker({
+      compact: true,
+      onError: (message) => showError(error, message),
+      onChange: () => hideError(error),
+    });
+    state.replyPicker = picker;
+
+    const text = el('textarea', {
+      id: 'reply-text', className: 'input', rows: '3', maxlength: String(LIMITS.replyText), placeholder: '返信を書く',
+    });
+    const counter = el('span', { className: 'counter' });
+    const updateCounter = bindCounter(text, counter, LIMITS.replyText);
+    const name = el('input', {
+      id: 'reply-name', className: 'input', type: 'text', maxlength: String(LIMITS.name), placeholder: DEFAULT_NAME, autocomplete: 'nickname',
+    });
+    name.value = prefs.name || '';
+    const key = el('input', {
+      id: 'reply-key', className: 'input', type: 'text', maxlength: String(LIMITS.password), autocomplete: 'off', spellcheck: 'false',
+    });
+    key.value = prefs.deleteKey || '';
+    const submit = el('button', { type: 'submit', className: 'btn btn-primary' }, '返信する');
+
+    const form = el('form', { className: 'reply-form', novalidate: true },
+      el('h3', { className: 'reply-form-title' }, '返信する'),
+      el('div', { className: 'field' },
+        el('div', { className: 'field-label' }, el('label', { for: 'reply-text' }, '本文'), counter),
+        text),
+      picker.root,
+      el('div', { className: 'field-row' },
+        el('div', { className: 'field' },
+          el('div', { className: 'field-label' }, el('label', { for: 'reply-name' }, '名前', el('span', { className: 'optional' }, '任意'))),
+          name),
+        el('div', { className: 'field key-field' },
+          el('div', { className: 'field-label' }, el('label', { for: 'reply-key' }, '削除キー')),
+          key)),
+      error,
+      el('div', { className: 'form-actions' }, submit));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError(error);
+      if (picker.busy) {
+        showError(error, '画像の準備が終わるまで少しお待ちください');
+        return;
+      }
+      const prepared = picker.value;
+      if (!text.value.trim() && !prepared) {
+        showError(error, '本文か画像のどちらかを入力してください');
+        text.focus();
+        return;
+      }
+      setBusy(submit, true, '送信中…');
+      try {
+        const image = prepared ? await blobToDataUrl(prepared.blob) : null;
+        const updated = await state.backend.reply(postId, {
+          name: name.value,
+          text: text.value,
+          password: state.backend.needsKey ? key.value.trim() : '',
+          image,
+        });
+        savePrefs({ name: name.value.trim(), deleteKey: key.value.trim() || prefs.deleteKey });
+        text.value = '';
+        updateCounter();
+        picker.reset();
+        if (state.openId === postId) {
+          state.current = updated;
+          const last = updated.replies[updated.replies.length - 1];
+          renderReplies(updated, last && last.id);
+          const lastNode = state.replyList.lastElementChild;
+          if (lastNode) lastNode.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+        syncCard(updated, { toTop: true });
+        toast('返信しました');
+      } catch (err) {
+        showError(error, err.message || '返信できませんでした');
+      } finally {
+        setBusy(submit, false);
+      }
+    });
+
+    return form;
+  }
+
+  async function copyLink(id) {
+    const url = `${location.href.split('#')[0]}#post/${id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast('リンクをコピーしました');
+    } catch (_) {
+      toast(`コピーできませんでした: ${url}`);
+    }
+  }
+
+  ui.threadDialog.addEventListener('close', () => {
+    state.openId = null;
+    state.current = null;
+    if (state.replyPicker) {
+      state.replyPicker.reset();
+      state.replyPicker = null;
+    }
+    state.repliesTitle = null;
+    state.replyList = null;
+    ui.threadContent.replaceChildren();
+    if (HASH_RE.test(location.hash)) {
+      try {
+        history.replaceState(null, '', location.pathname + location.search);
+      } catch (_) {
+        /* 何もしない */
+      }
+    }
+  });
+
+  function routeFromHash() {
+    const m = HASH_RE.exec(location.hash);
+    if (m) {
+      if (state.openId !== m[1] || !ui.threadDialog.open) openThread(m[1]);
+    } else if (ui.threadDialog.open) {
+      ui.threadDialog.close();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 削除
+  // ---------------------------------------------------------------------------
+
+  let deleteState = null;
+
+  function openDeleteDialog({ message, action }) {
+    const needsKey = state.backend.needsKey;
+    deleteState = { needsKey, action };
+    ui.deleteMessage.textContent = message;
+    ui.deleteKeyField.hidden = !needsKey;
+    ui.deleteKey.value = needsKey ? (prefs.deleteKey || '') : '';
+    hideError(ui.deleteError);
+    openDialog(ui.deleteDialog);
+    if (needsKey) {
+      ui.deleteKey.focus();
+      ui.deleteKey.select();
+    } else {
+      ui.deleteSubmit.focus();
+    }
+  }
+
+  ui.deleteForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!deleteState) return;
+    const { needsKey, action } = deleteState;
+    const password = ui.deleteKey.value.trim();
+    if (needsKey && !password) {
+      showError(ui.deleteError, '削除キーを入力してください');
+      ui.deleteKey.focus();
+      return;
+    }
+    hideError(ui.deleteError);
+    setBusy(ui.deleteSubmit, true, '削除中…');
+    try {
+      const done = await action(password);
+      ui.deleteDialog.close();
+      if (done) toast(done);
+    } catch (err) {
+      showError(ui.deleteError, err.message || '削除できませんでした');
+    } finally {
+      setBusy(ui.deleteSubmit, false);
+    }
+  });
+
+  ui.deleteDialog.addEventListener('close', () => {
+    deleteState = null;
+  });
+
+  function deletePostFlow(id, title) {
+    openDeleteDialog({
+      message: `「${title}」を削除します。返信と画像もすべて消え、元に戻すことはできません。`,
+      action: async (password) => {
+        await state.backend.removePost(id, password);
+        removeCard(id);
+        if (state.openId === id) ui.threadDialog.close();
+        return '投稿を削除しました';
+      },
+    });
+  }
+
+  function deleteReplyFlow(postId, replyId) {
+    openDeleteDialog({
+      message: 'この返信を削除します。元に戻すことはできません。',
+      action: async (password) => {
+        await state.backend.removeReply(postId, replyId, password);
+        try {
+          const updated = await state.backend.get(postId);
+          if (state.openId === postId) {
+            state.current = updated;
+            renderReplies(updated);
+          }
+          syncCard(updated);
+        } catch (_) {
+          /* 表示の更新に失敗しても削除自体は済んでいる */
+        }
+        return '返信を削除しました';
+      },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 拡大表示
+  // ---------------------------------------------------------------------------
+
+  function openViewer(url, alt) {
+    ui.viewerImg.src = url;
+    ui.viewerImg.alt = alt || '';
+    const canLink = state.backend.kind === 'server';
+    ui.viewerLink.hidden = !canLink;
+    if (canLink) ui.viewerLink.href = url;
+    openDialog(ui.viewerDialog);
+  }
+
+  ui.viewerInner.addEventListener('click', () => ui.viewerDialog.close());
+  ui.viewerDialog.addEventListener('close', () => ui.viewerImg.removeAttribute('src'));
+
+  // ---------------------------------------------------------------------------
+  // 画面全体のイベント
+  // ---------------------------------------------------------------------------
+
+  function applyMode() {
+    const local = state.backend.kind === 'local';
+    document.body.classList.toggle('is-local', local);
+    ui.modeBadge.hidden = !local;
+    if (local) {
+      ui.modeBadge.replaceChildren(
+        el('strong', null, 'ローカルモード'),
+        el('span', null, location.protocol === 'file:'
+          ? 'ファイルを直接開いているため、投稿はこのブラウザの中だけに保存されます。みんなで共有するには server.js を起動してください。'
+          : 'サーバーに接続できないため、投稿はこのブラウザの中だけに保存されます。'));
+    }
+  }
+
+  function bindEvents() {
+    ui.openCompose.addEventListener('click', () => openCompose());
+    ui.emptyCompose.addEventListener('click', () => openCompose());
+    ui.emptyClear.addEventListener('click', clearSearch);
+    ui.retry.addEventListener('click', () => loadPosts({ reset: true }));
+    ui.loadMore.addEventListener('click', () => {
+      state.autoPaused = false;
+      loadPosts();
+    });
+
+    ui.brand.addEventListener('click', (e) => {
+      if (isModifiedClick(e)) return;
+      e.preventDefault();
+      ui.search.value = '';
+      state.q = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      loadPosts({ reset: true });
+    });
+
+    let searchTimer = 0;
+    ui.search.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applySearch, 350);
+    });
+    ui.searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearTimeout(searchTimer);
+      applySearch();
+    });
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) maybeLoadMore();
+      }, { rootMargin: '600px 0px' });
+      observer.observe(ui.sentinel);
+    }
+
+    // 画像の貼り付け（Ctrl + V）
+    document.addEventListener('paste', (e) => {
+      const files = e.clipboardData ? Array.from(e.clipboardData.files || []) : [];
+      const file = files.find((f) => String(f.type).startsWith('image/'));
+      if (!file) return;
+      const top = topDialog();
+      if (top === ui.deleteDialog || top === ui.viewerDialog) return;
+      e.preventDefault();
+      if (top === ui.threadDialog) {
+        if (state.replyPicker) state.replyPicker.setFile(file);
+        return;
+      }
+      openCompose(file);
+    });
+
+    // 画面のどこにドロップしても投稿できるようにする（ブラウザが画像を開いてしまうのも防ぐ）
+    window.addEventListener('dragover', (e) => {
+      if (hasFiles(e)) e.preventDefault();
+    });
+    window.addEventListener('drop', (e) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const top = topDialog();
+      if (!top || top === ui.composeDialog) openCompose(file);
+      else if (top === ui.threadDialog && state.replyPicker) state.replyPicker.setFile(file);
+    });
+
+    window.addEventListener('hashchange', routeFromHash);
+    window.addEventListener('popstate', routeFromHash);
+
+    // 「◯分前」の表示を更新する
+    setInterval(() => {
+      for (const t of document.querySelectorAll('time[data-rel]')) {
+        t.textContent = relTime(t.getAttribute('datetime'));
+      }
+    }, 60_000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 起動
+  // ---------------------------------------------------------------------------
+
+  async function init() {
+    bindEvents();
+    showSkeletons();
+    state.backend = await pickBackend();
+    applyMode();
+    await loadPosts({ reset: true });
+    routeFromHash();
+  }
+
+  init().catch((err) => {
+    console.error(err);
+    ui.board.replaceChildren();
+    ui.errorText.textContent = err.message || '起動できませんでした';
+    ui.errorBox.hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

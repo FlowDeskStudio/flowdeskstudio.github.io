@@ -1,0 +1,13 @@
+{
+  "name": "member-login",
+  "version": "1.0.0",
+  "description": "ログイン機能付きの会員ページ（依存パッケージなし）",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

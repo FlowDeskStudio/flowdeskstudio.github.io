@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-W7y0pJOT3XjzaGuW9ZGpiLCwlQdrRW25TelKh8hLL0c='; script-src-attr 'none'; style-src 'sha256-6wyG03POZSUCj20nPgQgQyQjsHsClk48NcQVvOa05A0='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リンク掲示板</title>
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #6a6f76;
+    --border: #e2e0da;
+    --accent: #1f6feb;
+    --accent-text: #ffffff;
+    --link: #0b57d0;
+    --link-visited: #6f42c1;
+    --danger: #c0362c;
+    --chip: #eef2f8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171a;
+      --surface: #1e2125;
+      --text: #e6e8eb;
+      --muted: #9aa1a9;
+      --border: #30353b;
+      --accent: #4c8dff;
+      --accent-text: #0b1220;
+      --link: #7ab0ff;
+      --link-visited: #c4a3ff;
+      --danger: #ff7b72;
+      --chip: #262b31;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: .02em; }
+  header p { margin: 0 0 24px; color: var(--muted); font-size: .92rem; }
+
+  form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+  }
+  label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: 4px; }
+  input[type="text"], textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, textarea:focus, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .hint { font-size: .8rem; color: var(--muted); }
+  .error { color: var(--danger); font-size: .85rem; min-height: 1.2em; margin: 0; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid transparent;
+  }
+  .primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding: 8px 20px;
+    font-weight: 600;
+  }
+  .primary:hover { filter: brightness(1.08); }
+
+  .toolbar { margin: 28px 0 10px; }
+  .toolbar h2 { margin: 0; font-size: 1.05rem; }
+  .count { color: var(--muted); font-weight: normal; font-size: .9rem; }
+  .search {
+    max-width: 240px;
+    padding: 6px 10px !important;
+    font-size: .9rem !important;
+  }
+
+  ul.posts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .post {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .meta { display: flex; align-items: baseline; gap: 10px; font-size: .85rem; color: var(--muted); }
+  .meta .name { color: var(--text); font-weight: 600; font-size: .95rem; }
+  .meta .spacer { flex: 1; }
+  .body {
+    margin: 6px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .body a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+  .body a:visited { color: var(--link-visited); }
+  .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .78rem;
+    background: var(--chip);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 2px 10px;
+    text-decoration: none;
+  }
+  .chip:hover { color: var(--text); }
+  .del {
+    background: transparent;
+    color: var(--muted);
+    padding: 2px 8px;
+    font-size: .8rem;
+    border-color: var(--border);
+  }
+  .del:hover { color: var(--danger); border-color: var(--danger); }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 16px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .notice { font-size: .8rem; color: var(--muted); margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>リンク掲示板</h1>
+    <p>本文に http:// または https:// で始まるURLを書くと、自動でリンクになります。</p>
+  </header>
+
+  <form id="postForm" autocomplete="off" novalidate>
+    <div>
+      <label for="name">名前（省略すると「名無しさん」）</label>
+      <input type="text" id="name" maxlength="40" placeholder="名無しさん">
+    </div>
+    <div>
+      <label for="message">本文</label>
+      <textarea id="message" maxlength="2000" placeholder="例：この記事が参考になりました https://example.com/article"></textarea>
+    </div>
+    <p class="error" id="error" role="alert"></p>
+    <div class="row">
+      <span class="hint">Ctrl + Enter（Mac は ⌘ + Enter）でも投稿できます</span>
+      <button type="submit" class="primary">投稿する</button>
+    </div>
+  </form>
+
+  <div class="toolbar row">
+    <h2>投稿一覧 <span class="count" id="count"></span></h2>
+    <input type="text" class="search" id="search" placeholder="投稿を絞り込む" aria-label="投稿を絞り込む">
+  </div>
+  <ul class="posts" id="posts"></ul>
+
+  <p class="notice" id="notice">投稿はこのブラウザの中だけに保存されます（ほかの人には見えません）。</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "linkboard.posts.v1";
+  var NAME_KEY = "linkboard.name.v1";
+
+  var form = document.getElementById("postForm");
+  var nameInput = document.getElementById("name");
+  var messageInput = document.getElementById("message");
+  var errorEl = document.getElementById("error");
+  var listEl = document.getElementById("posts");
+  var countEl = document.getElementById("count");
+  var searchInput = document.getElementById("search");
+  var noticeEl = document.getElementById("notice");
+
+  var storageOk = true;
+  var posts = loadPosts();
+
+  // ---------- 保存まわり ----------
+  function loadPosts() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      var data = JSON.parse(raw);
+      if (!Array.isArray(data)) return [];
+      return data.filter(function (p) {
+        return p && typeof p.id === "string" && typeof p.message === "string";
+      });
+    } catch (e) {
+      storageOk = false;
+      return [];
+    }
+  }
+
+  function savePosts() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+      return true;
+    } catch (e) {
+      storageOk = false;
+      updateNotice();
+      return false;
+    }
+  }
+
+  function updateNotice() {
+    if (!storageOk) {
+      noticeEl.textContent = "このブラウザでは保存ができないため、ページを閉じると投稿は消えます。";
+    }
+  }
+
+  try {
+    var savedName = localStorage.getItem(NAME_KEY);
+    if (savedName) nameInput.value = savedName;
+  } catch (e) { /* 保存できない環境では何もしない */ }
+
+  // ---------- URL の検出 ----------
+  // http:// または https:// で始まり、空白や山括弧・引用符までをURLとみなす
+  var URL_PATTERN = /https?:\/\/[^\s<>"'`　「」『』【】、。]+/gi;
+  // 文末の句読点や閉じ括弧はURLに含めない
+  var TRAILING = /[.,;:!?)\]}'"＞）！？…]+$/;
+
+  function trimUrl(candidate) {
+    var url = candidate;
+    var m = url.match(TRAILING);
+    if (m) {
+      var tail = m[0];
+      url = url.slice(0, url.length - tail.length);
+      // 「(」がURL内にあれば、対応する「)」は残す（Wikipedia などのURL対策）
+      var opens = (url.match(/\(/g) || []).length;
+      var closes = (url.match(/\)/g) || []).length;
+      while (opens > closes && tail.charAt(0) === ")") {
+        url += ")";
+        tail = tail.slice(1);
+        closes++;
+      }
+    }
+    return url;
+  }
+
+  function isSafeUrl(str) {
+    try {
+      var u = new URL(str);
+      return (u.protocol === "http:" || u.protocol === "https:") && !!u.hostname;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 本文を「文字」と「リンク」の部品に分ける
+  function tokenize(text) {
+    var parts = [];
+    var last = 0;
+    var match;
+    URL_PATTERN.lastIndex = 0;
+    while ((match = URL_PATTERN.exec(text)) !== null) {
+      var url = trimUrl(match[0]);
+      var start = match.index;
+      if (!isSafeUrl(url)) continue;
+      if (start > last) parts.push({ type: "text", value: text.slice(last, start) });
+      parts.push({ type: "link", value: url });
+      last = start + url.length;
+      URL_PATTERN.lastIndex = last;
+    }
+    if (last < text.length) parts.push({ type: "text", value: text.slice(last) });
+    return parts;
+  }
+
+  function makeLink(href, text, className) {
+    var a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer nofollow ugc";
+    if (className) a.className = className;
+    return a;
+  }
+
+  function hostOf(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; }
+  }
+
+  // ---------- 表示 ----------
+  function formatDate(ts) {
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    function pad(n) { return n < 10 ? "0" + n : String(n); }
+    return d.getFullYear() + "/" + pad(d.getMonth() + 1) + "/" + pad(d.getDate()) +
+      " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function render() {
+    var q = searchInput.value.trim().toLowerCase();
+    var shown = posts.filter(function (p) {
+      if (!q) return true;
+      return (p.name + "\n" + p.message).toLowerCase().indexOf(q) !== -1;
+    });
+
+    countEl.textContent = q
+      ? "（" + shown.length + " / " + posts.length + " 件）"
+      : "（" + posts.length + " 件）";
+
+    listEl.textContent = "";
+
+    if (shown.length === 0) {
+      var empty = document.createElement("li");
+      empty.className = "empty";
+      empty.textContent = posts.length === 0
+        ? "まだ投稿はありません。最初の投稿をどうぞ。"
+        : "条件に合う投稿はありません。";
+      listEl.appendChild(empty);
+      return;
+    }
+
+    shown.forEach(function (p) {
+      var li = document.createElement("li");
+      li.className = "post";
+
+      var meta = document.createElement("div");
+      meta.className = "meta";
+      var nameEl = document.createElement("span");
+      nameEl.className = "name";
+      nameEl.textContent = p.name || "名無しさん";
+      var timeEl = document.createElement("time");
+      var created = new Date(p.createdAt);
+      if (!isNaN(created.getTime())) timeEl.dateTime = created.toISOString();
+      timeEl.textContent = formatDate(p.createdAt);
+      var spacer = document.createElement("span");
+      spacer.className = "spacer";
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "del";
+      del.textContent = "削除";
+      del.setAttribute("aria-label", "この投稿を削除");
+      del.addEventListener("click", function () { removePost(p.id); });
+      meta.appendChild(nameEl);
+      meta.appendChild(timeEl);
+      meta.appendChild(spacer);
+      meta.appendChild(del);
+
+      var body = document.createElement("p");
+      body.className = "body";
+      var urls = [];
+      tokenize(p.message).forEach(function (part) {
+        if (part.type === "link") {
+          body.appendChild(makeLink(part.value, part.value));
+          if (urls.indexOf(part.value) === -1) urls.push(part.value);
+        } else {
+          body.appendChild(document.createTextNode(part.value));
+        }
+      });
+
+      li.appendChild(meta);
+      li.appendChild(body);
+
+      if (urls.length) {
+        var chips = document.createElement("div");
+        chips.className = "links";
+        urls.forEach(function (u) {
+          chips.appendChild(makeLink(u, "↗ " + hostOf(u), "chip"));
+        });
+        li.appendChild(chips);
+      }
+
+      listEl.appendChild(li);
+    });
+  }
+
+  // ---------- 操作 ----------
+  function newId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function addPost() {
+    var name = nameInput.value.trim().slice(0, 40);
+    var message = messageInput.value.replace(/\s+$/, "");
+    if (!message.trim()) {
+      errorEl.textContent = "本文を入力してください。";
+      messageInput.focus();
+      return;
+    }
+    errorEl.textContent = "";
+    posts.unshift({
+      id: newId(),
+      name: name,
+      message: message.slice(0, 2000),
+      createdAt: Date.now()
+    });
+    savePosts();
+    try { localStorage.setItem(NAME_KEY, name); } catch (e) { /* 無視 */ }
+    messageInput.value = "";
+    searchInput.value = "";
+    render();
+    messageInput.focus();
+  }
+
+  function removePost(id) {
+    if (!window.confirm("この投稿を削除しますか？")) return;
+    posts = posts.filter(function (p) { return p.id !== id; });
+    savePosts();
+    render();
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    addPost();
+  });
+
+  messageInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      addPost();
+    }
+  });
+
+  messageInput.addEventListener("input", function () {
+    if (errorEl.textContent && messageInput.value.trim()) errorEl.textContent = "";
+  });
+
+  searchInput.addEventListener("input", render);
+
+  // ほかのタブで投稿されたときも一覧を更新する
+  window.addEventListener("storage", function (e) {
+    if (e.key === STORAGE_KEY) {
+      posts = loadPosts();
+      render();
+    }
+  });
+
+  updateNotice();
+  render();
+})();
+</script>
+</body>
+</html>

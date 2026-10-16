@@ -1,0 +1,66 @@
+<?php
+/**
+ * お問い合わせフォーム（送信処理）
+ * 画面は持たず、結果に応じて完了画面か確認画面へ移動します。
+ */
+declare(strict_types=1);
+require __DIR__ . '/lib.php';
+bootstrap();
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    redirect('index.php');
+}
+
+$input = $_SESSION['contact_input'] ?? null;
+if (!is_array($input) || validate_input($input)) {
+    redirect('index.php');
+}
+$input = array_merge(default_input(), $input);
+
+function fail_back(string $message): void
+{
+    $_SESSION['send_error'] = $message;
+    redirect('confirm.php');
+}
+
+if (!csrf_valid()) {
+    fail_back('ページの有効期限が切れました。お手数ですが、もう一度「送信する」を押してください。');
+}
+
+if (!config_is_ready()) {
+    error_log('[contact] config.php の送信先または送信元が未設定です');
+    fail_back('現在フォームの準備中のため送信できません。お手数ですが、時間をおいてお試しください。');
+}
+
+$cooldown = (int) cfg('cooldown_seconds', 60);
+$lastSent = (int) ($_SESSION['last_sent_at'] ?? 0);
+if ($cooldown > 0 && $lastSent > 0 && (time() - $lastSent) < $cooldown) {
+    fail_back('続けて送信することはできません。' . $cooldown . '秒ほどおいてから、もう一度お試しください。');
+}
+
+if (!ip_rate_allow()) {
+    fail_back('短い時間に送信が集中しています。しばらく時間をおいてから、もう一度お試しください。');
+}
+
+// 管理者へ送信
+[$subject, $body] = build_admin_mail($input);
+if (!send_mail(implode(', ', admin_addresses()), $subject, $body, $input['email'])) {
+    fail_back('送信に失敗しました。お手数ですが、時間をおいてもう一度お試しください。');
+}
+
+// お客様へ自動返信（失敗しても受付は完了扱い）
+if (cfg('auto_reply', false)) {
+    [$replySubject, $replyBody] = build_auto_reply($input);
+    $admins = admin_addresses();
+    if (!send_mail($input['email'], $replySubject, $replyBody, $admins[0] ?? null)) {
+        error_log('[contact] 自動返信メールの送信に失敗しました');
+    }
+}
+
+// 後片付け
+unset($_SESSION['contact_input'], $_SESSION['form_started_at'], $_SESSION['csrf_token']);
+$_SESSION['last_sent_at'] = time();
+$_SESSION['contact_sent'] = true;
+session_regenerate_id(true);
+
+redirect('thanks.php');

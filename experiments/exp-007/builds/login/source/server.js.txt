@@ -1,0 +1,839 @@
+'use strict';
+
+/**
+ * ログイン機能付き 会員ページ
+ *
+ * - 依存パッケージなし（Node.js 18 以上の標準モジュールのみ）
+ * - 起動: `node server.js` → http://127.0.0.1:3000
+ *
+ * 主な機能: 新規会員登録 / ログイン / ログアウト / 会員限定ページ / パスワード変更
+ * 主な安全対策: scrypt によるパスワードハッシュ、HttpOnly セッション Cookie、
+ *   ログイン時のセッション ID 再発行、CSRF トークン、Origin 検査、試行回数制限、
+ *   セキュリティヘッダー（CSP など）、HTML エスケープ
+ */
+
+const http = require('http');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+// ---------------------------------------------------------------------------
+// 設定（環境変数で上書きできます）
+// ---------------------------------------------------------------------------
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
+const SITE_NAME = process.env.SITE_NAME || 'メンバーズ';
+const COOKIE_SECURE = process.env.COOKIE_SECURE === '1'; // HTTPS で公開するときは 1
+const TRUST_PROXY = process.env.TRUST_PROXY === '1'; // リバースプロキシの背後に置くときは 1
+
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const CSS_FILE = path.join(__dirname, 'public', 'style.css');
+
+const SESSION_COOKIE = COOKIE_SECURE ? '__Host-sid' : 'sid';
+const SESSION_IDLE_MS = 30 * 60 * 1000; // 30 分操作がなければ失効
+const SESSION_ABSOLUTE_MS = 12 * 60 * 60 * 1000; // ログインから最長 12 時間
+const MAX_SESSIONS = 20000;
+const MAX_BODY_BYTES = 8 * 1024;
+
+const NAME_MAX = 40;
+const EMAIL_MAX = 254;
+const PASSWORD_MIN = 8;
+const PASSWORD_MAX = 128;
+
+const MINUTE = 60 * 1000;
+const LIMITS = {
+  loginEmail: { max: 5, windowMs: 15 * MINUTE }, // 同じメールアドレスへの失敗
+  loginIp: { max: 30, windowMs: 15 * MINUTE }, // 同じ IP からの失敗
+  register: { max: 20, windowMs: 60 * MINUTE }, // 同じ IP からの登録操作
+  password: { max: 5, windowMs: 15 * MINUTE }, // パスワード変更時の現在パスワード誤り
+};
+
+const SCRYPT = { N: 16384, r: 8, p: 1, keylen: 64, maxmem: 64 * 1024 * 1024 };
+
+// 会員限定ページに表示するお知らせ。自由に書き換えてください。
+const MEMBER_NEWS = [
+  {
+    date: '2026-10-16',
+    title: '会員ページを公開しました',
+    body: 'このページは、ログインした会員の方だけがご覧いただけます。',
+  },
+  {
+    date: '2026-10-10',
+    title: '会員限定コンテンツのご案内',
+    body: '今後、会員の方向けの資料やお知らせをこちらに掲載していきます。',
+  },
+  {
+    date: '2026-10-01',
+    title: 'パスワード管理のお願い',
+    body: 'ほかのサービスと同じパスワードの使い回しは避け、定期的な見直しをおすすめします。',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// 会員データ（data/users.json に保存）
+// ---------------------------------------------------------------------------
+let db = { users: [] };
+
+function loadUsers() {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    const parsed = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+    if (parsed && Array.isArray(parsed.users)) db = parsed;
+  } catch (err) {
+    // ファイルがなければ空で開始。壊れている場合は上書きしないよう起動を止める。
+    if (err.code !== 'ENOENT') throw err;
+  }
+}
+
+function saveUsers() {
+  const json = JSON.stringify(db, null, 2);
+  const tmp = `${USERS_FILE}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, json, { encoding: 'utf8', mode: 0o600 });
+  try {
+    fs.renameSync(tmp, USERS_FILE);
+  } catch (err) {
+    // OneDrive などがファイルを掴んでいて置き換えに失敗した場合は直接書き込む
+    fs.writeFileSync(USERS_FILE, json, { encoding: 'utf8', mode: 0o600 });
+    try { fs.unlinkSync(tmp); } catch (_) { /* 無視 */ }
+  }
+}
+
+const findUserByEmail = (email) => db.users.find((u) => u.email === email) || null;
+const findUserById = (id) => db.users.find((u) => u.id === id) || null;
+
+// ---------------------------------------------------------------------------
+// パスワードハッシュ（scrypt）
+// ---------------------------------------------------------------------------
+function scryptAsync(password, salt, keylen, opts) {
+  return new Promise((resolve, reject) => {
+    crypto.scrypt(password, salt, keylen, opts, (err, key) => (err ? reject(err) : resolve(key)));
+  });
+}
+
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16);
+  const key = await scryptAsync(password, salt, SCRYPT.keylen, {
+    N: SCRYPT.N, r: SCRYPT.r, p: SCRYPT.p, maxmem: SCRYPT.maxmem,
+  });
+  return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, salt.toString('base64'), key.toString('base64')].join('$');
+}
+
+async function verifyPassword(password, stored) {
+  const parts = String(stored || '').split('$');
+  if (parts.length !== 6 || parts[0] !== 'scrypt') return false;
+  const [, N, r, p, saltB64, keyB64] = parts;
+  const expected = Buffer.from(keyB64, 'base64');
+  const key = await scryptAsync(password, Buffer.from(saltB64, 'base64'), expected.length, {
+    N: Number(N), r: Number(r), p: Number(p), maxmem: SCRYPT.maxmem,
+  });
+  return key.length === expected.length && crypto.timingSafeEqual(key, expected);
+}
+
+// 存在しないメールアドレスでも同じだけ時間をかけ、登録有無を推測されにくくする
+const dummyHashPromise = hashPassword(crypto.randomBytes(16).toString('hex'));
+
+// ---------------------------------------------------------------------------
+// セッション（メモリ上に保持。サーバー再起動で全員ログアウト）
+// ---------------------------------------------------------------------------
+const sessions = new Map();
+
+function isExpired(s, now) {
+  return now - s.lastSeen > SESSION_IDLE_MS || now - s.createdAt > SESSION_ABSOLUTE_MS;
+}
+
+function newSession(userId = null) {
+  if (sessions.size >= MAX_SESSIONS) pruneSessions();
+  while (sessions.size >= MAX_SESSIONS) {
+    let victim = null;
+    for (const s of sessions.values()) {
+      if (!s.userId) { victim = s.id; break; }
+    }
+    sessions.delete(victim || sessions.keys().next().value);
+  }
+  const now = Date.now();
+  const s = {
+    id: crypto.randomBytes(32).toString('base64url'),
+    userId,
+    csrf: crypto.randomBytes(32).toString('base64url'),
+    createdAt: now,
+    lastSeen: now,
+    flash: null,
+  };
+  sessions.set(s.id, s);
+  return s;
+}
+
+function setSessionCookie(res, s) {
+  const parts = [`${SESSION_COOKIE}=${s.id}`, 'Path=/', 'HttpOnly', 'SameSite=Lax'];
+  if (COOKIE_SECURE) parts.push('Secure');
+  res.setHeader('Set-Cookie', parts.join('; '));
+}
+
+function parseCookies(header) {
+  const out = Object.create(null);
+  if (!header) return out;
+  for (const part of header.split(';')) {
+    const i = part.indexOf('=');
+    if (i < 0) continue;
+    const k = part.slice(0, i).trim();
+    const v = part.slice(i + 1).trim();
+    if (k && !(k in out)) out[k] = v;
+  }
+  return out;
+}
+
+function loadSession(req, res) {
+  const id = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  const now = Date.now();
+  let s = id ? sessions.get(id) : null;
+  if (s && isExpired(s, now)) {
+    sessions.delete(s.id);
+    s = null;
+  }
+  if (s) {
+    s.lastSeen = now;
+    return s;
+  }
+  s = newSession(null);
+  setSessionCookie(res, s);
+  return s;
+}
+
+// ログイン状態が変わるときはセッション ID を作り直す（セッション固定攻撃対策）
+function startSession(ctx, userId) {
+  sessions.delete(ctx.session.id);
+  const s = newSession(userId);
+  setSessionCookie(ctx.res, s);
+  ctx.session = s;
+  return s;
+}
+
+function takeFlash(session) {
+  const f = session.flash;
+  session.flash = null;
+  return f;
+}
+
+// ---------------------------------------------------------------------------
+// 試行回数制限
+// ---------------------------------------------------------------------------
+const attempts = new Map();
+
+function lockedFor(key, limit) {
+  const e = attempts.get(key);
+  const now = Date.now();
+  if (e && e.resetAt > now && e.count >= limit.max) return e.resetAt - now;
+  return 0;
+}
+
+function recordAttempt(key, limit) {
+  const now = Date.now();
+  const e = attempts.get(key);
+  if (!e || e.resetAt <= now) attempts.set(key, { count: 1, resetAt: now + limit.windowMs });
+  else e.count += 1;
+}
+
+function tooManyMessage(waitMs) {
+  return `試行回数が多すぎます。約${Math.max(1, Math.ceil(waitMs / MINUTE))}分後に再度お試しください。`;
+}
+
+function pruneSessions() {
+  const now = Date.now();
+  for (const [id, s] of sessions) if (isExpired(s, now)) sessions.delete(id);
+  for (const [k, e] of attempts) if (e.resetAt <= now) attempts.delete(k);
+}
+setInterval(pruneSessions, MINUTE).unref();
+
+// ---------------------------------------------------------------------------
+// リクエスト処理の補助
+// ---------------------------------------------------------------------------
+function httpError(status) {
+  const err = new Error(`HTTP ${status}`);
+  err.status = status;
+  return err;
+}
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const declared = Number(req.headers['content-length']);
+    if (declared > MAX_BODY_BYTES) {
+      reject(httpError(413));
+      req.resume();
+      return;
+    }
+    const chunks = [];
+    let size = 0;
+    let tooLarge = false;
+    req.on('data', (chunk) => {
+      if (tooLarge) return;
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        tooLarge = true;
+        chunks.length = 0;
+      } else {
+        chunks.push(chunk);
+      }
+    });
+    req.on('end', () => (tooLarge ? reject(httpError(413)) : resolve(Buffer.concat(chunks).toString('utf8'))));
+    req.on('error', reject);
+  });
+}
+
+async function readForm(req) {
+  const type = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  if (type !== 'application/x-www-form-urlencoded') throw httpError(415);
+  return new URLSearchParams(await readBody(req));
+}
+
+function str(form, name) {
+  const v = form.get(name);
+  return v == null ? '' : String(v);
+}
+
+function clientIp(req) {
+  if (TRUST_PROXY) {
+    const xff = String(req.headers['x-forwarded-for'] || '').split(',').map((s) => s.trim()).filter(Boolean);
+    if (xff.length) return xff[xff.length - 1];
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
+function sameOrigin(req) {
+  if (req.headers['sec-fetch-site'] === 'cross-site') return false;
+  const origin = req.headers.origin;
+  if (!origin) return true; // Origin を送らない古いブラウザ。CSRF トークンで守る。
+  try {
+    return new URL(origin).host === req.headers.host;
+  } catch (_) {
+    return false;
+  }
+}
+
+function csrfValid(ctx, form) {
+  const a = Buffer.from(str(form, '_csrf'));
+  const b = Buffer.from(ctx.session.csrf);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function csrfFailed(ctx, backTo) {
+  ctx.session.flash = {
+    type: 'error',
+    text: 'ページの有効期限が切れたため、操作を完了できませんでした。もう一度お試しください。',
+  };
+  redirect(ctx.res, backTo);
+}
+
+function setSecurityHeaders(res) {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'none'; style-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
+  );
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  if (COOKIE_SECURE) res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+}
+
+function sendHtml(res, status, html) {
+  res.writeHead(status, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
+  res.end(html);
+}
+
+function redirect(res, location) {
+  res.writeHead(303, { Location: location, 'Cache-Control': 'no-store' });
+  res.end();
+}
+
+function serveCss(res) {
+  fs.readFile(CSS_FILE, (err, data) => {
+    if (err) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Not found');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'no-cache' });
+    res.end(data);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 入力チェック
+// ---------------------------------------------------------------------------
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTROL_RE = /[\u0000-\u001f\u007f]/;
+
+function normalizeEmail(v) {
+  return String(v || '').trim().toLowerCase();
+}
+
+function charLength(s) {
+  return [...s].length;
+}
+
+function passwordErrors(password, confirm, label) {
+  const errors = [];
+  const len = charLength(password);
+  if (len < PASSWORD_MIN) errors.push(`${label}は${PASSWORD_MIN}文字以上で入力してください。`);
+  else if (len > PASSWORD_MAX) errors.push(`${label}は${PASSWORD_MAX}文字以内で入力してください。`);
+  if (password !== confirm) errors.push(`${label}（確認用）が一致しません。`);
+  return errors;
+}
+
+// ---------------------------------------------------------------------------
+// HTML テンプレート
+// ---------------------------------------------------------------------------
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ESC_MAP[c]);
+
+const dateTimeFmt = new Intl.DateTimeFormat('ja-JP', {
+  timeZone: 'Asia/Tokyo', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+});
+const dateFmt = new Intl.DateTimeFormat('ja-JP', {
+  timeZone: 'Asia/Tokyo', year: 'numeric', month: 'long', day: 'numeric',
+});
+
+function fmt(iso, withTime = true) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return (withTime ? dateTimeFmt : dateFmt).format(d);
+}
+
+const FAVICON =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f6f5c'/%3E%3Cpath d='M11 15v-3a5 5 0 0 1 10 0v3' fill='none' stroke='%23fff' stroke-width='2.4'/%3E%3Crect x='8' y='15' width='16' height='11' rx='2.5' fill='%23fff'/%3E%3C/svg%3E";
+
+function csrfField(ctx) {
+  return `<input type="hidden" name="_csrf" value="${esc(ctx.session.csrf)}">`;
+}
+
+function noticeBlock(type, text) {
+  const role = type === 'error' ? 'alert' : 'status';
+  return `<div class="notice notice-${esc(type)}" role="${role}"><p>${esc(text)}</p></div>`;
+}
+
+function flashBlock(ctx) {
+  const f = takeFlash(ctx.session);
+  return f ? noticeBlock(f.type, f.text) : '';
+}
+
+function errorBlock(errors) {
+  if (!errors || !errors.length) return '';
+  if (errors.length === 1) return noticeBlock('error', errors[0]);
+  return `<div class="notice notice-error" role="alert"><p>入力内容を確認してください。</p><ul>${errors
+    .map((e) => `<li>${esc(e)}</li>`)
+    .join('')}</ul></div>`;
+}
+
+function field({ label, name, type = 'text', value = '', autocomplete, minlength, maxlength, hint, autofocus }) {
+  const id = `f-${name}`;
+  const hintId = `${id}-hint`;
+  const attrs = [
+    `id="${id}"`,
+    `name="${esc(name)}"`,
+    `type="${esc(type)}"`,
+    'required',
+    type !== 'password' && value ? `value="${esc(value)}"` : '',
+    autocomplete ? `autocomplete="${esc(autocomplete)}"` : '',
+    minlength ? `minlength="${minlength}"` : '',
+    maxlength ? `maxlength="${maxlength}"` : '',
+    hint ? `aria-describedby="${hintId}"` : '',
+    autofocus ? 'autofocus' : '',
+  ].filter(Boolean).join(' ');
+  return `<div class="field">
+        <label for="${id}">${esc(label)}</label>
+        <input ${attrs}>
+        ${hint ? `<p class="hint" id="${hintId}">${esc(hint)}</p>` : ''}
+      </div>`;
+}
+
+function layout(ctx, { title, body }) {
+  const user = ctx.user;
+  const nav = user
+    ? `<span class="nav-user" title="${esc(user.name)}">${esc(user.name)} さん</span>
+        <form method="post" action="/logout" class="inline-form">
+          ${csrfField(ctx)}
+          <button type="submit" class="btn btn-ghost btn-sm">ログアウト</button>
+        </form>`
+    : `<a href="/login" class="nav-link">ログイン</a>
+        <a href="/register" class="btn btn-primary btn-sm">新規登録</a>`;
+
+  return `<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)} | ${esc(SITE_NAME)}</title>
+<link rel="icon" href="${FAVICON}">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>${esc(SITE_NAME)}</a>
+    <nav class="site-nav" aria-label="アカウント">
+      ${nav}
+    </nav>
+  </div>
+</header>
+<main id="main">
+${body}
+</main>
+<footer class="site-footer">
+  <p>&copy; ${new Date().getFullYear()} ${esc(SITE_NAME)}</p>
+</footer>
+</body>
+</html>`;
+}
+
+function loginPage(ctx, { errors = [], email = '' } = {}) {
+  const body = `
+<section class="auth">
+  <div class="auth-card">
+    <p class="eyebrow">会員の方</p>
+    <h1>ログイン</h1>
+    <p class="lead">登録したメールアドレスとパスワードを入力してください。</p>
+    ${flashBlock(ctx)}
+    ${errorBlock(errors)}
+    <form method="post" action="/login" class="form">
+      ${csrfField(ctx)}
+      ${field({ label: 'メールアドレス', name: 'email', type: 'email', value: email, autocomplete: 'username', maxlength: EMAIL_MAX, autofocus: true })}
+      ${field({ label: 'パスワード', name: 'password', type: 'password', autocomplete: 'current-password', maxlength: PASSWORD_MAX })}
+      <button type="submit" class="btn btn-primary btn-block">ログイン</button>
+    </form>
+    <p class="switch">はじめての方は <a href="/register">新規会員登録</a></p>
+  </div>
+</section>`;
+  return layout(ctx, { title: 'ログイン', body });
+}
+
+function registerPage(ctx, { errors = [], values = {} } = {}) {
+  const body = `
+<section class="auth">
+  <div class="auth-card">
+    <p class="eyebrow">はじめての方</p>
+    <h1>新規会員登録</h1>
+    <p class="lead">登録が完了すると、そのまま会員ページへ移動します。</p>
+    ${flashBlock(ctx)}
+    ${errorBlock(errors)}
+    <form method="post" action="/register" class="form">
+      ${csrfField(ctx)}
+      ${field({ label: 'お名前', name: 'name', value: values.name, autocomplete: 'name', maxlength: NAME_MAX, autofocus: true, hint: `${NAME_MAX}文字以内。会員ページの表示に使います。` })}
+      ${field({ label: 'メールアドレス', name: 'email', type: 'email', value: values.email, autocomplete: 'email', maxlength: EMAIL_MAX, hint: 'ログインに使います。' })}
+      ${field({ label: 'パスワード', name: 'password', type: 'password', autocomplete: 'new-password', minlength: PASSWORD_MIN, maxlength: PASSWORD_MAX, hint: `${PASSWORD_MIN}文字以上。ほかのサービスと同じものは避けてください。` })}
+      ${field({ label: 'パスワード（確認用）', name: 'password_confirm', type: 'password', autocomplete: 'new-password', minlength: PASSWORD_MIN, maxlength: PASSWORD_MAX })}
+      <button type="submit" class="btn btn-primary btn-block">登録する</button>
+    </form>
+    <p class="switch">すでに登録済みの方は <a href="/login">ログイン</a></p>
+  </div>
+</section>`;
+  return layout(ctx, { title: '新規会員登録', body });
+}
+
+function membersPage(ctx, { pwErrors = [] } = {}) {
+  const u = ctx.user;
+  const news = MEMBER_NEWS.map(
+    (n) => `<li class="news-item">
+          <time datetime="${esc(n.date)}">${esc(fmt(n.date, false))}</time>
+          <h3>${esc(n.title)}</h3>
+          <p>${esc(n.body)}</p>
+        </li>`
+  ).join('');
+
+  const body = `
+<div class="members">
+  ${flashBlock(ctx)}
+  <section class="welcome">
+    <p class="eyebrow">会員ページ</p>
+    <h1>ようこそ、${esc(u.name)} さん</h1>
+    <p class="muted">${u.previousLoginAt ? `前回のログイン：${esc(fmt(u.previousLoginAt))}` : 'はじめてのログインです。'}</p>
+  </section>
+
+  <div class="members-grid">
+    <section class="panel panel-main" aria-labelledby="news-title">
+      <h2 id="news-title">会員限定のお知らせ</h2>
+      <ul class="news">
+        ${news}
+      </ul>
+    </section>
+
+    <div class="side">
+      <section class="panel" aria-labelledby="account-title">
+        <h2 id="account-title">アカウント情報</h2>
+        <dl class="info">
+          <div><dt>お名前</dt><dd>${esc(u.name)}</dd></div>
+          <div><dt>メールアドレス</dt><dd class="break">${esc(u.email)}</dd></div>
+          <div><dt>登録日</dt><dd>${esc(fmt(u.createdAt, false))}</dd></div>
+          <div><dt>今回のログイン</dt><dd>${esc(fmt(u.lastLoginAt))}</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel" aria-labelledby="password-title" id="password">
+        <h2 id="password-title">パスワードの変更</h2>
+        ${errorBlock(pwErrors)}
+        <form method="post" action="/members/password" class="form">
+          ${csrfField(ctx)}
+          <input type="email" name="username" value="${esc(u.email)}" autocomplete="username" class="visually-hidden" tabindex="-1" aria-hidden="true" readonly>
+          ${field({ label: '現在のパスワード', name: 'current_password', type: 'password', autocomplete: 'current-password', maxlength: PASSWORD_MAX })}
+          ${field({ label: '新しいパスワード', name: 'new_password', type: 'password', autocomplete: 'new-password', minlength: PASSWORD_MIN, maxlength: PASSWORD_MAX, hint: `${PASSWORD_MIN}文字以上` })}
+          ${field({ label: '新しいパスワード（確認用）', name: 'new_password_confirm', type: 'password', autocomplete: 'new-password', minlength: PASSWORD_MIN, maxlength: PASSWORD_MAX })}
+          <button type="submit" class="btn btn-secondary btn-block">パスワードを変更する</button>
+        </form>
+        <p class="hint">変更すると、ほかの端末でのログインはすべて解除されます。</p>
+      </section>
+    </div>
+  </div>
+</div>`;
+  return layout(ctx, { title: '会員ページ', body });
+}
+
+function messagePage(ctx, { title, text }) {
+  const body = `
+<section class="auth">
+  <div class="auth-card center">
+    <h1>${esc(title)}</h1>
+    <p class="lead">${esc(text)}</p>
+    <a class="btn btn-primary" href="/">トップへ戻る</a>
+  </div>
+</section>`;
+  return layout(ctx, { title, body });
+}
+
+// ---------------------------------------------------------------------------
+// 各ページの処理
+// ---------------------------------------------------------------------------
+function requireLogin(ctx) {
+  ctx.session.flash = { type: 'info', text: '会員ページをご覧いただくにはログインしてください。' };
+  redirect(ctx.res, '/login');
+}
+
+async function handleLogin(ctx) {
+  if (ctx.user) return redirect(ctx.res, '/members');
+  const form = await readForm(ctx.req);
+  if (!csrfValid(ctx, form)) return csrfFailed(ctx, '/login');
+
+  const email = normalizeEmail(str(form, 'email'));
+  const password = str(form, 'password');
+  const ipKey = `login-ip:${ctx.ip}`;
+  const emailKey = `login-email:${email}`;
+
+  const wait = Math.max(lockedFor(ipKey, LIMITS.loginIp), lockedFor(emailKey, LIMITS.loginEmail));
+  if (wait > 0) {
+    return sendHtml(ctx.res, 429, loginPage(ctx, { errors: [tooManyMessage(wait)], email }));
+  }
+
+  const user = email ? findUserByEmail(email) : null;
+  let ok = false;
+  if (user && password) {
+    ok = await verifyPassword(password, user.passwordHash);
+  } else {
+    await verifyPassword(password || 'x', await dummyHashPromise);
+  }
+
+  if (!ok) {
+    recordAttempt(ipKey, LIMITS.loginIp);
+    recordAttempt(emailKey, LIMITS.loginEmail);
+    return sendHtml(
+      ctx.res,
+      401,
+      loginPage(ctx, { errors: ['メールアドレスまたはパスワードが正しくありません。'], email })
+    );
+  }
+
+  attempts.delete(emailKey);
+  user.previousLoginAt = user.lastLoginAt || null;
+  user.lastLoginAt = new Date().toISOString();
+  saveUsers();
+
+  const s = startSession(ctx, user.id);
+  s.flash = { type: 'success', text: 'ログインしました。' };
+  return redirect(ctx.res, '/members');
+}
+
+async function handleRegister(ctx) {
+  if (ctx.user) return redirect(ctx.res, '/members');
+  const form = await readForm(ctx.req);
+  if (!csrfValid(ctx, form)) return csrfFailed(ctx, '/register');
+
+  const name = str(form, 'name').trim();
+  const email = normalizeEmail(str(form, 'email'));
+  const password = str(form, 'password');
+  const confirm = str(form, 'password_confirm');
+  const values = { name, email };
+
+  const regKey = `register:${ctx.ip}`;
+  const wait = lockedFor(regKey, LIMITS.register);
+  if (wait > 0) {
+    return sendHtml(ctx.res, 429, registerPage(ctx, { errors: [tooManyMessage(wait)], values }));
+  }
+  recordAttempt(regKey, LIMITS.register);
+
+  const errors = [];
+  if (!name) errors.push('お名前を入力してください。');
+  else if (charLength(name) > NAME_MAX) errors.push(`お名前は${NAME_MAX}文字以内で入力してください。`);
+  else if (CONTROL_RE.test(name)) errors.push('お名前に使用できない文字が含まれています。');
+
+  if (!email) errors.push('メールアドレスを入力してください。');
+  else if (email.length > EMAIL_MAX || !EMAIL_RE.test(email)) errors.push('メールアドレスの形式が正しくありません。');
+
+  errors.push(...passwordErrors(password, confirm, 'パスワード'));
+
+  const duplicateMsg = 'このメールアドレスはすでに登録されています。ログインしてください。';
+  if (!errors.length && findUserByEmail(email)) errors.push(duplicateMsg);
+  if (errors.length) return sendHtml(ctx.res, 400, registerPage(ctx, { errors, values }));
+
+  const passwordHash = await hashPassword(password);
+  // ハッシュ計算中に同じメールアドレスで登録された場合に備えて再確認
+  if (findUserByEmail(email)) {
+    return sendHtml(ctx.res, 400, registerPage(ctx, { errors: [duplicateMsg], values }));
+  }
+
+  const now = new Date().toISOString();
+  const user = {
+    id: crypto.randomUUID(),
+    name,
+    email,
+    passwordHash,
+    createdAt: now,
+    lastLoginAt: now,
+    previousLoginAt: null,
+  };
+  db.users.push(user);
+  saveUsers();
+
+  const s = startSession(ctx, user.id);
+  s.flash = { type: 'success', text: '会員登録が完了しました。ようこそ！' };
+  return redirect(ctx.res, '/members');
+}
+
+async function handlePasswordChange(ctx) {
+  if (!ctx.user) return requireLogin(ctx);
+  const form = await readForm(ctx.req);
+  if (!csrfValid(ctx, form)) return csrfFailed(ctx, '/members');
+
+  const user = ctx.user;
+  const current = str(form, 'current_password');
+  const next = str(form, 'new_password');
+  const confirm = str(form, 'new_password_confirm');
+  const key = `password:${user.id}`;
+
+  const wait = lockedFor(key, LIMITS.password);
+  if (wait > 0) return sendHtml(ctx.res, 429, membersPage(ctx, { pwErrors: [tooManyMessage(wait)] }));
+
+  if (!current || !(await verifyPassword(current, user.passwordHash))) {
+    recordAttempt(key, LIMITS.password);
+    return sendHtml(ctx.res, 400, membersPage(ctx, { pwErrors: ['現在のパスワードが正しくありません。'] }));
+  }
+
+  const errors = passwordErrors(next, confirm, '新しいパスワード');
+  if (!errors.length && next === current) errors.push('新しいパスワードには現在と異なるものを指定してください。');
+  if (errors.length) return sendHtml(ctx.res, 400, membersPage(ctx, { pwErrors: errors }));
+
+  attempts.delete(key);
+  user.passwordHash = await hashPassword(next);
+  saveUsers();
+
+  // ほかの端末を含め、この会員のセッションをすべて無効化してから新しく発行する
+  for (const [id, s] of sessions) if (s.userId === user.id) sessions.delete(id);
+  const s = newSession(user.id);
+  setSessionCookie(ctx.res, s);
+  ctx.session = s;
+  s.flash = { type: 'success', text: 'パスワードを変更しました。' };
+  return redirect(ctx.res, '/members');
+}
+
+async function handleLogout(ctx) {
+  const form = await readForm(ctx.req);
+  if (!csrfValid(ctx, form)) return csrfFailed(ctx, ctx.user ? '/members' : '/login');
+  const s = startSession(ctx, null);
+  s.flash = { type: 'success', text: 'ログアウトしました。' };
+  return redirect(ctx.res, '/login');
+}
+
+// ---------------------------------------------------------------------------
+// ルーティング
+// ---------------------------------------------------------------------------
+const KNOWN_PATHS = new Set(['/', '/login', '/register', '/members', '/members/password', '/logout']);
+
+async function handle(req, res) {
+  const url = new URL(req.url, 'http://localhost');
+  const method = req.method === 'HEAD' ? 'GET' : req.method;
+  setSecurityHeaders(res);
+
+  if (method === 'GET' && url.pathname === '/static/style.css') return serveCss(res);
+  if (url.pathname === '/favicon.ico') {
+    res.writeHead(204);
+    return res.end();
+  }
+
+  const ctx = { req, res, url, ip: clientIp(req), session: loadSession(req, res), user: null };
+  if (ctx.session.userId) {
+    ctx.user = findUserById(ctx.session.userId);
+    if (!ctx.user) ctx.session.userId = null;
+  }
+
+  if (method === 'POST' && !sameOrigin(req)) {
+    return sendHtml(res, 403, messagePage(ctx, { title: '操作を受け付けられません', text: '別のサイトからの送信は受け付けていません。' }));
+  }
+
+  switch (`${method} ${url.pathname}`) {
+    case 'GET /':
+      return redirect(res, ctx.user ? '/members' : '/login');
+    case 'GET /login':
+      return ctx.user ? redirect(res, '/members') : sendHtml(res, 200, loginPage(ctx));
+    case 'POST /login':
+      return handleLogin(ctx);
+    case 'GET /register':
+      return ctx.user ? redirect(res, '/members') : sendHtml(res, 200, registerPage(ctx));
+    case 'POST /register':
+      return handleRegister(ctx);
+    case 'GET /members':
+      return ctx.user ? sendHtml(res, 200, membersPage(ctx)) : requireLogin(ctx);
+    case 'GET /members/password':
+      return redirect(res, '/members#password');
+    case 'POST /members/password':
+      return handlePasswordChange(ctx);
+    case 'POST /logout':
+      return handleLogout(ctx);
+    default:
+      if (KNOWN_PATHS.has(url.pathname)) {
+        return sendHtml(res, 405, messagePage(ctx, { title: '許可されていない操作です', text: 'このページではその操作を行えません。' }));
+      }
+      return sendHtml(res, 404, messagePage(ctx, { title: 'ページが見つかりません', text: 'お探しのページは移動または削除された可能性があります。' }));
+  }
+}
+
+const ERROR_TEXT = {
+  413: '送信された内容が大きすぎます。',
+  415: '対応していない形式の送信です。',
+};
+
+const server = http.createServer((req, res) => {
+  handle(req, res).catch((err) => {
+    const status = err.status || 500;
+    if (status >= 500) console.error(err);
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    res.writeHead(status, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+      Connection: 'close',
+    });
+    res.end(ERROR_TEXT[status] || 'サーバーでエラーが発生しました。時間をおいて再度お試しください。');
+  });
+});
+
+server.requestTimeout = 15000;
+server.headersTimeout = 10000;
+
+loadUsers();
+server.listen(PORT, HOST, () => {
+  console.log(`${SITE_NAME} 会員ページを起動しました: http://${HOST}:${PORT}`);
+  console.log(`会員データ: ${USERS_FILE}`);
+});
