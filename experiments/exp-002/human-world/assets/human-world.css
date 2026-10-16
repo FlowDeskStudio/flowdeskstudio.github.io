@@ -146,6 +146,18 @@
   line-height: 1.25;
 }
 
+.chronicle-index a {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.chronicle-index a:hover strong,
+.chronicle-index a:focus-visible strong {
+  text-decoration: underline;
+}
+
 .chronicle-era {
   scroll-margin-top: 20px;
 }

@@ -1,11 +1,14 @@
 // 起動と時間の進行。計算は一定間隔、描画は画面の更新に合わせて行う。
-import { setLang, detectLang, getLang } from './core/i18n.js';
+import { setLang, detectLang, getLang, LANGS } from './core/i18n.js';
 import { load, store, newSave } from './core/save.js';
 import { tickAll, simulate, runOffline } from './core/world.js';
 import { setVolume, startBgm } from './core/audio.js';
 import { createApp } from './ui/app.js';
 
 const save = load() || newSave();
+// ?lang=en / ?lang=ja を付けて開いたときは、その言語で始める（英語のページから来た人のため）。設定でいつでも戻せる
+const urlLang = new URLSearchParams(location.search).get('lang');
+if (LANGS.includes(urlLang)) save.lang = urlLang;
 if (!save.lang) save.lang = detectLang();
 setLang(save.lang);
 document.documentElement.lang = getLang();

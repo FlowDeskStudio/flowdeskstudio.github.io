@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ja">
+  <title>FlowDeskStudio 実験ログ</title>
+  <link href="https://flowdeskstudio.net/"/>
+  <link rel="self" href="https://flowdeskstudio.net/feed.xml"/>
+  <id>https://flowdeskstudio.net/feed.xml</id>
+  <updated>2026-10-16T00:00:00+09:00</updated>
+  <author><name>FlowDeskStudio</name></author>
+  <entry>
+    <title>AIに作らせたWebアプリ35個をセキュリティ検査した結果</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-007/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-007/</id>
+    <updated>2026-10-16T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>プロンプトの裏技20個をClaudeで試した結果</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-006/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-006/</id>
+    <updated>2026-10-12T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>AI個人ゲーム開発で直面した10の課題と解決策</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-005/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-005/</id>
+    <updated>2026-10-12T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>AIで絵の伝言ゲームを100回やった結果</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-004/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-004/</id>
+    <updated>2026-10-09T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>AIに一言で頼んで作れるもの15選</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-003/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-003/</id>
+    <updated>2026-10-09T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>300人の世界をAI Godに任せたら、745年後に人類が絶滅した</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-002/human-world/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-002/human-world/</id>
+    <updated>2026-09-07T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>AIを神にしてみた</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-002/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-002/</id>
+    <updated>2026-08-26T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>AIだけでゲームは作れる？Codexに丸投げした結果</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-001/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-001/</id>
+    <updated>2026-08-20T00:00:00+09:00</updated>
+  </entry>
+</feed>
