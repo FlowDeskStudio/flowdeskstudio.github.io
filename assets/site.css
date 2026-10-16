@@ -1909,3 +1909,45 @@ h1 em::after {
     grid-template-columns: 1fr;
   }
 }
+
+/* Card thumbnails on the top pages (2026-10-16) */
+.empty-log.has-thumb {
+  grid-template-columns: 130px minmax(0, 1fr) minmax(220px, 300px) 110px;
+}
+
+.log-thumb {
+  border-left: 1px solid var(--ink);
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.log-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .empty-log.has-thumb {
+    grid-template-columns: 110px minmax(0, 1fr) 200px;
+  }
+
+  .empty-log.has-thumb .log-mark {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .empty-log.has-thumb {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .empty-log.has-thumb .log-thumb {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 180px;
+    border-top: 1px solid var(--ink);
+    border-left: 0;
+  }
+}

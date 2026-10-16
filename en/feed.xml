@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <title>FlowDeskStudio experiment log</title>
+  <link href="https://flowdeskstudio.net/en/"/>
+  <link rel="self" href="https://flowdeskstudio.net/en/feed.xml"/>
+  <id>https://flowdeskstudio.net/en/feed.xml</id>
+  <updated>2026-10-16T00:00:00+09:00</updated>
+  <author><name>FlowDeskStudio</name></author>
+  <entry>
+    <title>We security-checked 35 web apps built by AI</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-007/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-007/</id>
+    <updated>2026-10-16T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>We tested 20 prompt tricks on Claude</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-006/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-006/</id>
+    <updated>2026-10-12T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>10 problems in solo AI game development and how we fixed them</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-005/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-005/</id>
+    <updated>2026-10-12T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>An AI picture telephone game, 100 rounds</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-004/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-004/</id>
+    <updated>2026-10-09T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>What can AI build from one sentence? 15 apps tested</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-003/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-003/</id>
+    <updated>2026-10-09T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>I gave an AI god a world of 300 people. Humanity was extinct 745 years later</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-002/human-world/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-002/human-world/</id>
+    <updated>2026-09-07T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>I let AI be a God</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-002/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-002/</id>
+    <updated>2026-08-26T00:00:00+09:00</updated>
+  </entry>
+  <entry>
+    <title>Can AI make a game on its own?</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-001/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-001/</id>
+    <updated>2026-08-20T00:00:00+09:00</updated>
+  </entry>
+</feed>
