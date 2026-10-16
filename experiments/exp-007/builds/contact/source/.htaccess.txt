@@ -1,0 +1,4 @@
+# 内部用ファイルへのブラウザからの直接アクセスを禁止します（Apache 2.4）
+<FilesMatch "^(config|lib)\.php$|\.(md|log|json)$">
+    Require all denied
+</FilesMatch>

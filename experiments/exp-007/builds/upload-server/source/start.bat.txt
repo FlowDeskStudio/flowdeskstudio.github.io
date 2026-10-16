@@ -1,0 +1,17 @@
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+
+where node >nul 2>nul
+if errorlevel 1 (
+  echo Node.js が見つかりません。https://nodejs.org/ から Node.js 18 以降をインストールしてください。
+  pause
+  exit /b 1
+)
+
+if "%PORT%"=="" set PORT=3000
+
+echo 画像掲示板を起動します。ブラウザで http://localhost:%PORT%/ を開きます。
+start "" "http://localhost:%PORT%/"
+node server.js
+pause

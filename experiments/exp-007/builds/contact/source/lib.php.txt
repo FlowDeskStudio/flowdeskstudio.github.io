@@ -1,0 +1,596 @@
+<?php
+/**
+ * お問い合わせフォーム 共通処理
+ *
+ * 動作要件: PHP 7.4 以上 / mbstring 拡張 / mail() が使えるサーバー
+ */
+declare(strict_types=1);
+
+/* ------------------------------------------------------------------
+ * 設定・初期化
+ * ------------------------------------------------------------------ */
+
+function config(): array
+{
+    static $config = null;
+    if ($config === null) {
+        $loaded = require __DIR__ . '/config.php';
+        $config = is_array($loaded) ? $loaded : [];
+    }
+    return $config;
+}
+
+function cfg(string $key, $default = null)
+{
+    $c = config();
+    return array_key_exists($key, $c) ? $c[$key] : $default;
+}
+
+function bootstrap(): void
+{
+    date_default_timezone_set((string) cfg('timezone', 'Asia/Tokyo'));
+    mb_language('uni');              // メールを UTF-8（BASE64）で送る
+    mb_internal_encoding('UTF-8');
+    send_security_headers();
+    start_session();
+}
+
+function send_security_headers(): void
+{
+    header('Content-Type: text/html; charset=UTF-8');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: same-origin');
+    header("Content-Security-Policy: default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
+    header('Cache-Control: no-store');
+}
+
+function is_https(): bool
+{
+    if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+    return (string) ($_SERVER['SERVER_PORT'] ?? '') === '443';
+}
+
+function cookie_path(): string
+{
+    $dir = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/')));
+    return rtrim($dir, '/') . '/';
+}
+
+function start_session(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_name('contact_form_sid');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => cookie_path(),
+        'secure'   => is_https(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+function redirect(string $path): void
+{
+    header('Location: ' . $path, true, 303);
+    exit;
+}
+
+function h(?string $s): string
+{
+    return htmlspecialchars((string) $s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/* ------------------------------------------------------------------
+ * CSRF・スパム対策
+ * ------------------------------------------------------------------ */
+
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_valid(): bool
+{
+    $sent = $_POST['csrf_token'] ?? '';
+    $saved = $_SESSION['csrf_token'] ?? '';
+    return is_string($sent) && is_string($saved) && $saved !== '' && hash_equals($saved, $sent);
+}
+
+function honeypot_filled(): bool
+{
+    // ブラウザの自動入力に拾われにくい名前にしている（website や url だと実際の利用者が弾かれることがある）
+    return post_string('hp_check') !== '';
+}
+
+function submitted_too_fast(): bool
+{
+    $started = (int) ($_SESSION['form_started_at'] ?? 0);
+    $min = (int) cfg('min_seconds_before_submit', 3);
+    if ($started === 0 || $min <= 0) {
+        return false;
+    }
+    return (time() - $started) < $min;
+}
+
+function client_ip(): string
+{
+    // プロキシのヘッダーは偽装できるため、REMOTE_ADDR だけを使う
+    return (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+}
+
+function hash_secret(): string
+{
+    $secret = (string) cfg('secret', '');
+    return $secret !== '' ? $secret : hash('sha256', __DIR__);
+}
+
+function data_dir(): string
+{
+    return __DIR__ . '/data';
+}
+
+function ensure_data_dir(): bool
+{
+    $dir = data_dir();
+    if (is_dir($dir)) {
+        return is_writable($dir);
+    }
+    return @mkdir($dir, 0700, true);
+}
+
+/**
+ * IP ごとの送信回数を数え、上限内なら記録して true を返す。
+ * 記録用ファイルが書けない場合は送信を止めない（エラーログに残す）。
+ */
+function ip_rate_allow(): bool
+{
+    $rl = cfg('rate_limit', []);
+    $max = (int) ($rl['max_per_ip'] ?? 0);
+    $window = (int) ($rl['window_seconds'] ?? 3600);
+    if ($max <= 0 || $window <= 0) {
+        return true;
+    }
+    if (!ensure_data_dir()) {
+        error_log('[contact] data ディレクトリに書き込めないため、IP ごとの送信制限を省略しました');
+        return true;
+    }
+
+    $fp = @fopen(data_dir() . '/ratelimit.json', 'c+');
+    if ($fp === false) {
+        error_log('[contact] ratelimit.json を開けないため、IP ごとの送信制限を省略しました');
+        return true;
+    }
+
+    $allowed = true;
+    try {
+        flock($fp, LOCK_EX);
+        $raw = stream_get_contents($fp);
+        $data = json_decode($raw !== false && $raw !== '' ? $raw : '[]', true);
+        if (!is_array($data)) {
+            $data = [];
+        }
+
+        $now = time();
+        $limit = $now - $window;
+        foreach ($data as $k => $times) {
+            $kept = [];
+            foreach ((array) $times as $t) {
+                if (is_int($t) && $t > $limit) {
+                    $kept[] = $t;
+                }
+            }
+            if ($kept) {
+                $data[$k] = $kept;
+            } else {
+                unset($data[$k]);
+            }
+        }
+
+        $key = hash_hmac('sha256', client_ip(), hash_secret());
+        $count = isset($data[$key]) ? count($data[$key]) : 0;
+        if ($count >= $max) {
+            $allowed = false;
+        } else {
+            $data[$key][] = $now;
+        }
+
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, (string) json_encode($data));
+        fflush($fp);
+        flock($fp, LOCK_UN);
+    } finally {
+        fclose($fp);
+    }
+    return $allowed;
+}
+
+/* ------------------------------------------------------------------
+ * 入力の取得・整形
+ * ------------------------------------------------------------------ */
+
+function post_string(string $key): string
+{
+    $v = $_POST[$key] ?? '';
+    if (!is_string($v) || !mb_check_encoding($v, 'UTF-8')) {
+        return '';
+    }
+    return $v;
+}
+
+function trim_u(string $v): string
+{
+    return (string) preg_replace('/\A[\s\x{3000}]+|[\s\x{3000}]+\z/u', '', $v);
+}
+
+/** 1行の項目: 改行・制御文字をすべて取り除く（メールヘッダー注入対策） */
+function clean_line(string $v): string
+{
+    $v = (string) preg_replace('/[\x00-\x1F\x7F\x{2028}\x{2029}]/u', '', $v);
+    return trim_u($v);
+}
+
+/** 複数行の項目: 改行とタブだけ残す */
+function clean_text(string $v): string
+{
+    $v = str_replace(["\r\n", "\r"], "\n", $v);
+    $v = (string) preg_replace('/[\x00-\x08\x0B-\x1F\x7F]/u', '', $v);
+    return trim_u($v);
+}
+
+function default_input(): array
+{
+    return [
+        'name'          => '',
+        'company'       => '',
+        'email'         => '',
+        'email_confirm' => '',
+        'tel'           => '',
+        'category'      => '',
+        'message'       => '',
+        'agree'         => '',
+    ];
+}
+
+function normalize_email(string $v): string
+{
+    return clean_line(mb_convert_kana($v, 'as', 'UTF-8'));
+}
+
+function collect_input(): array
+{
+    $tel = mb_convert_kana(post_string('tel'), 'as', 'UTF-8');
+    $tel = str_replace(['ー', '−', '‐', '–', '—', '―'], '-', $tel);
+
+    return [
+        'name'          => clean_line(post_string('name')),
+        'company'       => clean_line(post_string('company')),
+        'email'         => normalize_email(post_string('email')),
+        'email_confirm' => normalize_email(post_string('email_confirm')),
+        'tel'           => clean_line($tel),
+        'category'      => clean_line(post_string('category')),
+        'message'       => clean_text(post_string('message')),
+        'agree'         => post_string('agree') === '1' ? '1' : '',
+    ];
+}
+
+/* ------------------------------------------------------------------
+ * 入力チェック
+ * ------------------------------------------------------------------ */
+
+function is_valid_email(string $email): bool
+{
+    if ($email === '' || strlen($email) > 254) {
+        return false;
+    }
+    // 空白・制御文字・引用符・バックスラッシュを含むものは受け付けない
+    if (preg_match('/[\x00-\x20\x7F"\\\\]/', $email)) {
+        return false;
+    }
+    if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
+        return true;
+    }
+    // 携帯キャリアの古いアドレス（ドットの連続など）も受け付ける
+    return (bool) preg_match(
+        '/\A[A-Za-z0-9._%+\-!#$&\'*\/=?^`{|}~]+@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)+\z/',
+        $email
+    );
+}
+
+function validate_input(array $in): array
+{
+    $in = array_merge(default_input(), $in);
+    $e = [];
+
+    if ($in['name'] === '') {
+        $e['name'] = 'お名前を入力してください。';
+    } elseif (mb_strlen($in['name']) > 50) {
+        $e['name'] = 'お名前は50文字以内で入力してください。';
+    }
+
+    if (mb_strlen($in['company']) > 100) {
+        $e['company'] = '会社名・団体名は100文字以内で入力してください。';
+    }
+
+    if ($in['email'] === '') {
+        $e['email'] = 'メールアドレスを入力してください。';
+    } elseif (!is_valid_email($in['email'])) {
+        $e['email'] = 'メールアドレスの形式が正しくありません。';
+    }
+
+    if ($in['email_confirm'] === '') {
+        $e['email_confirm'] = '確認のため、メールアドレスをもう一度入力してください。';
+    } elseif (!isset($e['email']) && $in['email_confirm'] !== $in['email']) {
+        $e['email_confirm'] = '上のメールアドレスと一致しません。';
+    }
+
+    if ($in['tel'] !== '') {
+        $digits = strlen((string) preg_replace('/\D/', '', $in['tel']));
+        if (!preg_match('/\A\+?[0-9()\- ]+\z/', $in['tel']) || $digits < 10 || $digits > 15) {
+            $e['tel'] = '電話番号は数字とハイフンで入力してください（例: 03-1234-5678）。';
+        }
+    }
+
+    if (!in_array($in['category'], (array) cfg('categories', []), true)) {
+        $e['category'] = 'お問い合わせ種別を選んでください。';
+    }
+
+    $max = (int) cfg('max_message_length', 3000);
+    $maxUrls = (int) cfg('max_urls_in_message', 3);
+    if ($in['message'] === '') {
+        $e['message'] = 'お問い合わせ内容を入力してください。';
+    } elseif (mb_strlen($in['message']) > $max) {
+        $e['message'] = 'お問い合わせ内容は' . number_format($max) . '文字以内で入力してください。';
+    } elseif ($maxUrls >= 0 && preg_match_all('~https?://~i', $in['message']) > $maxUrls) {
+        $e['message'] = 'URL は' . $maxUrls . '件までにしてください。';
+    }
+
+    if ($in['agree'] !== '1') {
+        $e['agree'] = '個人情報の取り扱いへの同意が必要です。';
+    }
+
+    return $e;
+}
+
+/* ------------------------------------------------------------------
+ * メール
+ * ------------------------------------------------------------------ */
+
+function admin_addresses(): array
+{
+    $to = cfg('to', []);
+    $list = is_array($to) ? $to : [$to];
+    return array_values(array_filter(array_map('strval', $list), 'is_valid_email'));
+}
+
+function is_placeholder_address(string $addr): bool
+{
+    return (bool) preg_match('/@example\.(com|org|net)\z/i', $addr);
+}
+
+/** 送信先・送信元が正しく設定されているか */
+function config_is_ready(): bool
+{
+    $to = cfg('to', []);
+    $raw = is_array($to) ? $to : [$to];
+    $valid = admin_addresses();
+    $from = (string) cfg('from_address', '');
+
+    if (!$valid || count($valid) !== count($raw) || !is_valid_email($from)) {
+        return false;
+    }
+    if (cfg('mail_mode', 'mail') === 'log') {
+        return true;
+    }
+    if (is_placeholder_address($from)) {
+        return false;
+    }
+    foreach ($valid as $addr) {
+        if (is_placeholder_address($addr)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** 確認画面とメール本文で共通の「項目名 => 値」 */
+function summary_rows(array $in): array
+{
+    return [
+        'お名前'           => $in['name'],
+        '会社名・団体名'   => $in['company'],
+        'メールアドレス'   => $in['email'],
+        '電話番号'         => $in['tel'],
+        'お問い合わせ種別' => $in['category'],
+        'お問い合わせ内容' => $in['message'],
+    ];
+}
+
+function summary_text(array $in): string
+{
+    $out = [];
+    foreach (summary_rows($in) as $label => $value) {
+        $out[] = '■ ' . $label;
+        $out[] = $value !== '' ? $value : '（未入力）';
+        $out[] = '';
+    }
+    return implode("\n", $out);
+}
+
+function build_admin_mail(array $in): array
+{
+    $site = (string) cfg('site_name', '');
+    $subject = sprintf('[%s] お問い合わせ（%s）%s 様', $site, $in['category'], $in['name']);
+
+    $ua = clean_line((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+    $body = implode("\n", [
+        $site . ' のお問い合わせフォームから、次の内容が送信されました。',
+        'このメールに返信すると、お問い合わせいただいた方へ返信できます。',
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        summary_text($in),
+        '━━━━━━━━━━━━━━━━━━━━',
+        '送信日時: ' . date('Y年n月j日 H:i:s'),
+        '送信元IP: ' . client_ip(),
+        'ブラウザ: ' . mb_substr($ua, 0, 300),
+        '',
+    ]);
+
+    return [$subject, $body];
+}
+
+function build_auto_reply(array $in): array
+{
+    $site = (string) cfg('site_name', '');
+    $subject = sprintf('【%s】お問い合わせを受け付けました', $site);
+
+    $body = implode("\n", [
+        $in['name'] . ' 様',
+        '',
+        'このたびは ' . $site . ' へお問い合わせいただき、ありがとうございます。',
+        '次の内容で受け付けました。内容を確認のうえ、担当者からご連絡いたします。',
+        '',
+        '※ このメールは送信専用アドレスから自動でお送りしています。',
+        '※ お心当たりのない場合は、お手数ですがこのメールを破棄してください。',
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        summary_text($in),
+        '━━━━━━━━━━━━━━━━━━━━',
+        '',
+        (string) cfg('auto_reply_signature', ''),
+        '',
+    ]);
+
+    return [$subject, $body];
+}
+
+/**
+ * メールを送る。log モードでは data/mail.log へ書き出す。
+ * $to・$replyTo は is_valid_email() を通したアドレスだけを渡すこと。
+ */
+function send_mail(string $to, string $subject, string $body, ?string $replyTo = null): bool
+{
+    $from = (string) cfg('from_address', '');
+    if (!is_valid_email($from)) {
+        error_log('[contact] from_address が正しくありません');
+        return false;
+    }
+
+    $fromName = clean_line((string) cfg('from_name', ''));
+    $headers = [];
+    $headers[] = 'From: ' . ($fromName !== ''
+        ? mb_encode_mimeheader($fromName, 'UTF-8', 'B', "\r\n") . ' <' . $from . '>'
+        : $from);
+    if ($replyTo !== null && is_valid_email($replyTo)) {
+        $headers[] = 'Reply-To: ' . $replyTo;
+    }
+    $headers[] = 'X-Mailer: Contact Form';
+    $headerText = implode("\r\n", $headers);
+
+    if (cfg('mail_mode', 'mail') === 'log') {
+        return write_mail_log($to, $subject, $headerText, $body);
+    }
+
+    if (cfg('use_envelope_from', true)) {
+        $ok = @mb_send_mail($to, $subject, $body, $headerText, '-f' . $from);
+    } else {
+        $ok = @mb_send_mail($to, $subject, $body, $headerText);
+    }
+    if (!$ok) {
+        error_log('[contact] mb_send_mail が失敗しました（宛先: ' . $to . '）');
+    }
+    return (bool) $ok;
+}
+
+function write_mail_log(string $to, string $subject, string $headers, string $body): bool
+{
+    if (!ensure_data_dir()) {
+        error_log('[contact] data ディレクトリに書き込めません');
+        return false;
+    }
+    $entry = implode("\n", [
+        '==================== ' . date('Y-m-d H:i:s') . ' ====================',
+        'To: ' . $to,
+        'Subject: ' . $subject,
+        $headers,
+        '',
+        $body,
+        '',
+    ]);
+    return @file_put_contents(data_dir() . '/mail.log', $entry, FILE_APPEND | LOCK_EX) !== false;
+}
+
+/* ------------------------------------------------------------------
+ * 画面の共通部分
+ * ------------------------------------------------------------------ */
+
+function render_header(string $title, int $step): void
+{
+    $site = (string) cfg('site_name', '');
+    $steps = [1 => '入力', 2 => '確認', 3 => '完了'];
+    ?>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<?php if ($step > 1): ?>
+<meta name="robots" content="noindex">
+<?php endif; ?>
+<title><?= h($title) ?>｜<?= h($site) ?></title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="page-head">
+    <p class="site-name"><?= h($site) ?></p>
+    <h1>お問い合わせ</h1>
+    <ol class="steps" aria-label="手順">
+      <?php foreach ($steps as $n => $label): ?>
+      <li class="<?= $n === $step ? 'is-current' : ($n < $step ? 'is-done' : '') ?>"<?= $n === $step ? ' aria-current="step"' : '' ?>>
+        <span class="steps-num"><?= $n ?></span><span class="steps-label"><?= h($label) ?></span>
+      </li>
+      <?php endforeach; ?>
+    </ol>
+  </header>
+<?php
+}
+
+function render_footer(): void
+{
+    ?>
+  <footer class="page-foot">
+    <p>&copy; <?= h(date('Y')) ?> <?= h((string) cfg('site_name', '')) ?></p>
+  </footer>
+</main>
+</body>
+</html>
+<?php
+}
+
+/** 入力欄のエラー表示用属性 */
+function field_attrs(array $errors, string $key): string
+{
+    return isset($errors[$key])
+        ? ' aria-invalid="true" aria-describedby="err-' . h($key) . '"'
+        : '';
+}
+
+function field_error(array $errors, string $key): string
+{
+    return isset($errors[$key])
+        ? '<p class="field-error" id="err-' . h($key) . '">' . h($errors[$key]) . '</p>'
+        : '';
+}

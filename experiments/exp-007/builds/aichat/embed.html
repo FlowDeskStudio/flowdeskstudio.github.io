@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-rm7Z9QzvEaLYs2hY9Cbok+looXZeBc/bmIoeP9ZyoZU='; script-src-attr 'none'; style-src 'sha256-GzrCHbu+4Oa2LARAQa4To2wL+0g6SWnkpUkpIsLxgyE='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AIチャット</title>
+  <style>
+/* ===== デザイントークン ===== */
+:root {
+  --bg: #f6f5f1;
+  --panel: #ffffff;
+  --sidebar: #ecebe5;
+  --sidebar-hover: #e1dfd7;
+  --sidebar-active: #d8d5cb;
+  --text: #1e1e1b;
+  --muted: #6c6a63;
+  --border: #dedcd3;
+  --accent: #2f6b5b;
+  --accent-hover: #255649;
+  --accent-text: #ffffff;
+  --user-bubble: #2f6b5b;
+  --user-text: #ffffff;
+  --ai-bubble: #ffffff;
+  --code-bg: #1d221f;
+  --code-head: #2a312d;
+  --code-text: #e6e9e4;
+  --inline-code-bg: #eceae3;
+  --danger: #b3261e;
+  --danger-bg: #fbeceb;
+  --notice-bg: #f4efdf;
+  --notice-text: #6b5512;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+  --radius: 14px;
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, "BIZ UDGothic", "MS Gothic", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #171816;
+    --panel: #212320;
+    --sidebar: #1d1f1c;
+    --sidebar-hover: #2a2d29;
+    --sidebar-active: #343832;
+    --text: #e9e8e3;
+    --muted: #a09e96;
+    --border: #353832;
+    --accent: #5aa58f;
+    --accent-hover: #6db7a1;
+    --accent-text: #0f1a16;
+    --user-bubble: #2e5a4d;
+    --user-text: #f1f5f2;
+    --ai-bubble: #222521;
+    --code-bg: #111311;
+    --code-head: #1c201d;
+    --code-text: #e1e5df;
+    --inline-code-bg: #30332e;
+    --danger: #f08a82;
+    --danger-bg: #3a2220;
+    --notice-bg: #3a331d;
+    --notice-text: #e8d79c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+}
+
+/* ===== 基本 ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+.app { display: flex; height: 100vh; height: 100dvh; overflow: hidden; }
+
+/* ===== ボタン ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid transparent; border-radius: 10px;
+  padding: 8px 14px; font-weight: 600; font-size: 14px; line-height: 1.4;
+  background: transparent; transition: background .15s, border-color .15s;
+}
+.btn-block { width: 100%; }
+.btn-small { padding: 4px 10px; font-size: 13px; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-ghost { border-color: var(--border); background: var(--panel); }
+.btn-ghost:hover { background: var(--sidebar-hover); }
+.btn-danger-ghost { color: var(--danger); border-color: var(--border); background: transparent; }
+.btn-danger-ghost:hover { background: var(--danger-bg); }
+.btn:focus-visible, .icon-btn:focus-visible, .send-btn:focus-visible,
+.conv-item:focus-visible, .model-chip:focus-visible, .msg-action:focus-visible, .suggestion:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border: none; border-radius: 10px; background: transparent; color: var(--muted);
+}
+.icon-btn:hover { background: var(--sidebar-hover); color: var(--text); }
+
+/* ===== サイドバー ===== */
+.sidebar {
+  width: 270px; flex-shrink: 0; display: flex; flex-direction: column;
+  background: var(--sidebar); border-right: 1px solid var(--border);
+}
+.sidebar-head { padding: 16px 14px 10px; display: flex; flex-direction: column; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; padding: 0 4px; }
+.brand-mark {
+  width: 22px; height: 22px; border-radius: 7px; background: var(--accent);
+  box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--accent) 60%, var(--panel));
+}
+.conv-list { flex: 1; overflow-y: auto; padding: 6px 8px; }
+.conv-group { font-size: 12px; color: var(--muted); padding: 12px 8px 4px; font-weight: 600; }
+.conv-row { position: relative; display: flex; align-items: center; border-radius: 9px; }
+.conv-row:hover { background: var(--sidebar-hover); }
+.conv-row.active { background: var(--sidebar-active); }
+.conv-item {
+  flex: 1; min-width: 0; text-align: left; border: none; background: transparent;
+  padding: 8px 10px; border-radius: 9px; font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.conv-item .live-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); margin-right: 6px; vertical-align: middle; animation: pulse 1.2s infinite;
+}
+.conv-delete {
+  flex-shrink: 0; width: 28px; height: 28px; margin-right: 4px; border: none; border-radius: 7px;
+  background: transparent; color: var(--muted); opacity: 0; font-size: 13px;
+}
+.conv-row:hover .conv-delete, .conv-row.active .conv-delete, .conv-delete:focus-visible { opacity: 1; }
+.conv-delete:hover { color: var(--danger); background: var(--danger-bg); }
+.sidebar-foot { padding: 10px 14px 14px; border-top: 1px solid var(--border); }
+.overlay { display: none; }
+
+/* ===== メイン ===== */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg);
+  min-height: 56px;
+}
+.menu-btn { display: none; }
+.conv-title {
+  flex: 1; min-width: 0; margin: 0; font-size: 15px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.model-chip {
+  flex-shrink: 0; max-width: 46%; border: 1px solid var(--border); background: var(--panel);
+  border-radius: 999px; padding: 4px 12px; font-size: 12.5px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.model-chip:hover { color: var(--text); border-color: var(--muted); }
+.model-chip .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px;
+  background: var(--accent);
+}
+.model-chip.warn .dot { background: var(--danger); }
+
+/* ===== メッセージ ===== */
+.messages { flex: 1; overflow-y: auto; padding: 24px 16px 8px; scroll-behavior: auto; }
+.msg { display: flex; gap: 12px; max-width: 800px; margin: 0 auto 22px; }
+.avatar {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  background: var(--accent); color: var(--accent-text);
+}
+.msg-body { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.bubble {
+  max-width: 100%; padding: 12px 16px; border-radius: var(--radius);
+  background: var(--ai-bubble); border: 1px solid var(--border); box-shadow: var(--shadow);
+  overflow-wrap: anywhere;
+}
+.msg-user { flex-direction: row-reverse; }
+.msg-user .avatar { background: var(--sidebar-active); color: var(--text); font-size: 10px; }
+.msg-user .msg-body { align-items: flex-end; }
+.msg-user .bubble {
+  background: var(--user-bubble); color: var(--user-text); border-color: transparent;
+  white-space: pre-wrap; max-width: 88%;
+}
+.msg-meta { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.msg-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .15s; }
+.msg:hover .msg-actions, .msg:focus-within .msg-actions, .msg.last .msg-actions { opacity: 1; }
+.msg-action {
+  border: none; background: transparent; color: var(--muted);
+  font-size: 12.5px; padding: 3px 8px; border-radius: 7px;
+}
+.msg-action:hover { background: var(--sidebar-hover); color: var(--text); }
+.msg-error {
+  font-size: 13.5px; color: var(--danger); background: var(--danger-bg);
+  border-radius: 10px; padding: 8px 12px; max-width: 100%; white-space: pre-wrap;
+}
+.msg-notice {
+  font-size: 13px; color: var(--notice-text); background: var(--notice-bg);
+  border-radius: 10px; padding: 6px 12px;
+}
+
+/* 入力中インジケーター */
+.typing { display: inline-flex; gap: 5px; padding: 6px 2px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+.bubble.streaming > :last-child::after {
+  content: ""; display: inline-block; width: 8px; height: 1em; margin-left: 2px;
+  background: var(--accent); vertical-align: -2px; animation: caret 1s steps(1) infinite;
+}
+.bubble.streaming > .typing::after, .bubble.streaming > .code-block::after,
+.bubble.streaming > .table-wrap::after, .bubble.streaming > ul::after, .bubble.streaming > ol::after { display: none; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@keyframes caret { 50% { opacity: 0; } }
+@keyframes pulse { 50% { opacity: .3; } }
+
+/* ===== Markdown ===== */
+.bubble > :first-child { margin-top: 0; }
+.bubble > :last-child { margin-bottom: 0; }
+.bubble p { margin: 0 0 .8em; }
+.bubble h1, .bubble h2, .bubble h3, .bubble h4, .bubble h5, .bubble h6 { margin: 1.1em 0 .5em; line-height: 1.4; }
+.bubble h1 { font-size: 1.35em; } .bubble h2 { font-size: 1.22em; } .bubble h3 { font-size: 1.1em; }
+.bubble h4, .bubble h5, .bubble h6 { font-size: 1em; }
+.bubble ul, .bubble ol { margin: 0 0 .8em; padding-left: 1.5em; }
+.bubble li { margin: .2em 0; }
+.bubble blockquote {
+  margin: 0 0 .8em; padding: .2em 0 .2em 1em; border-left: 3px solid var(--border); color: var(--muted);
+}
+.bubble hr { border: none; border-top: 1px solid var(--border); margin: 1em 0; }
+.bubble a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.bubble code {
+  font-family: var(--mono); font-size: .9em; background: var(--inline-code-bg);
+  padding: .1em .4em; border-radius: 5px;
+}
+.code-block { margin: 0 0 .9em; border-radius: 10px; overflow: hidden; background: var(--code-bg); }
+.code-head {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--code-head); color: #a8b0a9; font-size: 12px; padding: 4px 6px 4px 12px; font-family: var(--mono);
+}
+.copy-code {
+  border: none; background: transparent; color: #c5ccc6; font-size: 12px; padding: 3px 8px; border-radius: 6px;
+}
+.copy-code:hover { background: rgba(255,255,255,.08); color: #fff; }
+.code-block pre { margin: 0; padding: 12px 14px; overflow-x: auto; }
+.code-block code {
+  background: none; padding: 0; color: var(--code-text); font-size: 13px; line-height: 1.6; white-space: pre;
+}
+.table-wrap { overflow-x: auto; margin: 0 0 .9em; }
+.bubble table { border-collapse: collapse; font-size: .93em; min-width: 50%; }
+.bubble th, .bubble td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+.bubble th { background: var(--bg); font-weight: 600; }
+
+/* ===== 空の状態 ===== */
+.empty { max-width: 640px; margin: 8vh auto 0; text-align: center; padding: 0 8px; }
+.empty-mark {
+  width: 52px; height: 52px; border-radius: 16px; margin: 0 auto 18px; background: var(--accent);
+  box-shadow: inset 0 0 0 12px color-mix(in srgb, var(--accent) 60%, var(--panel));
+}
+.empty h2 { margin: 0 0 6px; font-size: 22px; }
+.empty p { margin: 0 0 22px; color: var(--muted); }
+.setup-card {
+  text-align: left; background: var(--notice-bg); color: var(--notice-text);
+  border-radius: var(--radius); padding: 14px 16px; margin: 0 0 22px; font-size: 14px;
+}
+.setup-card strong { display: block; margin-bottom: 4px; }
+.setup-card .setup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.suggestion {
+  text-align: left; border: 1px solid var(--border); background: var(--panel); border-radius: 12px;
+  padding: 12px 14px; font-size: 14px; line-height: 1.5; box-shadow: var(--shadow);
+  transition: border-color .15s, transform .15s;
+}
+.suggestion:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+/* ===== 入力欄 ===== */
+.composer { padding: 8px 16px 14px; background: var(--bg); }
+.composer-box {
+  max-width: 800px; margin: 0 auto; display: flex; align-items: flex-end; gap: 8px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+  padding: 8px 8px 8px 16px; box-shadow: var(--shadow); transition: border-color .15s;
+}
+.composer-box:focus-within { border-color: var(--accent); }
+.composer textarea {
+  flex: 1; border: none; outline: none; resize: none; background: transparent;
+  max-height: 220px; min-height: 26px; padding: 6px 0; line-height: 1.6;
+}
+.send-btn {
+  flex-shrink: 0; height: 38px; min-width: 64px; padding: 0 16px; border: none; border-radius: 12px;
+  background: var(--accent); color: var(--accent-text); font-weight: 700; font-size: 14px;
+  transition: background .15s, opacity .15s;
+}
+.send-btn:hover { background: var(--accent-hover); }
+.send-btn:disabled { opacity: .45; cursor: default; }
+.send-btn.stop { background: var(--text); color: var(--bg); }
+.composer-note { max-width: 800px; margin: 6px auto 0; font-size: 11.5px; color: var(--muted); text-align: center; }
+
+/* ===== 設定ダイアログ ===== */
+dialog {
+  width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 18px; padding: 0;
+  background: var(--panel); color: var(--text); box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+dialog::backdrop { background: rgba(10, 12, 10, .45); }
+.settings { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+.settings-head { display: flex; justify-content: space-between; align-items: center; }
+.settings-head h2 { margin: 0; font-size: 18px; }
+.settings-msg:empty { display: none; }
+.settings-msg { margin: 0; color: var(--danger); background: var(--danger-bg); border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field-label .req { color: var(--danger); margin-left: 4px; }
+.field input, .field select, .field textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 10px; background: var(--bg);
+  padding: 8px 11px; outline: none;
+}
+.field textarea { resize: vertical; line-height: 1.6; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.key-input { display: flex; gap: 6px; }
+.key-input input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 13.5px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); margin-top: -6px; }
+.check input { margin-top: 4px; accent-color: var(--accent); }
+.hint { margin: -6px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.settings-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+.settings-actions .spacer { flex: 1; }
+
+/* ===== トースト ===== */
+.toast {
+  position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 12px);
+  background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 10px;
+  font-size: 13.5px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+  max-width: calc(100vw - 32px); z-index: 100;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== スマホ ===== */
+@media (max-width: 760px) {
+  .menu-btn { display: inline-flex; }
+  .sidebar {
+    position: fixed; inset: 0 auto 0 0; z-index: 50; width: min(300px, 86vw);
+    transform: translateX(-100%); transition: transform .22s ease;
+  }
+  body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,.3); }
+  body.sidebar-open .overlay { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.35); }
+  .conv-delete { opacity: 1; }
+  .topbar { padding: 8px 10px; }
+  .messages { padding: 16px 12px 4px; }
+  .msg { gap: 8px; }
+  .avatar { width: 28px; height: 28px; font-size: 10px; border-radius: 8px; }
+  .msg-user .avatar { display: none; }
+  .msg-user .bubble { max-width: 92%; }
+  .msg-actions { opacity: 1; }
+  .composer { padding: 6px 10px 10px; }
+  .suggestions { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .model-chip { max-width: 52%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- 会話一覧 -->
+    <aside class="sidebar" id="sidebar" aria-label="会話の一覧">
+      <div class="sidebar-head">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"></span>AIチャット</div>
+        <button class="btn btn-primary btn-block" id="newChatBtn" type="button">＋ 新しい会話</button>
+      </div>
+      <nav class="conv-list" id="convList" aria-label="会話"></nav>
+      <div class="sidebar-foot">
+        <button class="btn btn-ghost btn-block" id="settingsBtn" type="button">設定</button>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay" aria-hidden="true"></div>
+
+    <!-- チャット本体 -->
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="会話の一覧を開く">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        </button>
+        <h1 class="conv-title" id="convTitle">新しい会話</h1>
+        <button class="model-chip" id="modelChip" type="button" title="接続先とモデルを変更"></button>
+      </header>
+
+      <section class="messages" id="messages" aria-live="polite"></section>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <div class="composer-box">
+          <textarea id="input" rows="1" placeholder="メッセージを入力（Enterで送信／Shift+Enterで改行）" aria-label="メッセージ"></textarea>
+          <button class="send-btn" id="sendBtn" type="submit">送信</button>
+        </div>
+        <p class="composer-note">AIの回答には誤りが含まれることがあります。大事な内容は確認してください。</p>
+      </form>
+    </main>
+  </div>
+
+  <!-- 設定 -->
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+    <form id="settingsForm" class="settings">
+      <div class="settings-head">
+        <h2 id="settingsTitle">設定</h2>
+        <button class="icon-btn" id="settingsClose" type="button" aria-label="閉じる">✕</button>
+      </div>
+      <p class="settings-msg" id="settingsMsg" role="alert"></p>
+
+      <label class="field">
+        <span class="field-label">接続先</span>
+        <select id="provider"></select>
+      </label>
+      <p class="hint" id="providerHint"></p>
+
+      <label class="field" id="keyRow">
+        <span class="field-label" id="apiKeyLabel">APIキー</span>
+        <span class="key-input">
+          <input id="apiKey" type="password" spellcheck="false" autocomplete="off" placeholder="sk-...">
+          <button class="btn btn-ghost btn-small" id="toggleKey" type="button">表示</button>
+        </span>
+      </label>
+      <label class="check" id="rememberRow">
+        <input id="rememberKey" type="checkbox">
+        <span>APIキーをこのブラウザに記憶する（オフの場合はタブを閉じると消えます）</span>
+      </label>
+
+      <label class="field" id="baseUrlRow">
+        <span class="field-label">ベースURL</span>
+        <input id="baseUrl" type="url" spellcheck="false" placeholder="https://...">
+      </label>
+
+      <label class="field" id="modelRow">
+        <span class="field-label">モデル</span>
+        <input id="model" type="text" list="modelList" spellcheck="false">
+        <datalist id="modelList"></datalist>
+      </label>
+
+      <label class="field">
+        <span class="field-label">システムプロンプト（AIへの事前指示・任意）</span>
+        <textarea id="systemPrompt" rows="3" placeholder="例：あなたは親切なアシスタントです。やさしい日本語で答えてください。"></textarea>
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field-label">温度（空欄でモデルの既定値）</span>
+          <input id="temperature" type="number" min="0" max="2" step="0.1" placeholder="既定値">
+        </label>
+        <label class="field">
+          <span class="field-label">最大トークン数</span>
+          <input id="maxTokens" type="number" min="1" step="1" placeholder="4096">
+        </label>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-danger-ghost" id="clearAllBtn" type="button">すべての会話を削除</button>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" id="settingsCancel" type="button">キャンセル</button>
+        <button class="btn btn-primary" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+/* AIチャット — 依存ライブラリなしで動く 1 ページのチャットアプリ */
+(() => {
+  'use strict';
+
+  // ------------------------------------------------------------------
+  // 定数
+  // ------------------------------------------------------------------
+  const KEYS = {
+    conversations: 'aichat.conversations.v1',
+    settings: 'aichat.settings.v1',
+    active: 'aichat.activeId.v1',
+    apiKeyPrefix: 'aichat.apiKey.',
+  };
+  const NEW_TITLE = '新しい会話';
+
+  const PROVIDERS = {
+    anthropic: {
+      label: 'Anthropic（Claude）',
+      short: 'Claude',
+      needsKey: true,
+      defaultBaseUrl: 'https://api.anthropic.com',
+      defaultModel: 'claude-opus-5-5',
+      models: ['claude-opus-5-5', 'claude-sonnet-4-5', 'claude-haiku-4-5'],
+      maxTemperature: 1,
+      hint: 'Anthropic Console（console.anthropic.com）で発行した API キーを入力します。キーはこのブラウザの中にだけ保存され、ベースURL（通常は Anthropic の API）にだけ送信されます。',
+    },
+    openai: {
+      label: 'OpenAI 互換 API（OpenAI／Ollama／LM Studio など）',
+      short: 'OpenAI互換',
+      needsKey: false,
+      defaultBaseUrl: 'https://api.openai.com/v1',
+      defaultModel: 'gpt-4o-mini',
+      models: ['gpt-4o-mini', 'gpt-4o', 'llama3.2', 'qwen2.5', 'gemma2'],
+      maxTemperature: 2,
+      hint: '/chat/completions に対応したサーバーなら使えます。OpenAI は API キーが必要です。ローカルの Ollama は http://localhost:11434/v1、LM Studio は http://localhost:1234/v1 を指定します（キーは空欄で可）。最大トークン数を空欄にすると送信しません。',
+    },
+    demo: {
+      label: 'デモ（AIに接続せず画面を試す）',
+      short: 'デモ',
+      needsKey: false,
+      defaultBaseUrl: '',
+      defaultModel: 'demo',
+      models: [],
+      maxTemperature: 1,
+      hint: 'インターネットにも AI にも接続しません。決まった文章を返すので、画面の動きを確かめるのに使えます。',
+    },
+  };
+
+  const SUGGESTIONS = [
+    '日本の四季の特徴を、短くまとめて教えて',
+    'Pythonでフィボナッチ数列を表示するコードを書いて',
+    '丁寧なお礼メールの書き出しを3パターン考えて',
+    '集中力を保つコツを表にまとめて',
+  ];
+
+  // ------------------------------------------------------------------
+  // 保存（localStorage が使えない環境でも落ちないようにする）
+  // ------------------------------------------------------------------
+  const store = {
+    get(area, key, fallback) {
+      try {
+        const v = window[area].getItem(key);
+        return v == null ? fallback : JSON.parse(v);
+      } catch (_) { return fallback; }
+    },
+    set(area, key, value) {
+      try { window[area].setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; }
+    },
+    remove(area, key) {
+      try { window[area].removeItem(key); } catch (_) { /* 無視 */ }
+    },
+  };
+
+  function defaultSettings() {
+    const providers = {};
+    for (const [id, p] of Object.entries(PROVIDERS)) providers[id] = { model: p.defaultModel, baseUrl: p.defaultBaseUrl };
+    return { provider: 'anthropic', providers, systemPrompt: '', temperature: '', maxTokens: 4096, rememberKey: false };
+  }
+
+  function loadSettings() {
+    const d = defaultSettings();
+    const s = store.get('localStorage', KEYS.settings, null) || {};
+    const out = Object.assign({}, d, s, { providers: {} });
+    for (const id of Object.keys(PROVIDERS)) {
+      out.providers[id] = Object.assign({}, d.providers[id], (s.providers && s.providers[id]) || {});
+    }
+    if (!PROVIDERS[out.provider]) out.provider = d.provider;
+    if (typeof out.systemPrompt !== 'string') out.systemPrompt = '';
+    return out;
+  }
+
+  function saveSettings() { store.set('localStorage', KEYS.settings, settings); }
+
+  function loadKey(id) {
+    return store.get('localStorage', KEYS.apiKeyPrefix + id, null)
+      || store.get('sessionStorage', KEYS.apiKeyPrefix + id, null) || '';
+  }
+  function saveKey(id, key, remember) {
+    const k = KEYS.apiKeyPrefix + id;
+    store.remove('localStorage', k);
+    store.remove('sessionStorage', k);
+    if (key) store.set(remember ? 'localStorage' : 'sessionStorage', k, key);
+  }
+
+  function loadConversations() {
+    const list = store.get('localStorage', KEYS.conversations, []);
+    if (!Array.isArray(list)) return [];
+    return list.filter(c => c && typeof c.id === 'string' && Array.isArray(c.messages));
+  }
+  function saveConversations() {
+    const ok = store.set('localStorage', KEYS.conversations, conversations);
+    store.set('localStorage', KEYS.active, activeId);
+    if (!ok && !state.warnedStorage) {
+      state.warnedStorage = true;
+      toast('会話を保存できませんでした（保存容量の不足、またはブラウザの設定）。古い会話を削除してください。', 5000);
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 状態
+  // ------------------------------------------------------------------
+  let settings = loadSettings();
+  let conversations = loadConversations();
+  let activeId = store.get('localStorage', KEYS.active, null);
+  const keys = {};
+  for (const id of Object.keys(PROVIDERS)) keys[id] = loadKey(id);
+  if (settings.rememberKey === false && Object.keys(PROVIDERS).some(id => store.get('localStorage', KEYS.apiKeyPrefix + id, null))) {
+    settings.rememberKey = true; // 以前に記憶したキーがある場合
+  }
+
+  const state = {
+    streaming: null,     // { convId, msg, controller }
+    streamingEl: null,   // 生成中メッセージの吹き出し要素
+    rafPending: false,
+    draft: null,         // 設定ダイアログの編集中データ
+    draftKeys: null,
+    draftProvider: null,
+    warnedStorage: false,
+  };
+
+  // ------------------------------------------------------------------
+  // 要素
+  // ------------------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const els = {
+    convList: $('convList'), newChatBtn: $('newChatBtn'), settingsBtn: $('settingsBtn'),
+    menuBtn: $('menuBtn'), overlay: $('overlay'), convTitle: $('convTitle'), modelChip: $('modelChip'),
+    messages: $('messages'), composer: $('composer'), input: $('input'), sendBtn: $('sendBtn'),
+    dialog: $('settingsDialog'), form: $('settingsForm'), settingsMsg: $('settingsMsg'),
+    settingsClose: $('settingsClose'), settingsCancel: $('settingsCancel'),
+    provider: $('provider'), providerHint: $('providerHint'),
+    keyRow: $('keyRow'), apiKeyLabel: $('apiKeyLabel'), apiKey: $('apiKey'), toggleKey: $('toggleKey'),
+    rememberRow: $('rememberRow'), rememberKey: $('rememberKey'),
+    baseUrlRow: $('baseUrlRow'), baseUrl: $('baseUrl'),
+    modelRow: $('modelRow'), model: $('model'), modelList: $('modelList'),
+    systemPrompt: $('systemPrompt'), temperature: $('temperature'), maxTokens: $('maxTokens'),
+    clearAllBtn: $('clearAllBtn'), toast: $('toast'),
+  };
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  // ------------------------------------------------------------------
+  // 会話の操作
+  // ------------------------------------------------------------------
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  function createConversation() {
+    const now = Date.now();
+    const conv = { id: uid(), title: NEW_TITLE, createdAt: now, updatedAt: now, messages: [] };
+    conversations.unshift(conv);
+    return conv;
+  }
+
+  function activeConv() {
+    let conv = conversations.find(c => c.id === activeId);
+    if (!conv) {
+      conv = conversations.slice().sort((a, b) => b.updatedAt - a.updatedAt)[0] || createConversation();
+      activeId = conv.id;
+    }
+    return conv;
+  }
+
+  function makeTitle(text) {
+    const t = text.replace(/\s+/g, ' ').trim();
+    return t.length > 30 ? t.slice(0, 30) + '…' : (t || NEW_TITLE);
+  }
+
+  function newChat() {
+    const cur = activeConv();
+    if (!cur.messages.length) { closeSidebar(); els.input.focus(); return; }
+    const conv = createConversation();
+    activeId = conv.id;
+    saveConversations();
+    renderAll();
+    closeSidebar();
+    els.input.focus();
+  }
+
+  function selectConversation(id) {
+    if (id === activeId) { closeSidebar(); return; }
+    activeId = id;
+    store.set('localStorage', KEYS.active, activeId);
+    renderAll();
+    closeSidebar();
+  }
+
+  function deleteConversation(id) {
+    const conv = conversations.find(c => c.id === id);
+    if (!conv) return;
+    if (!window.confirm(`「${conv.title}」を削除しますか？\nこの操作は取り消せません。`)) return;
+    if (state.streaming && state.streaming.convId === id) state.streaming.controller.abort();
+    conversations = conversations.filter(c => c.id !== id);
+    if (activeId === id) activeId = null;
+    if (!conversations.length) activeId = createConversation().id;
+    activeConv();
+    saveConversations();
+    renderAll();
+  }
+
+  function clearAllConversations() {
+    if (!window.confirm('すべての会話を削除しますか？\nこの操作は取り消せません。')) return;
+    if (state.streaming) state.streaming.controller.abort();
+    conversations = [];
+    activeId = createConversation().id;
+    saveConversations();
+    els.dialog.close();
+    renderAll();
+    toast('すべての会話を削除しました');
+  }
+
+  // ------------------------------------------------------------------
+  // 描画
+  // ------------------------------------------------------------------
+  function renderAll() {
+    renderSidebar();
+    renderMessages();
+    renderModelChip();
+  }
+
+  function dayLabel(ts) {
+    const d = new Date(ts); const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    if (ts >= start) return '今日';
+    if (ts >= start - 86400000) return '昨日';
+    if (ts >= start - 6 * 86400000) return '過去7日間';
+    return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+  }
+
+  function renderSidebar() {
+    const list = conversations.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+    els.convList.textContent = '';
+    let lastGroup = '';
+    for (const conv of list) {
+      const group = dayLabel(conv.updatedAt);
+      if (group !== lastGroup) { els.convList.appendChild(el('div', 'conv-group', group)); lastGroup = group; }
+      const row = el('div', 'conv-row' + (conv.id === activeId ? ' active' : ''));
+      const item = el('button', 'conv-item');
+      item.type = 'button';
+      item.title = conv.title;
+      if (state.streaming && state.streaming.convId === conv.id) item.appendChild(el('span', 'live-dot'));
+      item.appendChild(document.createTextNode(conv.title));
+      if (conv.id === activeId) item.setAttribute('aria-current', 'true');
+      item.addEventListener('click', () => selectConversation(conv.id));
+      const del = el('button', 'conv-delete', '✕');
+      del.type = 'button';
+      del.title = 'この会話を削除';
+      del.setAttribute('aria-label', `「${conv.title}」を削除`);
+      del.addEventListener('click', e => { e.stopPropagation(); deleteConversation(conv.id); });
+      row.append(item, del);
+      els.convList.appendChild(row);
+    }
+  }
+
+  function renderModelChip() {
+    const id = settings.provider;
+    const p = PROVIDERS[id];
+    const ready = isReady(id);
+    els.modelChip.textContent = '';
+    els.modelChip.classList.toggle('warn', !ready);
+    els.modelChip.appendChild(el('span', 'dot'));
+    const model = id === 'demo' ? '' : ` · ${settings.providers[id].model}`;
+    els.modelChip.appendChild(document.createTextNode(ready ? `${p.short}${model}` : `${p.short} · APIキー未設定`));
+  }
+
+  function isReady(id) {
+    return !PROVIDERS[id].needsKey || !!keys[id];
+  }
+
+  function renderEmpty() {
+    const wrap = el('div', 'empty');
+    wrap.appendChild(el('div', 'empty-mark'));
+    wrap.appendChild(el('h2', null, '何でも聞いてください'));
+    wrap.appendChild(el('p', null, '質問、文章の手直し、アイデア出し、コードの相談などができます。'));
+
+    if (!isReady(settings.provider)) {
+      const card = el('div', 'setup-card');
+      card.appendChild(el('strong', null, 'APIキーが設定されていません'));
+      card.appendChild(document.createTextNode('AIと会話するには、設定で API キーを入力してください。キーがなくても、デモモードで画面を試せます。'));
+      const actions = el('div', 'setup-actions');
+      const openBtn = el('button', 'btn btn-primary btn-small', '設定を開く');
+      openBtn.type = 'button';
+      openBtn.addEventListener('click', () => openSettings());
+      const demoBtn = el('button', 'btn btn-ghost btn-small', 'デモモードで試す');
+      demoBtn.type = 'button';
+      demoBtn.addEventListener('click', () => {
+        settings.provider = 'demo';
+        saveSettings();
+        renderAll();
+        els.input.focus();
+      });
+      actions.append(openBtn, demoBtn);
+      card.appendChild(actions);
+      wrap.appendChild(card);
+    }
+
+    const grid = el('div', 'suggestions');
+    for (const s of SUGGESTIONS) {
+      const b = el('button', 'suggestion', s);
+      b.type = 'button';
+      b.addEventListener('click', () => send(s));
+      grid.appendChild(b);
+    }
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  function renderMessages() {
+    const conv = activeConv();
+    els.convTitle.textContent = conv.title;
+    document.title = conv.title === NEW_TITLE ? 'AIチャット' : `${conv.title} - AIチャット`;
+    els.messages.textContent = '';
+    state.streamingEl = null;
+    if (!conv.messages.length) {
+      els.messages.appendChild(renderEmpty());
+      return;
+    }
+    const lastIdx = conv.messages.length - 1;
+    conv.messages.forEach((m, i) => els.messages.appendChild(renderMessage(m, i === lastIdx)));
+    scrollToBottom();
+  }
+
+  function renderMessage(m, isLast) {
+    const isStreaming = !!(state.streaming && state.streaming.msg === m);
+    const row = el('div', `msg msg-${m.role}` + (isLast ? ' last' : ''));
+    row.appendChild(el('div', 'avatar', m.role === 'user' ? 'あなた' : 'AI'));
+    const body = el('div', 'msg-body');
+
+    const bubble = el('div', 'bubble');
+    if (m.role === 'user') {
+      bubble.textContent = m.content;
+    } else if (isStreaming) {
+      bubble.classList.add('streaming');
+      bubble.innerHTML = m.content ? renderMarkdown(m.content) : TYPING_HTML;
+      state.streamingEl = bubble;
+    } else if (m.content) {
+      bubble.innerHTML = renderMarkdown(m.content);
+    }
+    if (m.role === 'user' || isStreaming || m.content) body.appendChild(bubble);
+
+    if (!isStreaming) {
+      if (m.notice) body.appendChild(el('div', 'msg-notice', m.notice));
+      if (m.error) body.appendChild(el('div', 'msg-error', m.error));
+
+      const actions = el('div', 'msg-actions');
+      if (m.content) actions.appendChild(actionButton('コピー', () => copyText(m.content)));
+      if (m.role === 'assistant' && isLast) {
+        actions.appendChild(actionButton(m.error ? '再試行' : '再生成', regenerate));
+      }
+      if (m.role === 'user' && isLast) {
+        actions.appendChild(actionButton('返答をもらう', regenerate));
+      }
+      const meta = [];
+      if (m.role === 'assistant' && m.model) meta.push(m.model);
+      if (m.ts) meta.push(new Date(m.ts).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }));
+      if (meta.length) actions.appendChild(el('span', 'msg-meta', meta.join(' · ')));
+      if (actions.childNodes.length) body.appendChild(actions);
+    }
+
+    row.appendChild(body);
+    return row;
+  }
+
+  function actionButton(label, onClick) {
+    const b = el('button', 'msg-action', label);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  const TYPING_HTML = '<span class="typing" aria-label="入力中"><i></i><i></i><i></i></span>';
+
+  function isNearBottom() {
+    const m = els.messages;
+    return m.scrollHeight - m.scrollTop - m.clientHeight < 120;
+  }
+  function scrollToBottom() {
+    els.messages.scrollTop = els.messages.scrollHeight;
+  }
+
+  function scheduleStreamRender() {
+    if (state.rafPending) return;
+    state.rafPending = true;
+    requestAnimationFrame(() => {
+      state.rafPending = false;
+      const s = state.streaming;
+      if (!s || !state.streamingEl || !state.streamingEl.isConnected) return;
+      const stick = isNearBottom();
+      state.streamingEl.innerHTML = s.msg.content ? renderMarkdown(s.msg.content) : TYPING_HTML;
+      if (stick) scrollToBottom();
+    });
+  }
+
+  function setStreamingUI(on) {
+    els.sendBtn.textContent = on ? '停止' : '送信';
+    els.sendBtn.classList.toggle('stop', on);
+    els.sendBtn.setAttribute('aria-label', on ? '生成を停止' : '送信');
+  }
+
+  // ------------------------------------------------------------------
+  // 送信と生成
+  // ------------------------------------------------------------------
+  function ensureReady() {
+    const id = settings.provider;
+    if (!isReady(id)) {
+      openSettings(`${PROVIDERS[id].short} を使うには API キーが必要です。`);
+      return false;
+    }
+    if (id !== 'demo' && !settings.providers[id].model) {
+      openSettings('モデル名を入力してください。');
+      return false;
+    }
+    return true;
+  }
+
+  function send(text) {
+    if (state.streaming) return;
+    text = String(text || '').trim();
+    if (!text) return;
+    if (!ensureReady()) return;
+    const conv = activeConv();
+    conv.messages.push({ role: 'user', content: text, ts: Date.now() });
+    if (conv.title === NEW_TITLE) conv.title = makeTitle(text);
+    els.input.value = '';
+    autosize();
+    generate(conv);
+  }
+
+  function regenerate() {
+    if (state.streaming) return;
+    const conv = activeConv();
+    const last = conv.messages[conv.messages.length - 1];
+    if (last && last.role === 'assistant') conv.messages.pop();
+    const tail = conv.messages[conv.messages.length - 1];
+    if (!tail || tail.role !== 'user') { renderAll(); return; }
+    if (!ensureReady()) { saveConversations(); renderAll(); return; }
+    generate(conv);
+  }
+
+  /** API に送る形へ整える（エラーや空の返答を除き、同じ役割が続けば結合する） */
+  function buildApiMessages(list) {
+    const out = [];
+    for (const m of list) {
+      if (m.role !== 'user' && m.role !== 'assistant') continue;
+      if (!m.content || !m.content.trim()) continue;
+      const prev = out[out.length - 1];
+      if (prev && prev.role === m.role) prev.content += '\n\n' + m.content;
+      else out.push({ role: m.role, content: m.content });
+    }
+    while (out.length && out[0].role !== 'user') out.shift();
+    while (out.length && out[out.length - 1].role !== 'user') out.pop();
+    return out;
+  }
+
+  async function generate(conv) {
+    const providerId = settings.provider;
+    const apiMessages = buildApiMessages(conv.messages);
+    if (!apiMessages.length) return;
+
+    const msg = {
+      role: 'assistant', content: '', ts: Date.now(),
+      model: providerId === 'demo' ? 'デモ' : settings.providers[providerId].model,
+    };
+    conv.messages.push(msg);
+    conv.updatedAt = Date.now();
+
+    const controller = new AbortController();
+    state.streaming = { convId: conv.id, msg, controller };
+    setStreamingUI(true);
+    saveConversations();
+    renderSidebar();
+    if (conv.id === activeId) { renderMessages(); scrollToBottom(); }
+
+    const streamFn = { anthropic: streamAnthropic, openai: streamOpenAI, demo: streamDemo }[providerId];
+    let stopReason = null;
+    try {
+      const iter = streamFn({
+        settings, apiKey: keys[providerId] || '', messages: apiMessages, signal: controller.signal,
+      });
+      for await (const ev of iter) {
+        if (ev.type === 'text') { msg.content += ev.text; scheduleStreamRender(); }
+        else if (ev.type === 'stop') stopReason = ev.reason;
+      }
+      if (stopReason === 'max_tokens') msg.notice = '最大トークン数に達したため、返答が途中で終わっています。設定で上限を増やせます。';
+      else if (stopReason === 'refusal') msg.notice = 'AIがこの依頼への返答を控えました。';
+      if (!msg.content && !msg.notice) msg.error = 'AIから空の返答が返されました。もう一度お試しください。';
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        msg.notice = '生成を停止しました。';
+      } else {
+        msg.error = friendlyError(err);
+      }
+    } finally {
+      state.streaming = null;
+      setStreamingUI(false);
+      conv.updatedAt = Date.now();
+      saveConversations();
+      renderSidebar();
+      if (conv.id === activeId) {
+        const stick = isNearBottom();
+        renderMessages();
+        if (!stick) { /* renderMessages は最下部へ移動する。読み返し中でも結果を見せる */ }
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 通信
+  // ------------------------------------------------------------------
+  function trimSlash(s) { return String(s || '').trim().replace(/\/+$/, ''); }
+
+  function parseTemperature(v, max) {
+    if (v === '' || v == null) return null;
+    const n = Number(v);
+    if (!Number.isFinite(n)) return null;
+    return Math.min(Math.max(n, 0), max);
+  }
+
+  function parseMaxTokens(v) {
+    if (v === '' || v == null) return null;
+    const n = Math.floor(Number(v));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  /** Server-Sent Events を 1 イベントずつ取り出す */
+  async function* readSSE(body) {
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    const parse = raw => {
+      let event = 'message';
+      const data = [];
+      for (const line of raw.split(/\r?\n/)) {
+        if (!line || line.startsWith(':')) continue;
+        const i = line.indexOf(':');
+        const field = i === -1 ? line : line.slice(0, i);
+        let val = i === -1 ? '' : line.slice(i + 1);
+        if (val.startsWith(' ')) val = val.slice(1);
+        if (field === 'event') event = val;
+        else if (field === 'data') data.push(val);
+      }
+      return data.length ? { event, data: data.join('\n') } : null;
+    };
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let m;
+        while ((m = /\r?\n\r?\n/.exec(buf))) {
+          const raw = buf.slice(0, m.index);
+          buf = buf.slice(m.index + m[0].length);
+          const ev = parse(raw);
+          if (ev) yield ev;
+        }
+      }
+      buf += decoder.decode();
+      if (buf.trim()) {
+        const ev = parse(buf);
+        if (ev) yield ev;
+      }
+    } finally {
+      try { reader.releaseLock(); } catch (_) { /* 無視 */ }
+    }
+  }
+
+  function apiErrorText(e) {
+    if (!e) return '';
+    if (typeof e === 'string') return e;
+    if (e.message) return String(e.message);
+    if (e.error) return apiErrorText(e.error);
+    try { return JSON.stringify(e).slice(0, 300); } catch (_) { return ''; }
+  }
+
+  async function httpError(res) {
+    let detail = '';
+    try {
+      const txt = await res.text();
+      try { detail = apiErrorText(JSON.parse(txt)); } catch (_) { detail = txt.slice(0, 300); }
+    } catch (_) { /* 無視 */ }
+    const map = {
+      400: 'リクエストの内容に問題があります',
+      401: 'APIキーが正しくないか、設定されていません',
+      403: 'このAPIキーでは利用できません',
+      404: 'URLまたはモデル名が見つかりません',
+      413: '会話が長すぎます。新しい会話を始めてください',
+      429: '利用回数の上限に達したか、残高が不足しています。しばらく待ってから再試行してください',
+      500: 'サーバー側でエラーが発生しました',
+      502: 'サーバーに接続できませんでした',
+      503: 'サーバーが一時的に利用できません',
+      529: 'サーバーが混み合っています。しばらく待ってから再試行してください',
+    };
+    const head = map[res.status] || 'エラーが発生しました';
+    const err = new Error(`${head}（HTTP ${res.status}）${detail ? '\n' + detail : ''}`);
+    err.isHttp = true;
+    return err;
+  }
+
+  function friendlyError(err) {
+    if (!err) return '不明なエラーが発生しました。';
+    if (err.isHttp) return err.message;
+    if (err instanceof TypeError && /fetch|network|load/i.test(err.message)) {
+      return '接続できませんでした。インターネット接続、ベースURL、またはサーバー側のCORS設定を確認してください。\n（' + err.message + '）';
+    }
+    return err.message || String(err);
+  }
+
+  async function* streamAnthropic({ settings: s, apiKey, messages, signal }) {
+    const p = s.providers.anthropic;
+    const base = trimSlash(p.baseUrl || PROVIDERS.anthropic.defaultBaseUrl);
+    const url = /\/v1$/.test(base) ? `${base}/messages` : `${base}/v1/messages`;
+    const body = {
+      model: p.model,
+      max_tokens: parseMaxTokens(s.maxTokens) || 4096,
+      messages,
+      stream: true,
+    };
+    if (s.systemPrompt.trim()) body.system = s.systemPrompt.trim();
+    const t = parseTemperature(s.temperature, PROVIDERS.anthropic.maxTemperature);
+    if (t !== null) body.temperature = t;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok) throw await httpError(res);
+    if (!res.body) throw new Error('このブラウザはストリーミング受信に対応していません。');
+
+    for await (const ev of readSSE(res.body)) {
+      let data;
+      try { data = JSON.parse(ev.data); } catch (_) { continue; }
+      if (data.type === 'content_block_delta' && data.delta && data.delta.type === 'text_delta') {
+        yield { type: 'text', text: data.delta.text || '' };
+      } else if (data.type === 'message_delta' && data.delta && data.delta.stop_reason) {
+        yield { type: 'stop', reason: data.delta.stop_reason };
+      } else if (data.type === 'error') {
+        throw new Error('ストリーミング中にエラーが発生しました：' + apiErrorText(data.error));
+      }
+    }
+  }
+
+  async function* streamOpenAI({ settings: s, apiKey, messages, signal }) {
+    const p = s.providers.openai;
+    const base = trimSlash(p.baseUrl || PROVIDERS.openai.defaultBaseUrl);
+    const url = /\/chat\/completions$/.test(base) ? base : `${base}/chat/completions`;
+    const msgs = [];
+    if (s.systemPrompt.trim()) msgs.push({ role: 'system', content: s.systemPrompt.trim() });
+    msgs.push(...messages);
+    const body = { model: p.model, messages: msgs, stream: true };
+    const t = parseTemperature(s.temperature, PROVIDERS.openai.maxTemperature);
+    if (t !== null) body.temperature = t;
+    const mt = parseMaxTokens(s.maxTokens);
+    if (mt !== null) body.max_tokens = mt;
+
+    const headers = { 'content-type': 'application/json' };
+    if (apiKey) headers.authorization = `Bearer ${apiKey}`;
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal });
+    if (!res.ok) throw await httpError(res);
+
+    // ストリーミングに対応していないサーバー向け
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('text/event-stream') && ct.includes('json')) {
+      const j = await res.json();
+      if (j.error) throw new Error(apiErrorText(j.error));
+      const ch = j.choices && j.choices[0];
+      const text = ch && ch.message && ch.message.content;
+      if (text) yield { type: 'text', text };
+      if (ch && ch.finish_reason) yield { type: 'stop', reason: ch.finish_reason === 'length' ? 'max_tokens' : ch.finish_reason };
+      return;
+    }
+    if (!res.body) throw new Error('このブラウザはストリーミング受信に対応していません。');
+
+    for await (const ev of readSSE(res.body)) {
+      if (ev.data.trim() === '[DONE]') return;
+      let data;
+      try { data = JSON.parse(ev.data); } catch (_) { continue; }
+      if (data.error) throw new Error('ストリーミング中にエラーが発生しました：' + apiErrorText(data.error));
+      const ch = data.choices && data.choices[0];
+      if (!ch) continue;
+      const text = ch.delta && ch.delta.content;
+      if (text) yield { type: 'text', text };
+      if (ch.finish_reason) yield { type: 'stop', reason: ch.finish_reason === 'length' ? 'max_tokens' : ch.finish_reason };
+    }
+  }
+
+  function abortError() {
+    try { return new DOMException('停止しました', 'AbortError'); } catch (_) {
+      const e = new Error('停止しました'); e.name = 'AbortError'; return e;
+    }
+  }
+
+  function sleep(ms, signal) {
+    return new Promise((resolve, reject) => {
+      if (signal && signal.aborted) { reject(abortError()); return; }
+      const timer = setTimeout(() => { if (signal) signal.removeEventListener('abort', onAbort); resolve(); }, ms);
+      function onAbort() { clearTimeout(timer); reject(abortError()); }
+      if (signal) signal.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  function demoReply(messages) {
+    const last = messages[messages.length - 1].content;
+    const turns = messages.filter(m => m.role === 'user').length;
+    const quoted = last.length > 120 ? last.slice(0, 120) + '…' : last;
+    const greet = /こんにち|こんばん|おはよう|はじめまして|hello|hi\b/i.test(last)
+      ? 'こんにちは！話しかけてくれてありがとうございます。\n\n' : '';
+    return `${greet}これは**デモモード**の返答です。実際のAIには接続していないため、内容には答えられません。
+
+受け取ったメッセージ（この会話で ${turns} 通目）：
+
+> ${quoted.replace(/\n/g, '\n> ')}
+
+### 本物のAIと話すには
+1. 画面右上の接続先ボタン、または左下の「設定」を開く
+2. 接続先で **Anthropic（Claude）** か **OpenAI 互換 API** を選ぶ
+3. API キー（ローカルの Ollama などはベースURL）を入力して保存する
+
+| できること | 説明 |
+|---|---|
+| 会話の保存 | ブラウザ内に自動で保存されます |
+| 停止・再生成 | 返答の途中で止めたり、作り直したりできます |
+| Markdown 表示 | 見出し・表・コードなどを整えて表示します |
+
+\`\`\`javascript
+// コードブロックの右上にある「コピー」も試してみてください
+console.log('こんにちは、AIチャット！');
+\`\`\``;
+  }
+
+  async function* streamDemo({ messages, signal }) {
+    const reply = demoReply(messages);
+    await sleep(350, signal);
+    const chunks = reply.match(/[\s\S]{1,3}/g) || [];
+    for (const c of chunks) {
+      await sleep(14, signal);
+      yield { type: 'text', text: c };
+    }
+    yield { type: 'stop', reason: 'end_turn' };
+  }
+
+  // ------------------------------------------------------------------
+  // Markdown（HTML はすべてエスケープしてから、決まったタグだけを組み立てる）
+  // ------------------------------------------------------------------
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function inline(s) {
+    let t = escapeHtml(s);
+    const codes = [];
+    t = t.replace(/`([^`\n]+)`/g, (m, c) => { codes.push(c); return `\u0001${codes.length - 1}\u0001`; });
+    t = t.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      (m, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+    t = t.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/(^|[^\w])__([^_\n]+?)__(?!\w)/g, '$1<strong>$2</strong>');
+    t = t.replace(/(^|[^*\w])\*([^*\s][^*\n]*?)\*(?![*\w])/g, '$1<em>$2</em>');
+    t = t.replace(/~~([^~\n]+?)~~/g, '<del>$1</del>');
+    t = t.replace(/\u0001(\d+)\u0001/g, (m, i) => `<code>${codes[Number(i)]}</code>`);
+    return t;
+  }
+
+  function renderCodeBlock(b) {
+    return `<div class="code-block"><div class="code-head"><span>${escapeHtml(b.lang || 'code')}</span>`
+      + `<button type="button" class="copy-code">コピー</button></div>`
+      + `<pre><code>${escapeHtml(b.code)}</code></pre></div>`;
+  }
+
+  function splitRow(line) {
+    return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+  }
+
+  function renderTable(head, aligns, rows) {
+    const al = j => (aligns[j] ? ` style="text-align:${aligns[j]}"` : '');
+    let h = '<div class="table-wrap"><table><thead><tr>';
+    head.forEach((c, j) => { h += `<th${al(j)}>${inline(c)}</th>`; });
+    h += '</tr></thead><tbody>';
+    for (const r of rows) {
+      h += '<tr>';
+      head.forEach((_, j) => { h += `<td${al(j)}>${inline(r[j] || '')}</td>`; });
+      h += '</tr>';
+    }
+    return h + '</tbody></table></div>';
+  }
+
+  const TABLE_ROW = /^\s*\|.*\|\s*$/;
+  const TABLE_SEP = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/;
+
+  function renderMarkdown(src) {
+    if (!src) return '';
+    const blocks = [];
+    let text = String(src).replace(/\r\n?/g, '\n').replace(/[\u0000\u0001]/g, '');
+    // コードブロック（閉じていない生成途中のものも含む）を先に取り出す
+    text = text.replace(/(^|\n)[ \t]*```[ \t]*([^\n`]*)\n([\s\S]*?)(?:\n[ \t]*```[ \t]*(?=\n|$)|$)/g,
+      (m, pre, info, code) => {
+        blocks.push({ lang: info.trim().split(/\s+/)[0] || '', code });
+        return `${pre}\u0000${blocks.length - 1}\u0000`;
+      });
+
+    const lines = text.split('\n');
+    const html = [];
+    let para = [];
+    let list = null;
+    let quote = [];
+
+    const flushPara = () => {
+      if (para.length) { html.push('<p>' + para.map(inline).join('<br>') + '</p>'); para = []; }
+    };
+    const flushList = () => {
+      if (!list) return;
+      const start = list.type === 'ol' && list.start > 1 ? ` start="${list.start}"` : '';
+      html.push(`<${list.type}${start}>`
+        + list.items.map(it => `<li>${inline(it).replace(/\n/g, '<br>')}</li>`).join('')
+        + `</${list.type}>`);
+      list = null;
+    };
+    const flushQuote = () => {
+      if (quote.length) { html.push('<blockquote>' + quote.map(inline).join('<br>') + '</blockquote>'); quote = []; }
+    };
+    const flushAll = () => { flushPara(); flushList(); flushQuote(); };
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      let m;
+
+      if ((m = line.match(/^\u0000(\d+)\u0000$/)) && blocks[Number(m[1])]) {
+        flushAll(); html.push(renderCodeBlock(blocks[Number(m[1])])); continue;
+      }
+      if (!line.trim()) { flushAll(); continue; }
+      if ((m = line.match(/^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/))) {
+        flushAll(); const lv = m[1].length; html.push(`<h${lv}>${inline(m[2])}</h${lv}>`); continue;
+      }
+      if (/^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line)) { flushAll(); html.push('<hr>'); continue; }
+      if (TABLE_ROW.test(line) && i + 1 < lines.length && TABLE_SEP.test(lines[i + 1])) {
+        flushAll();
+        const head = splitRow(line);
+        const aligns = splitRow(lines[i + 1]).map(c => {
+          const l = c.startsWith(':'); const r = c.endsWith(':');
+          return l && r ? 'center' : r ? 'right' : l ? 'left' : '';
+        });
+        const rows = [];
+        i += 2;
+        while (i < lines.length && TABLE_ROW.test(lines[i])) { rows.push(splitRow(lines[i])); i++; }
+        i--;
+        html.push(renderTable(head, aligns, rows));
+        continue;
+      }
+      if ((m = line.match(/^\s{0,3}>\s?(.*)$/))) { flushPara(); flushList(); quote.push(m[1]); continue; }
+      if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) {
+        flushPara(); flushQuote();
+        if (!list || list.type !== 'ul') { flushList(); list = { type: 'ul', items: [] }; }
+        list.items.push(m[1]); continue;
+      }
+      if ((m = line.match(/^\s*(\d{1,9})[.)]\s+(.*)$/))) {
+        flushPara(); flushQuote();
+        if (!list || list.type !== 'ol') { flushList(); list = { type: 'ol', items: [], start: Number(m[1]) }; }
+        list.items.push(m[2]); continue;
+      }
+      if (list && /^\s+\S/.test(line)) { list.items[list.items.length - 1] += '\n' + line.trim(); continue; }
+      flushList(); flushQuote();
+      para.push(line);
+    }
+    flushAll();
+    return html.join('');
+  }
+
+  // ------------------------------------------------------------------
+  // コピー・トースト
+  // ------------------------------------------------------------------
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        if (!ok) throw new Error('copy failed');
+      }
+      toast('コピーしました');
+    } catch (_) {
+      toast('コピーできませんでした');
+    }
+  }
+
+  let toastTimer = null;
+  function toast(text, ms = 1800) {
+    els.toast.textContent = text;
+    els.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => els.toast.classList.remove('show'), ms);
+  }
+
+  // ------------------------------------------------------------------
+  // 設定ダイアログ
+  // ------------------------------------------------------------------
+  function buildProviderOptions() {
+    els.provider.textContent = '';
+    for (const [id, p] of Object.entries(PROVIDERS)) {
+      const o = document.createElement('option');
+      o.value = id;
+      o.textContent = p.label;
+      els.provider.appendChild(o);
+    }
+  }
+
+  function openSettings(message) {
+    state.draft = JSON.parse(JSON.stringify(settings));
+    state.draftKeys = Object.assign({}, keys);
+    state.draftProvider = settings.provider;
+    els.provider.value = settings.provider;
+    els.settingsMsg.textContent = message || '';
+    els.systemPrompt.value = settings.systemPrompt;
+    els.temperature.value = settings.temperature === '' || settings.temperature == null ? '' : settings.temperature;
+    els.maxTokens.value = settings.maxTokens === '' || settings.maxTokens == null ? '' : settings.maxTokens;
+    els.rememberKey.checked = !!settings.rememberKey;
+    els.apiKey.type = 'password';
+    els.toggleKey.textContent = '表示';
+    fillProviderFields();
+    closeSidebar();
+    if (!els.dialog.open) els.dialog.showModal();
+    const focusTarget = PROVIDERS[settings.provider].needsKey && !keys[settings.provider] ? els.apiKey : els.provider;
+    setTimeout(() => focusTarget.focus(), 0);
+  }
+
+  function fillProviderFields() {
+    const id = els.provider.value;
+    const p = PROVIDERS[id];
+    const ps = state.draft.providers[id];
+    els.providerHint.textContent = p.hint;
+    els.keyRow.hidden = id === 'demo';
+    els.rememberRow.hidden = id === 'demo';
+    els.baseUrlRow.hidden = !p.defaultBaseUrl;
+    els.modelRow.hidden = id === 'demo';
+    els.apiKeyLabel.textContent = '';
+    els.apiKeyLabel.appendChild(document.createTextNode(p.needsKey ? 'APIキー' : 'APIキー（必要な場合のみ）'));
+    if (p.needsKey) els.apiKeyLabel.appendChild(el('span', 'req', '必須'));
+    els.apiKey.value = state.draftKeys[id] || '';
+    els.apiKey.placeholder = id === 'anthropic' ? 'sk-ant-...' : 'sk-...（ローカルサーバーは空欄で可）';
+    els.baseUrl.value = ps.baseUrl || p.defaultBaseUrl;
+    els.baseUrl.placeholder = p.defaultBaseUrl;
+    els.model.value = ps.model || p.defaultModel;
+    els.model.placeholder = p.defaultModel;
+    els.modelList.textContent = '';
+    for (const name of p.models) {
+      const o = document.createElement('option');
+      o.value = name;
+      els.modelList.appendChild(o);
+    }
+  }
+
+  function captureProviderFields(id) {
+    const p = PROVIDERS[id];
+    const ps = state.draft.providers[id];
+    if (p.defaultBaseUrl) ps.baseUrl = trimSlash(els.baseUrl.value) || p.defaultBaseUrl;
+    if (id !== 'demo') {
+      ps.model = els.model.value.trim() || p.defaultModel;
+      state.draftKeys[id] = els.apiKey.value.trim();
+    }
+  }
+
+  function saveSettingsFromDialog() {
+    const id = els.provider.value;
+    captureProviderFields(id);
+
+    const tempRaw = els.temperature.value.trim();
+    if (tempRaw !== '') {
+      const n = Number(tempRaw);
+      if (!Number.isFinite(n) || n < 0 || n > 2) {
+        els.settingsMsg.textContent = '温度は 0〜2 の数値で入力してください（空欄でモデルの既定値）。';
+        els.temperature.focus();
+        return;
+      }
+    }
+    const mtRaw = els.maxTokens.value.trim();
+    if (mtRaw !== '' && !(Number(mtRaw) >= 1)) {
+      els.settingsMsg.textContent = '最大トークン数は 1 以上の整数で入力してください。';
+      els.maxTokens.focus();
+      return;
+    }
+    if (PROVIDERS[id].defaultBaseUrl && !/^https?:\/\//i.test(state.draft.providers[id].baseUrl)) {
+      els.settingsMsg.textContent = 'ベースURLは http:// か https:// で始めてください。';
+      els.baseUrl.focus();
+      return;
+    }
+
+    const d = state.draft;
+    d.provider = id;
+    d.systemPrompt = els.systemPrompt.value;
+    d.temperature = tempRaw === '' ? '' : Number(tempRaw);
+    d.maxTokens = mtRaw === '' ? '' : Math.floor(Number(mtRaw));
+    d.rememberKey = els.rememberKey.checked;
+    settings = d;
+    for (const pid of Object.keys(PROVIDERS)) {
+      if (pid === 'demo') continue;
+      keys[pid] = state.draftKeys[pid] || '';
+      saveKey(pid, keys[pid], settings.rememberKey);
+    }
+    saveSettings();
+    els.dialog.close();
+    renderModelChip();
+    if (!activeConv().messages.length) renderMessages();
+    toast('設定を保存しました');
+    els.input.focus();
+  }
+
+  // ------------------------------------------------------------------
+  // 入力欄
+  // ------------------------------------------------------------------
+  function autosize() {
+    els.input.style.height = 'auto';
+    els.input.style.height = Math.min(els.input.scrollHeight, 220) + 'px';
+  }
+
+  function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+  // ------------------------------------------------------------------
+  // イベント
+  // ------------------------------------------------------------------
+  function bindEvents() {
+    els.composer.addEventListener('submit', e => {
+      e.preventDefault();
+      if (state.streaming) { state.streaming.controller.abort(); return; }
+      send(els.input.value);
+    });
+    els.input.addEventListener('keydown', e => {
+      // 日本語入力の変換確定の Enter では送信しない
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === 'Enter' && !e.shiftKey && !e.altKey) {
+        e.preventDefault();
+        if (!state.streaming) send(els.input.value);
+      } else if (e.key === 'Escape' && state.streaming) {
+        state.streaming.controller.abort();
+      }
+    });
+    els.input.addEventListener('input', autosize);
+
+    els.newChatBtn.addEventListener('click', newChat);
+    els.settingsBtn.addEventListener('click', () => openSettings());
+    els.modelChip.addEventListener('click', () => openSettings());
+    els.menuBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+    els.overlay.addEventListener('click', closeSidebar);
+
+    // コードブロックのコピー
+    els.messages.addEventListener('click', e => {
+      const btn = e.target.closest('.copy-code');
+      if (!btn) return;
+      const code = btn.closest('.code-block').querySelector('code');
+      if (code) copyText(code.textContent);
+    });
+
+    // 設定
+    els.provider.addEventListener('change', () => {
+      captureProviderFields(state.draftProvider);
+      state.draftProvider = els.provider.value;
+      els.settingsMsg.textContent = '';
+      fillProviderFields();
+    });
+    els.toggleKey.addEventListener('click', () => {
+      const show = els.apiKey.type === 'password';
+      els.apiKey.type = show ? 'text' : 'password';
+      els.toggleKey.textContent = show ? '隠す' : '表示';
+    });
+    els.form.addEventListener('submit', e => { e.preventDefault(); saveSettingsFromDialog(); });
+    els.settingsCancel.addEventListener('click', () => els.dialog.close());
+    els.settingsClose.addEventListener('click', () => els.dialog.close());
+    els.dialog.addEventListener('click', e => { if (e.target === els.dialog) els.dialog.close(); });
+    els.clearAllBtn.addEventListener('click', clearAllConversations);
+
+    // 新しい会話のショートカット（Ctrl/⌘ + Shift + O）
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'o' || e.key === 'O')) {
+        e.preventDefault();
+        newChat();
+      }
+    });
+
+    // 生成途中でページを閉じても、そこまでの内容を残す
+    window.addEventListener('pagehide', () => { if (state.streaming) saveConversations(); });
+
+    // 別のタブで会話が変わったら反映する
+    window.addEventListener('storage', e => {
+      if (e.key !== KEYS.conversations || state.streaming) return;
+      conversations = loadConversations();
+      renderAll();
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // 起動
+  // ------------------------------------------------------------------
+  function init() {
+    buildProviderOptions();
+    // 前回の生成が途中で終わっていた場合の後片付け
+    for (const c of conversations) {
+      for (const m of c.messages) {
+        if (m.role === 'assistant' && !m.content && !m.error && !m.notice) m.error = '返答の受信が完了しませんでした。';
+      }
+    }
+    activeConv();
+    bindEvents();
+    renderAll();
+    autosize();
+    els.input.focus();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

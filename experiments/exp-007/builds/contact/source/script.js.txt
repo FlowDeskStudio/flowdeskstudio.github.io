@@ -1,0 +1,51 @@
+/* お問い合わせフォーム: 文字数カウンターと二重送信防止（JavaScript が無くてもフォームは動きます） */
+(function () {
+  'use strict';
+
+  // 文字数カウンター
+  document.querySelectorAll('textarea[data-counter]').forEach(function (area) {
+    var counter = document.getElementById(area.getAttribute('data-counter'));
+    if (!counter) return;
+    var max = parseInt(counter.getAttribute('data-max'), 10) || 0;
+
+    function update() {
+      var len = Array.from(area.value.replace(/\r\n/g, '\n')).length;
+      counter.textContent = len.toLocaleString() + ' / ' + max.toLocaleString() + '文字';
+      counter.classList.toggle('is-near', max > 0 && len > max * 0.9);
+    }
+    area.addEventListener('input', update);
+    update();
+  });
+
+  // 二重送信防止
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (form.dataset.submitting === '1') {
+      e.preventDefault();
+      return;
+    }
+    form.dataset.submitting = '1';
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.setAttribute('aria-disabled', 'true');
+      btn.classList.add('is-busy');
+      if (btn.dataset.busyLabel) {
+        btn.dataset.idleLabel = btn.textContent;
+        btn.textContent = btn.dataset.busyLabel;
+      }
+    }
+  });
+
+  // ブラウザの「戻る」で表示されたときはボタンを元に戻す
+  window.addEventListener('pageshow', function () {
+    document.querySelectorAll('form[data-submitting="1"]').forEach(function (form) {
+      delete form.dataset.submitting;
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.removeAttribute('aria-disabled');
+        btn.classList.remove('is-busy');
+        if (btn.dataset.idleLabel) btn.textContent = btn.dataset.idleLabel;
+      }
+    });
+  });
+})();

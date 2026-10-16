@@ -1,0 +1,51 @@
+<?php
+/**
+ * お問い合わせフォーム（2. 確認）
+ */
+declare(strict_types=1);
+require __DIR__ . '/lib.php';
+bootstrap();
+
+$input = $_SESSION['contact_input'] ?? null;
+if (!is_array($input) || validate_input($input)) {
+    redirect('index.php');
+}
+$input = array_merge(default_input(), $input);
+
+$sendError = isset($_SESSION['send_error']) ? (string) $_SESSION['send_error'] : '';
+unset($_SESSION['send_error']);
+
+render_header('入力内容の確認', 2);
+?>
+  <section class="card">
+    <?php if ($sendError !== ''): ?>
+    <div class="notice notice-error" role="alert">
+      <p><?= h($sendError) ?></p>
+    </div>
+    <?php else: ?>
+    <p class="lead">以下の内容で送信します。よろしければ「送信する」を押してください。</p>
+    <?php endif; ?>
+
+    <dl class="summary">
+      <?php foreach (summary_rows($input) as $label => $value): ?>
+      <div class="summary-row">
+        <dt><?= h($label) ?></dt>
+        <dd>
+          <?php if ($value === ''): ?>
+          <span class="muted">未入力</span>
+          <?php else: ?>
+          <?= nl2br(h($value), false) ?>
+          <?php endif; ?>
+        </dd>
+      </div>
+      <?php endforeach; ?>
+    </dl>
+
+    <form class="actions actions-split" method="post" action="send.php">
+      <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
+      <a class="btn btn-secondary" href="index.php">入力内容を修正する</a>
+      <button type="submit" class="btn btn-primary" data-busy-label="送信中…">送信する</button>
+    </form>
+  </section>
+<?php
+render_footer();

@@ -1,0 +1,60 @@
+<?php
+/**
+ * お問い合わせフォームの設定
+ *
+ * 公開前に、少なくとも「to」「from_address」「site_name」「secret」を書き換えてください。
+ * 送信先や送信元が example.com のままだと、フォームは送信を受け付けません（log モードを除く）。
+ */
+return [
+    // サイト名（画面の見出しやメールの件名に使います）
+    'site_name' => 'サイト名',
+
+    // お問い合わせを受け取るメールアドレス（複数指定できます）
+    'to' => [
+        'info@example.com',
+    ],
+
+    // 送信元アドレス。このサイトと同じドメインのアドレスにしてください。
+    // （お客様のアドレスを From にすると迷惑メール扱いされやすいため、お客様のアドレスは Reply-To に入ります）
+    'from_address' => 'no-reply@example.com',
+    'from_name'    => 'サイト名 お問い合わせフォーム',
+
+    // sendmail に -f（エンベロープ送信者）を渡すかどうか。サーバーが拒否する場合は false に。
+    'use_envelope_from' => true,
+
+    // 'mail' = 実際にメールを送る / 'log' = 送らずに data/mail.log へ書き出す（動作確認用）
+    'mail_mode' => 'mail',
+
+    // お客様へ自動返信メールを送るかどうか
+    // 他人のアドレスを入力されると、その人へ自動返信が届いてしまう点に注意してください。
+    'auto_reply' => false,
+    'auto_reply_signature' => "────────────────\nサイト名\nhttps://example.com/\n────────────────",
+
+    // お問い合わせ種別の選択肢
+    'categories' => [
+        'サービスについてのご質問',
+        'お見積もりのご依頼',
+        'お仕事のご相談',
+        'その他',
+    ],
+
+    // プライバシーポリシーのURL（空なら説明文だけを表示します）
+    'privacy_policy_url' => '',
+
+    // 入力の制限
+    'max_message_length' => 3000,   // お問い合わせ内容の最大文字数
+    'max_urls_in_message' => 3,     // 本文に含められる URL の数（スパム対策）
+
+    // スパム・連投対策
+    'min_seconds_before_submit' => 3,  // 画面を開いてから確認へ進めるまでの最短秒数
+    'cooldown_seconds' => 60,          // 同じブラウザから続けて送れるまでの秒数
+    'rate_limit' => [
+        'max_per_ip'     => 5,         // 同じ IP から送れる回数
+        'window_seconds' => 3600,      // 上の回数を数える期間（秒）
+    ],
+
+    // IP アドレスを記録するときのハッシュ用の鍵。長いランダムな文字列に変えてください。
+    'secret' => 'change-me-to-a-long-random-string',
+
+    'timezone' => 'Asia/Tokyo',
+];

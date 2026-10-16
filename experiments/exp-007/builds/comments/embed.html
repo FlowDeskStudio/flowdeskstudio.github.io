@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-U5VU5mwjLaVYsZtoTv+CYMvNVk7/vhAuoVeoddnhnYU='; script-src-attr 'none'; style-src 'sha256-3L9K91/IU3ms1xid0yCn8Gktur9F6UwV1VP4Rc/NH5M='; style-src-attr 'unsafe-inline'; img-src data: blob:; media-src 'none'; connect-src 'none'; font-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>コメント掲示板</title>
+<meta name="description" content="レス番号・アンカー・ID 表示つきの掲示板風コメント欄">
+<style>
+  :root {
+    --bg: #ebebe6;
+    --surface: #fbfbf8;
+    --surface-2: #f2f2ec;
+    --text: #1d1d1b;
+    --muted: #6a6a63;
+    --line: #d2d2ca;
+    --brand: #7a1f1f;
+    --brand-ink: #fff6ef;
+    --name: #14703f;
+    --link: #0d4f9e;
+    --hot: #c0262d;
+    --flash: #fff1b0;
+    --danger: #b3261e;
+    --focus: #2b6fd6;
+    --shadow: 0 8px 28px rgba(0, 0, 0, .16);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413;
+      --surface: #1d1d1b;
+      --surface-2: #262624;
+      --text: #e7e5de;
+      --muted: #9d9b93;
+      --line: #3a3936;
+      --brand: #5b1919;
+      --brand-ink: #f6eae2;
+      --name: #62c690;
+      --link: #86b6ff;
+      --hot: #ff7070;
+      --flash: #3d3713;
+      --danger: #ff8a80;
+      --focus: #86b6ff;
+      --shadow: 0 8px 28px rgba(0, 0, 0, .55);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413;
+    --surface: #1d1d1b;
+    --surface-2: #262624;
+    --text: #e7e5de;
+    --muted: #9d9b93;
+    --line: #3a3936;
+    --brand: #5b1919;
+    --brand-ink: #f6eae2;
+    --name: #62c690;
+    --link: #86b6ff;
+    --hot: #ff7070;
+    --flash: #3d3713;
+    --danger: #ff8a80;
+    --focus: #86b6ff;
+    --shadow: 0 8px 28px rgba(0, 0, 0, .55);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  a { color: var(--link); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+
+  .wrap { max-width: 52rem; margin: 0 auto; padding: 0 16px; }
+
+  /* ---------- header ---------- */
+  .board-bar {
+    background: var(--brand);
+    color: var(--brand-ink);
+    font-size: .8rem;
+    letter-spacing: .04em;
+  }
+  .board-bar .wrap { display: flex; justify-content: space-between; gap: 1rem; padding-top: .45rem; padding-bottom: .45rem; }
+  .board-bar a { color: inherit; text-decoration: none; opacity: .9; }
+  .board-bar a:hover { text-decoration: underline; opacity: 1; }
+
+  .thread-head { padding: 1.25rem 0 .75rem; border-bottom: 2px solid var(--brand); }
+  .thread-head h1 {
+    margin: 0;
+    font-size: clamp(1.1rem, 2.6vw, 1.4rem);
+    line-height: 1.4;
+    color: var(--hot);
+    font-weight: 700;
+  }
+  .thread-meta { margin-top: .35rem; color: var(--muted); font-size: .82rem; display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+  .seg button {
+    font: inherit; font-size: .82rem; padding: .3rem .8rem; border: 0; background: transparent; color: var(--text); cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); }
+  .toolbar .spacer { flex: 1; }
+  .toolbar a { font-size: .85rem; }
+
+  /* ---------- posts ---------- */
+  .posts { padding: .25rem 0 1rem; }
+  .post { padding: .8rem .5rem .7rem; border-bottom: 1px dashed var(--line); scroll-margin-top: 1rem; border-radius: 4px; }
+  .post.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0%, 35% { background: var(--flash); } 100% { background: transparent; } }
+  @media (prefers-reduced-motion: reduce) {
+    .post.flash { animation: none; background: var(--flash); }
+  }
+
+  .post-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .6rem; font-size: .84rem; color: var(--muted); }
+  .post-no { font-weight: 700; color: var(--text); text-decoration: none; min-width: 1.6em; }
+  .post-no:hover { text-decoration: underline; }
+  .post-no.hot { color: var(--hot); }
+  .post-name { color: var(--name); font-weight: 700; }
+  .post-name.has-mail { color: var(--link); }
+  .post-mail { font-size: .78rem; }
+  .post-id { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .8rem; }
+  .post-id .id-count { font-family: inherit; }
+  .own-badge {
+    font-size: .7rem; padding: 0 .4rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface-2);
+  }
+  .post-body {
+    margin: .4rem 0 0 2.2rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.75;
+  }
+  .post-body.is-deleted { color: var(--muted); font-style: italic; }
+  .anchor { color: var(--link); text-decoration: none; }
+  .anchor:hover { text-decoration: underline; }
+  .post-foot { margin: .35rem 0 0 2.2rem; display: flex; flex-wrap: wrap; gap: .1rem .9rem; }
+  .link-btn {
+    font: inherit; font-size: .78rem; color: var(--muted); background: none; border: 0; padding: .15rem 0; cursor: pointer;
+  }
+  .link-btn:hover { color: var(--link); text-decoration: underline; }
+  .link-btn.refs { color: var(--link); }
+  .link-btn.danger:hover { color: var(--danger); }
+
+  .omitted {
+    margin: .4rem 0; padding: .55rem .75rem; font-size: .84rem; color: var(--muted);
+    background: var(--surface-2); border-radius: 6px; text-align: center;
+  }
+  .omitted .link-btn { font-size: .84rem; color: var(--link); }
+
+  /* ---------- popup ---------- */
+  .popup {
+    position: absolute;
+    z-index: 50;
+    width: max-content;
+    max-width: min(36rem, calc(100vw - 16px));
+    max-height: 60vh;
+    overflow: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: .2rem .6rem;
+    font-size: .93rem;
+  }
+  .popup .post { padding: .55rem 0; }
+  .popup .post:last-child { border-bottom: 0; }
+  .popup .post-body { margin-left: 0; }
+  .popup-missing { margin: .55rem 0; color: var(--muted); font-size: .85rem; }
+
+  /* ---------- form ---------- */
+  .compose {
+    margin: 1rem 0 2rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .compose h2 { margin: 0 0 .75rem; font-size: 1rem; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .field { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: .8rem; color: var(--muted); }
+  .field input, .field textarea {
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .5rem .6rem;
+    width: 100%;
+  }
+  .field textarea { min-height: 8.5rem; resize: vertical; line-height: 1.7; }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--focus); outline-offset: 0; border-color: transparent; }
+  .compose-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: .7rem; }
+  .counter { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .counter.over { color: var(--danger); font-weight: 700; }
+  .hint { font-size: .78rem; color: var(--muted); flex: 1; min-width: 12rem; }
+  .submit {
+    font: inherit; font-weight: 700; padding: .55rem 1.4rem; border: 0; border-radius: 6px;
+    background: var(--brand); color: var(--brand-ink); cursor: pointer;
+  }
+  .submit:hover { filter: brightness(1.12); }
+  .submit:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+  .status { margin-top: .6rem; font-size: .85rem; min-height: 1.4em; }
+  .status.error { color: var(--danger); }
+  .status.ok { color: var(--name); }
+
+  .notice {
+    margin: .8rem 0 0; padding: .55rem .75rem; border-radius: 6px; font-size: .82rem;
+    background: var(--surface-2); color: var(--muted);
+  }
+  .notice.warn { color: var(--danger); }
+
+  footer.page-foot { padding: 0 0 2.5rem; color: var(--muted); font-size: .78rem; }
+
+  @media (max-width: 560px) {
+    body { font-size: 14.5px; }
+    .fields { grid-template-columns: 1fr; }
+    .post { padding-left: .25rem; padding-right: .25rem; }
+    .post-body, .post-foot { margin-left: 0; }
+    .compose { padding: .85rem; }
+    .submit { width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <div class="board-bar">
+    <div class="wrap">
+      <span>コメント板</span>
+      <a href="#compose">書き込む ↓</a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <header class="thread-head">
+      <h1 id="thread-title">【雑談】このページの感想・質問を書き込むスレ</h1>
+      <div class="thread-meta">
+        <span id="meta-count">レス数 0</span>
+        <span id="meta-last"></span>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="表示範囲">
+        <button type="button" data-mode="all" aria-pressed="true">全部</button>
+        <button type="button" data-mode="latest" aria-pressed="false">最新50</button>
+      </div>
+      <span class="spacer"></span>
+      <a href="#compose">書き込む ↓</a>
+    </div>
+
+    <noscript><p class="notice warn">このコメント欄は JavaScript を有効にすると表示されます。</p></noscript>
+
+    <section class="posts" id="posts" aria-label="レス一覧" aria-live="polite"></section>
+
+    <section class="compose" id="compose" aria-labelledby="compose-title">
+      <h2 id="compose-title">書き込む</h2>
+      <form id="post-form" novalidate>
+        <div class="fields">
+          <div class="field">
+            <label for="f-name">名前</label>
+            <input id="f-name" name="name" type="text" maxlength="32" placeholder="名無しさん" autocomplete="nickname">
+          </div>
+          <div class="field">
+            <label for="f-mail">メール欄（sage など）</label>
+            <input id="f-mail" name="mail" type="text" maxlength="32" placeholder="空欄でOK" autocomplete="off">
+          </div>
+          <div class="field full">
+            <label for="f-body">本文</label>
+            <textarea id="f-body" name="body" maxlength="2400" placeholder="「>>番号」で過去のレスに返信できます" required></textarea>
+          </div>
+        </div>
+        <div class="compose-foot">
+          <span class="counter" id="counter">0 / 2000</span>
+          <span class="hint">Ctrl + Enter（Mac は ⌘ + Enter）でも書き込めます</span>
+          <button class="submit" id="submit" type="submit">書き込む</button>
+        </div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+      </form>
+      <p class="notice" id="storage-notice">書き込みはこのブラウザの中にだけ保存されます。ほかの人の画面には表示されません。</p>
+    </section>
+  </main>
+
+  <footer class="page-foot">
+    <div class="wrap">レス番号やアンカー（&gt;&gt;1）にカーソルを乗せると、その書き込みを表示します。スマホではタップで表示します。</div>
+  </footer>
+
+<script>
+(() => {
+  'use strict';
+
+  const KEY_THREAD = 'bbs-comments-thread-v1';
+  const KEY_PREF = 'bbs-comments-pref-v1';
+  const KEY_SEED = 'bbs-comments-seed-v1';
+  const MAX_POSTS = 1000;
+  const MAX_BODY = 2000;
+  const MAX_LINES = 60;
+  const MAX_NAME = 32;
+  const COOLDOWN_MS = 5000;
+  const LATEST = 50;
+  const DEFAULT_NAME = '名無しさん';
+  const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+
+  /* ---------- storage (falls back to memory) ---------- */
+  const memory = {};
+  let storageOk = true;
+  const store = {
+    get(k) {
+      try { const v = localStorage.getItem(k); return v === null ? (memory[k] ?? null) : v; }
+      catch (e) { storageOk = false; return memory[k] ?? null; }
+    },
+    set(k, v) {
+      memory[k] = v;
+      try { localStorage.setItem(k, v); return true; }
+      catch (e) { storageOk = false; return false; }
+    }
+  };
+  function readJSON(k, fallback) {
+    const raw = store.get(k);
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); } catch (e) { return fallback; }
+  }
+
+  /* ---------- helpers ---------- */
+  const $ = (s) => document.querySelector(s);
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function hash(str) {
+    let h1 = 0x811c9dc5, h2 = 0x9747b28c;
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 16777619);
+      h2 = Math.imul(h2 ^ c, 2246822519);
+      h2 = (h2 << 13) | (h2 >>> 19);
+    }
+    const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let a = h1 >>> 0, b = h2 >>> 0, out = '';
+    for (let i = 0; i < 4; i++) { out += abc[a & 63]; a >>>= 6; }
+    for (let i = 0; i < 4; i++) { out += abc[b & 63]; b >>>= 6; }
+    return out;
+  }
+  const pad = (n, w = 2) => String(n).padStart(w, '0');
+  function fmtDate(ms) {
+    const d = new Date(ms);
+    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}(${WEEK[d.getDay()]}) ` +
+      `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(Math.floor(d.getMilliseconds() / 10))}`;
+  }
+  const dayKey = (ms) => { const d = new Date(ms); return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`; };
+
+  /* ---------- identity (per browser) ---------- */
+  let seed = store.get(KEY_SEED);
+  if (!seed) {
+    seed = Array.from({ length: 4 }, () => Math.random().toString(36).slice(2)).join('');
+    store.set(KEY_SEED, seed);
+  }
+  const ownerKey = hash('owner:' + seed);
+  const makeId = (ms) => hash(seed + ':' + dayKey(ms));
+
+  /* ---------- data ---------- */
+  function sampleThread() {
+    const now = Date.now();
+    const m = (min) => now - min * 60000 - Math.floor(Math.random() * 900);
+    return {
+      title: '【雑談】このページの感想・質問を書き込むスレ',
+      posts: [
+        { no: 1, name: DEFAULT_NAME, mail: '', time: m(312), id: 'qX3vT8kA', body: 'スレ立てました。\nページの感想、質問、要望などご自由にどうぞ。\n\n・過去のレスには「>>番号」で返信できます\n・荒らしはスルーでお願いします' },
+        { no: 2, name: DEFAULT_NAME, mail: 'sage', time: m(298), id: 'Lm0pQe2Z', body: '>>1 乙です' },
+        { no: 3, name: DEFAULT_NAME, mail: '', time: m(241), id: 'u7Hc1rWd', body: '表示が軽くていいね' },
+        { no: 4, name: '通りすがり', mail: '', time: m(203), id: 'bN5yKs9f', body: '>>3\nわかる。スマホでも読みやすい' },
+        { no: 5, name: DEFAULT_NAME, mail: 'sage', time: m(187), id: 'u7Hc1rWd', body: '>>4\nレス番号にカーソル乗せると元の書き込みが出るの地味に便利' },
+        { no: 6, name: DEFAULT_NAME, mail: '', time: m(96), id: 'Ty2gMv4P', body: '質問です。\nここに書いた内容って、ほかの人にも見えるんですか？' },
+        { no: 7, name: DEFAULT_NAME, mail: '', time: m(71), id: 'bN5yKs9f', body: '>>6\nこのページはブラウザの中に保存する仕組みなので、自分の端末でしか見えないはず\n>>2-5 あたりも全部サンプルらしい' }
+      ]
+    };
+  }
+  function isValidThread(d) {
+    return d && Array.isArray(d.posts) && d.posts.every((p) => p && Number.isInteger(p.no) && typeof p.body === 'string');
+  }
+  function loadThread() {
+    const d = readJSON(KEY_THREAD, null);
+    return isValidThread(d) ? d : sampleThread();
+  }
+  function saveThread() {
+    const ok = store.set(KEY_THREAD, JSON.stringify(thread));
+    updateStorageNotice(ok);
+  }
+
+  let thread = loadThread();
+  const pref = Object.assign({ name: '', mail: '', mode: 'all', lastPost: 0 }, readJSON(KEY_PREF, {}) || {});
+  const savePref = () => { store.set(KEY_PREF, JSON.stringify(pref)); };
+
+  /* ---------- parsing ---------- */
+  const TOKEN = /(?:>>|＞＞)(\d{1,4})(?:-(\d{1,4}))?|https?:\/\/[\w\-.~:/?#[\]@!$&*+,;=%()]+/g;
+
+  function parseTargets(spec) {
+    if (spec.includes(',')) return spec.split(',').map(Number).filter((n) => n > 0);
+    const [a, b] = spec.split('-').map(Number);
+    if (!b) return a > 0 ? [a] : [];
+    const lo = Math.max(1, Math.min(a, b));
+    const hi = Math.min(Math.max(a, b), lo + 9);
+    const out = [];
+    for (let i = lo; i <= hi; i++) out.push(i);
+    return out;
+  }
+  function buildBody(text, target) {
+    let last = 0;
+    for (const m of text.matchAll(TOKEN)) {
+      if (m.index > last) target.append(text.slice(last, m.index));
+      if (m[1]) {
+        const spec = m[2] ? `${m[1]}-${m[2]}` : m[1];
+        const a = el('a', 'anchor', m[0]);
+        a.href = '#res-' + Number(m[1]);
+        a.dataset.pop = spec;
+        target.append(a);
+      } else {
+        const a = el('a', 'url', m[0]);
+        a.href = m[0];
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer nofollow';
+        target.append(a);
+      }
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) target.append(text.slice(last));
+  }
+  function buildRefs(posts) {
+    const refs = new Map();
+    for (const p of posts) {
+      if (p.deleted) continue;
+      const seen = new Set();
+      for (const m of p.body.matchAll(TOKEN)) {
+        if (!m[1]) continue;
+        const spec = m[2] ? `${m[1]}-${m[2]}` : m[1];
+        for (const t of parseTargets(spec)) {
+          if (t === p.no || seen.has(t)) continue;
+          seen.add(t);
+          if (!refs.has(t)) refs.set(t, []);
+          refs.get(t).push(p.no);
+        }
+      }
+    }
+    return refs;
+  }
+  function buildIdIndex(posts) {
+    const total = new Map();
+    for (const p of posts) total.set(p.id, (total.get(p.id) || 0) + 1);
+    const running = new Map();
+    const idx = new Map();
+    for (const p of posts) {
+      const n = (running.get(p.id) || 0) + 1;
+      running.set(p.id, n);
+      idx.set(p.no, { n, total: total.get(p.id) });
+    }
+    return idx;
+  }
+
+  /* ---------- rendering ---------- */
+  const listEl = $('#posts');
+  let refs = new Map();
+  let idIndex = new Map();
+  const findPost = (no) => thread.posts.find((p) => p.no === no);
+
+  function renderPost(p, opts = {}) {
+    const inPopup = !!opts.inPopup;
+    const own = p.owner === ownerKey;
+    const art = el('article', 'post');
+    if (!inPopup) art.id = 'res-' + p.no;
+    art.dataset.no = p.no;
+
+    const head = el('header', 'post-head');
+    const r = refs.get(p.no) || [];
+    const no = el('a', 'post-no' + (r.length >= 3 ? ' hot' : ''), String(p.no));
+    no.href = '#res-' + p.no;
+    no.dataset.jump = p.no;
+    no.setAttribute('aria-label', `レス ${p.no}`);
+    head.append(no);
+
+    const name = el('span', 'post-name' + (p.mail ? ' has-mail' : ''), p.name || DEFAULT_NAME);
+    if (p.mail) name.title = 'メール欄: ' + p.mail;
+    head.append(name);
+    if (p.mail) head.append(el('span', 'post-mail', `[${p.mail}]`));
+
+    const t = el('time', 'post-time', fmtDate(p.time));
+    t.dateTime = new Date(p.time).toISOString();
+    head.append(t);
+
+    const idInfo = idIndex.get(p.no);
+    const idEl = el('span', 'post-id', 'ID:' + p.id);
+    if (idInfo && idInfo.total > 1) idEl.append(el('span', 'id-count', ` (${idInfo.n}/${idInfo.total})`));
+    head.append(idEl);
+    if (own) head.append(el('span', 'own-badge', '自分'));
+    art.append(head);
+
+    const body = el('div', 'post-body');
+    if (p.deleted) {
+      body.classList.add('is-deleted');
+      body.textContent = 'このレスは投稿者によって削除されました';
+    } else {
+      buildBody(p.body, body);
+    }
+    art.append(body);
+
+    if (!inPopup) {
+      const foot = el('div', 'post-foot');
+      const reply = el('button', 'link-btn', '返信');
+      reply.type = 'button';
+      reply.dataset.reply = p.no;
+      reply.setAttribute('aria-label', `レス ${p.no} に返信`);
+      foot.append(reply);
+      if (r.length) {
+        const b = el('button', 'link-btn refs', `返信されたレス ${r.length}件`);
+        b.type = 'button';
+        b.dataset.pop = r.join(',');
+        foot.append(b);
+      }
+      if (own && !p.deleted) {
+        const del = el('button', 'link-btn danger', '削除');
+        del.type = 'button';
+        del.dataset.del = p.no;
+        foot.append(del);
+      }
+      art.append(foot);
+    }
+    return art;
+  }
+
+  function render() {
+    closePopups(0);
+    refs = buildRefs(thread.posts);
+    idIndex = buildIdIndex(thread.posts);
+    const posts = thread.posts;
+    const frag = document.createDocumentFragment();
+
+    if (pref.mode === 'latest' && posts.length > LATEST + 1) {
+      frag.append(renderPost(posts[0]));
+      const omitted = posts.length - LATEST - 1;
+      const gap = el('div', 'omitted');
+      gap.append(`${omitted}件のレスを省略しています ・ `);
+      const b = el('button', 'link-btn', '全部表示する');
+      b.type = 'button';
+      b.dataset.mode = 'all';
+      gap.append(b);
+      frag.append(gap);
+      posts.slice(-LATEST).forEach((p) => frag.append(renderPost(p)));
+    } else {
+      posts.forEach((p) => frag.append(renderPost(p)));
+    }
+    listEl.replaceChildren(frag);
+
+    $('#thread-title').textContent = thread.title || 'コメント';
+    $('#meta-count').textContent = `レス数 ${posts.length} / ${MAX_POSTS}`;
+    const last = posts[posts.length - 1];
+    $('#meta-last').textContent = last ? `最終書き込み ${fmtDate(last.time)}` : '';
+    document.querySelectorAll('.seg [data-mode]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.mode === pref.mode));
+    });
+
+    const full = posts.length >= MAX_POSTS;
+    $('#submit').disabled = full;
+    if (full) setStatus(`レス数が ${MAX_POSTS} を超えたため、これ以上書き込めません。`, 'error');
+  }
+
+  function setMode(mode) {
+    pref.mode = mode === 'latest' ? 'latest' : 'all';
+    savePref();
+    render();
+  }
+
+  function jumpTo(no) {
+    if (!findPost(no)) return false;
+    let target = document.getElementById('res-' + no);
+    if (!target) { setMode('all'); target = document.getElementById('res-' + no); }
+    if (!target) return false;
+    closePopups(0);
+    target.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    target.classList.remove('flash');
+    void target.offsetWidth;
+    target.classList.add('flash');
+    try { history.replaceState(null, '', '#res-' + no); } catch (e) { /* ignore */ }
+    return true;
+  }
+
+  /* ---------- popups ---------- */
+  const stack = [];
+  let hideTimer = 0;
+  let touchMode = false;
+
+  function closePopups(from) {
+    while (stack.length > from) stack.pop().remove();
+  }
+  function openPopup(trigger) {
+    const host = trigger.closest('.popup');
+    const level = host ? stack.indexOf(host) + 1 : 0;
+    closePopups(level);
+
+    const pop = el('div', 'popup');
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', '引用されたレス');
+    pop._trigger = trigger;
+    const nos = parseTargets(trigger.dataset.pop);
+    for (const n of nos) {
+      const p = findPost(n);
+      pop.append(p ? renderPost(p, { inPopup: true }) : el('p', 'popup-missing', `>>${n} はまだ書き込まれていません`));
+    }
+    document.body.append(pop);
+
+    const r = trigger.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const w = pop.offsetWidth;
+    const h = pop.offsetHeight;
+    let left = r.left + window.scrollX;
+    left = Math.max(window.scrollX + 8, Math.min(left, window.scrollX + vw - w - 8));
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + 6 + h > window.innerHeight && r.top - 6 - h > 0) top = r.top + window.scrollY - 6 - h;
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+    stack.push(pop);
+  }
+  const isOpenFor = (trigger) => stack.find((p) => p._trigger === trigger);
+
+  document.addEventListener('pointerdown', (e) => { touchMode = e.pointerType !== 'mouse'; }, true);
+
+  document.addEventListener('mouseover', (e) => {
+    if (touchMode) return;
+    const inside = e.target.closest('.popup, [data-pop]');
+    if (inside) clearTimeout(hideTimer);
+    const trig = e.target.closest('[data-pop]');
+    if (trig && !isOpenFor(trig)) openPopup(trig);
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (touchMode || !stack.length) return;
+    const to = e.relatedTarget;
+    if (to && to.closest && to.closest('.popup, [data-pop]')) return;
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => closePopups(0), 280);
+  });
+
+  document.addEventListener('click', (e) => {
+    const modeBtn = e.target.closest('[data-mode]');
+    if (modeBtn) { setMode(modeBtn.dataset.mode); return; }
+
+    const replyBtn = e.target.closest('[data-reply]');
+    if (replyBtn) { insertReply(Number(replyBtn.dataset.reply)); return; }
+
+    const delBtn = e.target.closest('[data-del]');
+    if (delBtn) { deletePost(Number(delBtn.dataset.del)); return; }
+
+    const jump = e.target.closest('[data-jump]');
+    if (jump) { e.preventDefault(); jumpTo(Number(jump.dataset.jump)); return; }
+
+    const trig = e.target.closest('[data-pop]');
+    if (trig) {
+      e.preventDefault();
+      const isAnchor = trig.classList.contains('anchor');
+      if (touchMode || !isAnchor) {
+        const open = isOpenFor(trig);
+        if (open) closePopups(stack.indexOf(open));
+        else openPopup(trig);
+      } else {
+        jumpTo(parseTargets(trig.dataset.pop)[0]);
+      }
+      return;
+    }
+    if (!e.target.closest('.popup')) closePopups(0);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && stack.length) closePopups(stack.length - 1); });
+  window.addEventListener('resize', () => closePopups(0));
+
+  /* ---------- compose ---------- */
+  const form = $('#post-form');
+  const fName = $('#f-name');
+  const fMail = $('#f-mail');
+  const fBody = $('#f-body');
+  const counter = $('#counter');
+  const statusEl = $('#status');
+  let statusTimer = 0;
+
+  fName.value = pref.name || '';
+  fMail.value = pref.mail || '';
+
+  function setStatus(msg, kind) {
+    clearTimeout(statusTimer);
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (kind ? ' ' + kind : '');
+    if (kind === 'ok') statusTimer = setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status'; }, 4000);
+  }
+  function updateCounter() {
+    const len = [...fBody.value].length;
+    counter.textContent = `${len} / ${MAX_BODY}`;
+    counter.classList.toggle('over', len > MAX_BODY);
+  }
+  function insertReply(no) {
+    const tag = `>>${no}\n`;
+    const v = fBody.value;
+    const s = fBody.selectionStart ?? v.length;
+    const before = v.slice(0, s);
+    const prefix = before && !before.endsWith('\n') ? '\n' : '';
+    fBody.value = before + prefix + tag + v.slice(fBody.selectionEnd ?? s);
+    const caret = (before + prefix + tag).length;
+    closePopups(0);
+    $('#compose').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    fBody.focus({ preventScroll: true });
+    fBody.setSelectionRange(caret, caret);
+    updateCounter();
+  }
+  function deletePost(no) {
+    thread = loadThread();
+    const p = findPost(no);
+    if (!p || p.owner !== ownerKey || p.deleted) { render(); return; }
+    if (!window.confirm(`>>${no} を削除しますか？\nレス番号は残り、本文だけが消えます。`)) return;
+    p.deleted = true;
+    p.body = '';
+    saveThread();
+    render();
+    setStatus(`>>${no} を削除しました。`, 'ok');
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = fName.value.trim().slice(0, MAX_NAME) || DEFAULT_NAME;
+    const mail = fMail.value.trim().slice(0, MAX_NAME);
+    const body = fBody.value.replace(/\r\n?/g, '\n').replace(/\s+$/, '').replace(/^\n+/, '');
+
+    if (!body.trim()) { setStatus('本文を入力してください。', 'error'); fBody.focus(); return; }
+    if ([...body].length > MAX_BODY) { setStatus(`本文が長すぎます（${MAX_BODY}文字まで）。`, 'error'); fBody.focus(); return; }
+    if (body.split('\n').length > MAX_LINES) { setStatus(`改行が多すぎます（${MAX_LINES}行まで）。`, 'error'); fBody.focus(); return; }
+    const wait = pref.lastPost + COOLDOWN_MS - Date.now();
+    if (wait > 0) { setStatus(`連続投稿はできません。あと ${Math.ceil(wait / 1000)} 秒待ってください。`, 'error'); return; }
+
+    thread = loadThread();
+    if (thread.posts.length >= MAX_POSTS) { render(); return; }
+    const now = Date.now();
+    const no = thread.posts.reduce((mx, p) => Math.max(mx, p.no), 0) + 1;
+    thread.posts.push({ no, name, mail, body, time: now, id: makeId(now), owner: ownerKey });
+    saveThread();
+
+    pref.name = fName.value.trim().slice(0, MAX_NAME);
+    pref.mail = mail;
+    pref.lastPost = now;
+    savePref();
+
+    fBody.value = '';
+    updateCounter();
+    render();
+    jumpTo(no);
+    setStatus(`>>${no} として書き込みました。`, 'ok');
+  });
+
+  fBody.addEventListener('input', updateCounter);
+  fBody.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); form.requestSubmit(); }
+  });
+
+  function updateStorageNotice(ok) {
+    const n = $('#storage-notice');
+    if (ok === false || !storageOk) {
+      n.classList.add('warn');
+      n.textContent = 'このブラウザでは保存できない設定になっています（プライベートモードなど）。ページを閉じると書き込みは消えます。';
+    }
+  }
+
+  /* other tabs */
+  window.addEventListener('storage', (e) => {
+    if (e.key === KEY_THREAD) { thread = loadThread(); render(); }
+  });
+
+  /* ---------- init ---------- */
+  if (!store.get(KEY_THREAD)) saveThread();
+  updateStorageNotice();
+  updateCounter();
+  render();
+  const m = /^#res-(\d+)$/.exec(location.hash);
+  if (m) requestAnimationFrame(() => jumpTo(Number(m[1])));
+})();
+</script>
+</body>
+</html>
