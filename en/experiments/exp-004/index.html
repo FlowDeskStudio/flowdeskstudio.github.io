@@ -63,8 +63,22 @@
       </figure>
 
       <div class="article-copy">
+        <nav class="toc" aria-label="Contents">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#sec-1">How it worked</a></li>
+            <li><a href="#sec-2">A cat riding a bicycle</a></li>
+            <li><a href="#sec-3">A seaside with a lighthouse</a></li>
+            <li><a href="#sec-4">A breakfast table</a></li>
+            <li><a href="#sec-5">Asking a separate AI what each picture shows</a></li>
+            <li><a href="#sec-6">What the three had in common</a></li>
+            <li><a href="#sec-7">The frame stayed and the details were swapped</a></li>
+            <li><a href="#sec-8">Experiment data</a></li>
+          </ol>
+        </nav>
+
         <section>
-          <h2>How it worked</h2>
+          <h2 id="sec-1">How it worked</h2>
           <p>The first AI is given the subject in words and draws it. That drawing is turned into an image and shown to the next AI. The only request is to copy the same picture. It is not told the subject, and it is not told this is a telephone game.</p>
           <p>The new drawing is turned into an image again and shown to the AI after that. This continues to round 100.</p>
           <ul class="article-list">
@@ -79,7 +93,7 @@
         </section>
 
         <section>
-          <h2>A cat riding a bicycle</h2>
+          <h2 id="sec-2">A cat riding a bicycle</h2>
           <p>In the first three rounds the picture was simplified a lot. The markings on the face, the thin lines of the wheels and the chain disappeared. The number of shapes went from 94 in round 1 to 61 in round 2.</p>
           <p>After that, it changed slowly.</p>
           <p>The clearest case is the tail. In round 1 it was a curled, raised tail. It shifted shape little by little, and from around round 14 it looked like a raised arm. The AI that drew round 17 wrote "a cat waving its hand" in its own report. The AI that drew round 1 had written that the cat was holding the handlebars with both hands.</p>
@@ -100,7 +114,7 @@
 
       <div class="article-copy">
         <section>
-          <h2>A seaside with a lighthouse</h2>
+          <h2 id="sec-3">A seaside with a lighthouse</h2>
           <p>Round 1 was a dusk scene in muted colors. By round 10 the sky was pink and purple and the sea was emerald. The colors kept getting stronger with each round after that.</p>
           <p>The birds in the sky became symbols like wavy lines and arcs. One of the clouds became a dark purple ellipse. The hut beside the lighthouse became something like a pink wall.</p>
           <p>The rock had a pale triangle that stood for its lit face. Between rounds 70 and 80, that triangle turned blue. A shape that had described how the light fell came to be drawn as an object: a blue triangle.</p>
@@ -124,7 +138,7 @@
 
       <div class="article-copy">
         <section>
-          <h2>A breakfast table</h2>
+          <h2 id="sec-4">A breakfast table</h2>
           <p>This subject has many small objects, and each of them turned into a different shape.</p>
           <p>The wavy bacon became two red lines. The glass of orange juice became a striped cylinder and then something like a bundle of thin sticks. The toast became a yellow diamond, and the wood-grain table became plain. The steam rising from the coffee was gone by round 30.</p>
           <p>The biggest change was outside the window. The hills started inside the window and grew with each round. Between rounds 60 and 70 they spilled past the window frame, and by round 100 they are two large green circles overlapping the window.</p>
@@ -148,7 +162,7 @@
 
       <div class="article-copy">
         <section>
-          <h2>Asking a separate AI what each picture shows</h2>
+          <h2 id="sec-5">Asking a separate AI what each picture shows</h2>
           <p>Round 1 and every tenth round were shown, one picture at a time, to a separate AI that knew nothing. The only question was what the picture shows, in one sentence. The answers were given in Japanese and are translated here.</p>
           <p class="score-line"><span>Subject still recognized at round 100</span><strong>3 / 3</strong></p>
           <p>These were the answers for the round-100 pictures.</p>
@@ -166,7 +180,7 @@
         </section>
 
         <section>
-          <h2>What the three had in common</h2>
+          <h2 id="sec-6">What the three had in common</h2>
           <ul class="article-list">
             <li>A large simplification in roughly the first ten rounds, then slow change</li>
             <li>Colors that grew stronger and more vivid with each round</li>
@@ -177,7 +191,7 @@
 
         <section class="article-conclusion">
           <p class="kicker">WHAT REMAINED</p>
-          <h2>The frame stayed and the details were swapped</h2>
+          <h2 id="sec-7">The frame stayed and the details were swapped</h2>
           <p>In this experiment, Claude Code running Claude Opus 5.5 copied each of three subjects 100 times. What each picture was of still came through to a separate AI at round 100.</p>
           <p>What changed was the details. They did not fade into a blur. A tail became an arm, hills became green circles, and the lit face of a rock became a blue triangle. Each was replaced by something else that was just as definite.</p>
           <p>There are clear limits on what this supports. There were three subjects and each was run once. Running the same subject again would produce a different drift. One kind of AI was used, and the AI that looked at the pictures and answered was the same kind. A person looking at them might see it differently.</p>
@@ -187,7 +201,7 @@
 
         <section class="experiment-data">
           <p class="kicker">EXPERIMENT DATA</p>
-          <h2>Experiment data</h2>
+          <h2 id="sec-8">Experiment data</h2>
           <dl>
             <div><dt>Date</dt><dd>9 October 2026 (pilot and main run)</dd></div>
             <div><dt>Environment</dt><dd>Claude Code (desktop app)</dd></div>
