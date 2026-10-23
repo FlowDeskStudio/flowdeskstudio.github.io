@@ -4,8 +4,14 @@
   <link href="https://flowdeskstudio.net/"/>
   <link rel="self" href="https://flowdeskstudio.net/feed.xml"/>
   <id>https://flowdeskstudio.net/feed.xml</id>
-  <updated>2026-10-16T00:00:00+09:00</updated>
+  <updated>2026-10-23T00:00:00+09:00</updated>
   <author><name>FlowDeskStudio</name></author>
+  <entry>
+    <title>AIは知らないことを「知らない」と言えるか｜架空のことわざや郷土料理を196回聞いた</title>
+    <link href="https://flowdeskstudio.net/experiments/exp-008/"/>
+    <id>https://flowdeskstudio.net/experiments/exp-008/</id>
+    <updated>2026-10-23T00:00:00+09:00</updated>
+  </entry>
   <entry>
     <title>AIに作らせたWebアプリ35個をセキュリティ検査した結果</title>
     <link href="https://flowdeskstudio.net/experiments/exp-007/"/>
