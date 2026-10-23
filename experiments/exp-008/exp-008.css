@@ -92,3 +92,22 @@
   font-size: clamp(1.15rem, 2vw, 1.4rem);
   line-height: 1.4;
 }
+
+.prompt-details details > p {
+  margin: 0;
+  padding: 18px 26px 0;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.prompt-details details > blockquote + p {
+  border-top: 1px solid var(--line);
+}
+
+.prompt-details details > p + blockquote {
+  padding-top: 12px;
+}
+
+.article-copy > section > .prompt-details {
+  margin: 30px 0 34px !important;
+}
