@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>Six Ways to Ask AI for Meeting Minutes, Compared: 180 Runs on 10 Made-Up Meetings</title>
+  <meta name="description" content="We wrote 10 fictional meeting transcripts and asked three Claude models for minutes in six different ways, 180 runs in all. Every way of asking got the decisions, owners and open items almost entirely right. The differences were in adding things nobody said (Opus 0, Haiku 16) and in writing deadlines as dates. Specifying the headings gave the most fully correct sets of minutes.">
+  <link rel="canonical" href="https://flowdeskstudio.net/en/experiments/exp-009/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-009/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-009/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-009/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/en/experiments/exp-009/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Six Ways to Ask AI for Meeting Minutes, Compared: 180 Runs on 10 Made-Up Meetings">
+  <meta property="og:description" content="Six ways to ask for meeting minutes, 180 runs on 10 made-up meetings. Decisions came out right every time; the differences were in additions and deadlines.">
+  <meta property="og:image" content="https://flowdeskstudio.net/experiments/exp-009/assets/og-en.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-10-25T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Six ways to ask AI for meeting minutes">
+  <meta name="twitter:description" content="Six ways to ask for meeting minutes, 180 runs on 10 made-up meetings. Decisions came out right every time; the differences were in additions and deadlines.">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-009/assets/og-en.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-009/exp-009.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Six Ways to Ask AI for Meeting Minutes, Compared: 180 Runs on 10 Made-Up Meetings","description":"We wrote 10 fictional meeting transcripts and asked three Claude models for minutes in six different ways, 180 runs in all. Every way of asking got the decisions, owners and open items almost entirely right. The differences were in adding things nobody said (Opus 0, Haiku 16) and in writing deadlines as dates. Specifying the headings gave the most fully correct sets of minutes.","inLanguage":"en","datePublished":"2026-10-25","dateModified":"2026-10-25","image":"https://flowdeskstudio.net/experiments/exp-009/assets/og-en.png","mainEntityOfPage":"https://flowdeskstudio.net/en/experiments/exp-009/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/en/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/en/experiments/"},{"@type":"ListItem","position":3,"name":"Six ways to ask AI for meeting minutes","item":"https://flowdeskstudio.net/en/experiments/exp-009/"}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/en/experiments/" aria-current="page">Experiments</a>
+      <a href="/en/projects/">Projects</a>
+      <a class="nav-pill" href="/en/about.html">About</a>
+      <span class="language-switch" aria-label="Language"><a href="/experiments/exp-009/" lang="ja" hreflang="ja">JA</a><span aria-current="true">EN</span></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-009">
+      <p class="kicker">EXPERIMENT #009 / COMPLETE</p>
+      <h1>Six ways to ask AI<br>for meeting minutes</h1>
+      <p class="article-deck">Every way of asking got the decisions almost entirely right<br>The difference was whether it added things nobody said</p>
+      <div class="article-meta" aria-label="Article information">
+        <span>2026.10.25</span>
+        <span>CLAUDE OPUS / SONNET / HAIKU 5.5</span>
+        <span>180 RUNS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>In a made-up hiking club meeting, a first-year student, back from a first-ever climb, said: “It was my first time, and my legs were shaking on the way down.”</p>
+        <p>Given the transcript and asked for “minutes to submit to my boss,” Claude Sonnet 5.5 wrote that the newcomer “made it all the way without trouble.” Nobody in the meeting said that.</p>
+        <p>We wrote 10 fictional meetings, prepared six ways of asking for minutes, and ran them on three Claude models, 180 times in all. Every way of asking got the decisions, the owners of each task and the open items almost entirely right. Where they differed was in how often they wrote things nobody said as fact, and in how they wrote deadlines.</p>
+        <p class="fiction-note">Every meeting, shop, company, group and person in this article was made up for this experiment.</p>
+      </div>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="Contents">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#summary">All results</a></li>
+            <li><a href="#method">What we did</a></li>
+            <li><a href="#decisions">The decisions came out right</a></li>
+            <li><a href="#added">The difference: additions</a></li>
+            <li><a href="#quote">Asking for quotes</a></li>
+            <li><a href="#asr">Transcription errors and a lost deadline</a></li>
+            <li><a href="#length">Length</a></li>
+            <li><a href="#data">Experiment data</a></li>
+          </ol>
+        </nav>
+
+        <section>
+          <h2 id="summary">All results</h2>
+          <p>We ran each of the six ways of asking once per meeting and model: 30 runs per way of asking. Every answer was checked item by item against an answer key written before the run.</p>
+          <ul class="article-list">
+            <li>Fully correct: every decision, condition on a decision, task owner and deadline, and open item right, no trap taken, and nothing added</li>
+            <li>Additions: things not said in the meeting, written as fact. Anything labeled as a guess or “to confirm” was not counted</li>
+            <li>Deadline left as said: written the way it was said, such as “next Friday” or “tomorrow,” with no date. Not wrong, but a later reader can't tell the date, so as decided before the run we did not count it as correct</li>
+          </ul>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Way of asking</th><th>Fully correct (of 30)</th><th>Additions</th><th>Deadlines left as said (of 126)</th><th>Avg. length (chars)</th></tr></thead><tbody>
+            <tr><td>Plain</td><td class="num">25</td><td class="num">5 (4 answers)</td><td class="num">4</td><td class="num">1,400</td></tr>
+            <tr><td>Headings</td><td class="num">28</td><td class="num">2 (2 answers)</td><td class="num">0</td><td class="num">1,278</td></tr>
+            <tr><td>Secretary role</td><td class="num">23</td><td class="num">9 (7 answers)</td><td class="num">1</td><td class="num">1,420</td></tr>
+            <tr><td>Quote the source</td><td class="num">15</td><td class="num">2 (2 answers)</td><td class="num">29</td><td class="num">1,802</td></tr>
+            <tr><td>Two steps</td><td class="num">26</td><td class="num">2 (2 answers)</td><td class="num">1</td><td class="num">1,120 (whole answer 2,310)</td></tr>
+            <tr><td>Headings + quotes</td><td class="num">26</td><td class="num">2 (2 answers)</td><td class="num">6</td><td class="num">1,783</td></tr>
+          </tbody></table></div>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>Model</th><th>Fully correct (of 60)</th><th>Additions</th><th>Deadlines left as said (of 252)</th><th>Avg. length (chars)</th></tr></thead><tbody>
+            <tr><td>Opus 5.5</td><td class="num">58</td><td class="num">0</td><td class="num">2</td><td class="num">1,490</td></tr>
+            <tr><td>Sonnet 5.5</td><td class="num">46</td><td class="num">6 (5 answers)</td><td class="num">22</td><td class="num">1,555</td></tr>
+            <tr><td>Haiku 5.5</td><td class="num">39</td><td class="num">16 (14 answers)</td><td class="num">17</td><td class="num">1,356</td></tr>
+          </tbody></table></div>
+          <p>Additions are a count of items; the number in brackets is how many answers had at least one. Length is the number of Japanese characters in one set of minutes; for the two-step request, only the minutes from the second step.</p>
+        </section>
+
+        <section>
+          <h2 id="method">What we did</h2>
+          <p>We wrote 10 fictional meetings: a sweet shop planning Christmas cakes, an app team planning a sprint, a condominium board, a PTA bazaar committee, a publisher's production meeting, a tourism office's social media meeting, an office move, a university hiking club's winter trip, library storytelling volunteers, and a company study session. Each was about 1,300–2,400 Japanese characters, with updates and small talk mixed in.</p>
+          <p>Each meeting had moments where minutes easily go wrong:</p>
+          <ul class="article-list">
+            <li>A decision changed near the end (a start date moved from November 1 to November 8)</li>
+            <li>A number corrected mid-sentence (“300 yen each… no, 500 yen”)</li>
+            <li>A task that changes hands, or one meant for someone who is absent</li>
+            <li>Deadlines like “next Friday” or “a week before orders open,” and tasks with no deadline</li>
+            <li>Conditional decisions (“switch if the quote is the same or lower,” “if the general meeting approves”)</li>
+            <li>Jokes (“How about I deliver them dressed as Santa?”)</li>
+            <li>Rough automatic transcription (speakers shown only as numbers, “reel video” turned into “rule video,” dropped audio)</li>
+          </ul>
+          <p>There were six ways of asking, each placed before the transcript. The full Japanese text is at the end of this article.</p>
+          <ul class="article-list">
+            <li>Plain: “Make minutes from the following meeting transcript.”</li>
+            <li>Headings: the sentence above, plus headings to use: meeting name, decisions, tasks (owner and deadline), open items, other</li>
+            <li>Secretary role: “You are an excellent secretary,” asked for minutes to submit to a boss</li>
+            <li>Quote the source: adds “Don't write anything not said in the meeting. For decisions and tasks, briefly quote the remark they are based on.”</li>
+            <li>Two steps: first list what was decided, the tasks and what was left undecided, then turn that into minutes</li>
+            <li>Headings + quotes: adds both the headings and the two sentences about quoting</li>
+          </ul>
+          <p>Each request was a fresh conversation, with search and other tools off. For the two-step request, only the second-step minutes were judged.</p>
+        </section>
+
+        <section>
+          <h2 id="decisions">The decisions came out right</h2>
+          <p>Only 1 run in 180 left out a decision (647 of 648 decisions written). All 756 task owners were right, and all 180 runs wrote the open items as still open. No run wrote an overturned decision, a number before its correction, or a joke as something decided.</p>
+          <p>Conditional decisions kept their conditions. The condominium board decided to “recommend Company B and put it to the general meeting.” No answer wrote that Company B had been chosen; all said the general meeting would decide.</p>
+          <p>The one miss was Haiku with the two-step request, which wrote only that the egg supplier “depends on the quote,” dropping the actual rule: switch if the quote is the same or lower than now.</p>
+          <p>In the pilot, with three easier meetings (45 runs), the decisions were also all correct. Longer, more confusing meetings made no difference here.</p>
+        </section>
+
+        <section>
+          <h2 id="added">The difference: additions</h2>
+          <p>Opus added nothing; Sonnet added 6 things and Haiku 16. By way of asking, the secretary role had the most, 9; plain had 5; the other four had 2 each. The pilot pointed the same way: most additions came from Haiku and the secretary role.</p>
+          <p>Most additions were small slips: a reason gotten wrong, someone's words slightly changed, a task nobody assigned. The answers were in Japanese; these are our translations.</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>What the AI wrote</th><th>What was said</th><th>Model / way of asking</th></tr></thead><tbody>
+            <tr><td>“Four posts a week is put off given the current follower count”</td><td>“Four is a bit much. We can't with the people we have now”</td><td>Haiku / Plain</td></tr>
+            <tr><td>“Neighborhood cleanup on November 5 (Thu) from 9:00”</td><td>“Oh, there's the neighborhood cleanup on the 5th of next month” (the meeting was on September 27)</td><td>Sonnet / Secretary role</td></tr>
+            <tr><td>“In the move at his previous company, two monitors were damaged”</td><td>“I heard that when another company moved last year, two monitors broke”</td><td>Haiku / Plain</td></tr>
+            <tr><td>A task row: “Chiba | manage the author's manuscript progress (rewriting the last chapter) | end of October”</td><td>Only a report that the manuscript should be complete by the end of the month. No task was assigned</td><td>Haiku / Secretary role</td></tr>
+            <tr><td>“Hayashida pointed out that accounting and administration might not have finished the month-start closing”</td><td>“Our department might not be done with the month-start closing yet” (no department named)</td><td>Sonnet / Secretary role</td></tr>
+          </tbody></table></div>
+          <p>In the tourism office meeting, Haiku made the same slip with three ways of asking: it gave the reason for not going to four posts a week as the follower count. The reason given in the meeting was not having enough staff.</p>
+          <p>We drew the line finely. Writing “already reserved” for “I'll reserve it” counted as one. Treat the counts as a rough guide.</p>
+          <p>Some owners were unclear but could be guessed from context. In the sweet shop meeting, the owner said “Work out the cost and we'll decide next time,” and the clerk who suggested the idea answered “Got it.” Three answers (Opus 2, Sonnet 1) stated flatly that this clerk would work out the cost. We counted these separately from additions.</p>
+        </section>
+
+        <section>
+          <h2 id="quote">Asking for quotes</h2>
+          <p>Asking “Don't write anything not said in the meeting” and “briefly quote the remark” kept additions low: 2 in 30 runs. But deadlines were often left as said, such as “by next Friday” or “tomorrow”: 29 of 126, against 0–6 for the other ways of asking. Of Sonnet's 22 deadlines left as said, 17 came with this request.</p>
+          <p>The date can be worked out from the meeting date and the wording, but the model may have treated a worked-out date as something “not said in the meeting.” Combined with headings, deadlines left as said dropped to 6. Both points are our guesses; we did not test them.</p>
+          <p>This is almost entirely why this request had only 15 fully correct runs in 30.</p>
+        </section>
+
+        <section>
+          <h2 id="asr">Transcription errors and a lost deadline</h2>
+          <p>The tourism office meeting was formatted as an automatic transcript, with “reel” (short video) turned into “rule” and the word for autumn leaves into a homophone. Of 18 runs, 13 corrected it, 4 kept “rule video” with a note that it might be a mishearing of “reel,” and 1 put “rule video” into a task with no note (Haiku, two steps).</p>
+          <p>In the online study-session meeting, the audio drops just as one person gives a deadline for the handout. All 18 runs wrote that deadline as unknown or to be confirmed. None filled in a date.</p>
+        </section>
+
+        <section>
+          <h2 id="length">Length</h2>
+          <p>The shortest minutes came from specifying headings, 1,278 characters on average. The two requests that ask for quotes were the longest, around 1,800, longer by the quotes. Two steps averaged 1,120 for the minutes alone, but 2,310 for the whole answer including the first-step list.</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT WE FOUND</p>
+          <h2>Every way of asking got the decisions</h2>
+          <p>Across 10 made-up meetings, all six ways of asking and all three models wrote the decisions, owners and open items almost entirely right. No run took a trap.</p>
+          <p>The differences were in adding things nobody said, and in writing deadlines as dates. Additions came mostly from Haiku and from the secretary role. Asking for quotes cut additions but tended to leave deadlines as said.</p>
+          <p class="conclusion-line">In these 180 runs, specifying headings gave the most fully correct minutes: 28 of 30.</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2 id="data">Experiment data</h2>
+          <dl>
+            <div><dt>Date</dt><dd>October 23, 2026 (pilot), October 24, 2026 (main run)</dd></div>
+            <div><dt>Environment</dt><dd>Claude Code (desktop app), one fresh conversation (subagent) per request</dd></div>
+            <div><dt>Models</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code>, Claude Sonnet 5.5 <code>claude-sonnet-5-5</code>, Claude Haiku 5.5 <code>claude-haiku-5-5</code></dd></div>
+            <div><dt>Runs</dt><dd>180 in the main run: 10 meetings × 6 ways of asking × 3 models, once each. The pilot (3 easier meetings × 5 ways × 3 models = 45 runs) is not counted</dd></div>
+            <div><dt>Tools</dt><dd>In all 180 runs, no search or other tool was used (confirmed from the call records)</dd></div>
+            <div><dt>Meetings and answer key</dt><dd>Claude Code wrote the 10 transcripts and the answer key (decisions, tasks, open items, traps) before the run</dd></div>
+            <div><dt>Judging</dt><dd>Claude Code (Claude Opus 5.5) read all 180 answers and checked them against the answer key. The judge is from the same Claude family as the models tested, and its judgments were not checked against a person's. Some judging lines (how to treat an unclear owner, or a deadline like “tomorrow”) were set after reading answers, and we kept a record of them. The answer key itself was not changed after the run started</dd></div>
+            <div><dt>Deadlines</dt><dd>Deadlines left as said, like “next Friday,” were not counted as correct. A date with the same meaning, such as “by October 31” for “within this month,” was counted as correct</dd></div>
+            <div><dt>Call conditions</dt><dd>The models were called inside Claude Code, with its default instructions and workspace information that included the run date. At least 14 answers wrote the run date into the minutes, for example that deadlines “have passed as of today, October 24.” These were not counted as additions. Results in an ordinary chat app may differ</dd></div>
+            <div><dt>About the counts</dt><dd>Each request was run only once, so differences of one or two cannot be told apart from chance</dd></div>
+            <div><dt>Other AIs</dt><dd>We did not test ChatGPT or any AI other than Claude</dd></div>
+            <div><dt>Language</dt><dd>The meetings, requests and answers are in Japanese</dd></div>
+            <div><dt>Roles</dt><dd>Claude Code drafted the proposal, wrote the meetings and answer key, ran the experiment, judged the answers and drafted this article. A person chose the project and its scale and approved publication</dd></div>
+            <div><dt>Extra cost</dt><dd>0 yen / no new contracts or purchases for this experiment</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>The exact requests (Japanese)</summary>
+            <p>Each request had this shape: the instruction not to use tools, the way of asking, then the transcript between lines.</p>
+            <blockquote>道具（検索、ファイルの読み書き、コードの実行など）は使わずに答えてください。<br><br>{way of asking}<br><br>――――<br>{transcript}<br>――――</blockquote>
+            <p>Plain</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。</blockquote>
+            <p>Headings</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。次の見出しでまとめてください。<br>・会議名、日時、参加者<br>・決定事項<br>・宿題(担当者と期限)<br>・保留事項<br>・その他</blockquote>
+            <p>Secretary role</p>
+            <blockquote>あなたは優秀な秘書です。次の会議の書き起こしを読み、上司に提出する議事録を作成してください。</blockquote>
+            <p>Quote the source</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。会議で話されていないことは書かないでください。決定事項と宿題には、根拠になった発言を短く引用してください。</blockquote>
+            <p>Two steps</p>
+            <blockquote>次の会議の書き起こしについて、2段階で作業してください。<br>1. まず、会議で決まったこと、宿題(担当者と期限)、決まらなかったことを、発言をもとにすべて書き出してください。<br>2. 次に、1の内容を使って議事録にまとめてください。</blockquote>
+            <p>Headings + quotes</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。次の見出しでまとめてください。<br>・会議名、日時、参加者<br>・決定事項<br>・宿題(担当者と期限)<br>・保留事項<br>・その他<br>会議で話されていないことは書かないでください。決定事項と宿題には、根拠になった発言を短く引用してください。</blockquote>
+          </details>
+        </section>
+
+        <section class="related-experiments" aria-labelledby="related-title"><h2 id="related-title">More experiments</h2><ul class="article-list"><li><a href="/en/experiments/exp-008/">Can AI say “I don't know”?</a></li><li><a href="/en/experiments/exp-007/">We security-checked 35 web apps built by AI</a></li><li><a href="/en/experiments/exp-006/">We tested 20 prompt tricks on Claude</a></li><li><a href="/en/experiments/exp-005/">10 problems in solo AI game development and how we fixed them</a></li><li><a href="/en/experiments/exp-004/">AI picture telephone game, 100 rounds</a></li><li><a href="/en/experiments/exp-003/">What can AI build from one sentence? 15 apps tested</a></li><li><a href="/en/experiments/exp-002/human-world/">I gave an AI god a world of 300 people</a></li><li><a href="/en/experiments/exp-002/">I let AI be a god</a></li><li><a href="/en/experiments/exp-001/">Can AI make a game on its own?</a></li></ul></section>
+        <nav class="article-back" aria-label="Article navigation"><a href="/en/experiments/">← Back to the experiment log</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/en/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
