@@ -4,8 +4,14 @@
   <link href="https://flowdeskstudio.net/en/"/>
   <link rel="self" href="https://flowdeskstudio.net/en/feed.xml"/>
   <id>https://flowdeskstudio.net/en/feed.xml</id>
-  <updated>2026-10-23T00:00:00+09:00</updated>
+  <updated>2026-10-25T00:00:00+09:00</updated>
   <author><name>FlowDeskStudio</name></author>
+  <entry>
+    <title>Six ways to ask AI for meeting minutes: 180 runs on 10 made-up meetings</title>
+    <link href="https://flowdeskstudio.net/en/experiments/exp-009/"/>
+    <id>https://flowdeskstudio.net/en/experiments/exp-009/</id>
+    <updated>2026-10-25T00:00:00+09:00</updated>
+  </entry>
   <entry>
     <title>Can AI say “I don't know”? We asked Claude 196 times about things that don't exist</title>
     <link href="https://flowdeskstudio.net/en/experiments/exp-008/"/>

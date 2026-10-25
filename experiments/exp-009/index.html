@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="max-image-preview:large">
+  <title>AIに議事録を作らせる頼み方6通りを比べた｜架空の会議10本・180回で差が出たのは「書き足し」と期限</title>
+  <meta name="description" content="架空の会議を10本作り、議事録を作らせる頼み方6通りをClaudeの3モデルで180回試しました。決まったこと・担当者・保留は、どの頼み方でもほぼ正しく書けました。差が出たのは、会議で出ていないことを書き足すかどうか（Opus 0件、Haiku 16件）と、期限を日付にするかどうか。満点の回がいちばん多かったのは、見出しを指定する頼み方でした。">
+  <link rel="canonical" href="https://flowdeskstudio.net/experiments/exp-009/">
+  <link rel="alternate" hreflang="ja" href="https://flowdeskstudio.net/experiments/exp-009/">
+  <link rel="alternate" hreflang="en" href="https://flowdeskstudio.net/en/experiments/exp-009/">
+  <link rel="alternate" hreflang="x-default" href="https://flowdeskstudio.net/experiments/exp-009/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="FlowDeskStudio">
+  <meta property="og:url" content="https://flowdeskstudio.net/experiments/exp-009/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="AIに議事録を作らせる頼み方6通りを比べた｜架空の会議10本・180回で差が出たのは「書き足し」と期限">
+  <meta property="og:description" content="議事録の頼み方6通りを、架空の会議10本で180回試した。決まったことはどれでもほぼ正しく書けた。差が出たのは書き足しと期限の書き方。">
+  <meta property="og:image" content="https://flowdeskstudio.net/experiments/exp-009/assets/og-ja.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="article:published_time" content="2026-10-25T00:00:00+09:00">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AIに議事録を作らせる頼み方6通りを比べた">
+  <meta name="twitter:description" content="議事録の頼み方6通りを、架空の会議10本で180回試した。決まったことはどれでもほぼ正しく書けた。差が出たのは書き足しと期限の書き方。">
+  <meta name="twitter:image" content="https://flowdeskstudio.net/experiments/exp-009/assets/og-ja.png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/experiments/exp-009/exp-009.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AIに議事録を作らせる頼み方6通りを比べた｜架空の会議10本・180回で差が出たのは「書き足し」と期限","description":"架空の会議を10本作り、議事録を作らせる頼み方6通りをClaudeの3モデルで180回試しました。決まったこと・担当者・保留は、どの頼み方でもほぼ正しく書けました。差が出たのは、会議で出ていないことを書き足すかどうか（Opus 0件、Haiku 16件）と、期限を日付にするかどうか。満点の回がいちばん多かったのは、見出しを指定する頼み方でした。","inLanguage":"ja","datePublished":"2026-10-25","dateModified":"2026-10-25","image":"https://flowdeskstudio.net/experiments/exp-009/assets/og-ja.png","mainEntityOfPage":"https://flowdeskstudio.net/experiments/exp-009/","author":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"},"publisher":{"@type":"Organization","name":"FlowDeskStudio","url":"https://flowdeskstudio.net/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FlowDeskStudio","item":"https://flowdeskstudio.net/"},{"@type":"ListItem","position":2,"name":"Experiments","item":"https://flowdeskstudio.net/experiments/"},{"@type":"ListItem","position":3,"name":"AIに議事録を作らせる頼み方6通りを比べた","item":"https://flowdeskstudio.net/experiments/exp-009/"}]}]}</script>
+</head>
+<body>
+  <a class="skip-link" href="#article">本文へ移動</a>
+  <header class="site-header">
+    <a class="wordmark" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/experiments/" aria-current="page">Experiments</a>
+      <a href="/projects/">Projects</a>
+      <a class="nav-pill" href="/about.html">About</a>
+      <span class="language-switch" aria-label="言語"><span aria-current="true">JA</span><a href="/en/experiments/exp-009/" lang="en" hreflang="en">EN</a></span>
+    </nav>
+  </header>
+
+  <main id="article" class="article-main">
+    <header class="article-hero exp-009">
+      <p class="kicker">EXPERIMENT #009 / COMPLETE</p>
+      <h1>議事録の頼み方を<br>6通り比べてみた</h1>
+      <p class="article-deck">決まったことは、どの頼み方でもほぼ正しく書けた<br>差が出たのは、会議で出ていないことを書き足すかどうか</p>
+      <div class="article-meta" aria-label="記事情報">
+        <span>2026.10.25</span>
+        <span>CLAUDE OPUS / SONNET / HAIKU 5.5</span>
+        <span>180 RUNS</span>
+      </div>
+    </header>
+
+    <article class="article-body">
+      <div class="article-copy article-opening">
+        <p>架空の山歩き同好会の会議で、はじめて山に登った1年生はこう話した。「僕、初めてだったんですけど、下りで足がガクガクになりました。」</p>
+        <p>この会議の書き起こしを渡して「上司に提出する議事録を」と頼むと、Claude Sonnet 5.5 は「初参加の大塚さんも無事に歩き通した」と書いた。会議では、だれもそうは言っていない。</p>
+        <p>架空の会議を10本作り、議事録を作らせる頼み方を6通り用意して、Claude の3つのモデルで180回試した。決まったこと、宿題の担当者、保留にしたことは、どの頼み方でもほぼ全部正しく書けた。差が出たのは、こうした「会議で出ていないことを事実として書く」回の数と、期限の書き方だった。</p>
+        <p class="fiction-note">この記事に出てくる会議、店、会社、団体、人物は、すべてこの実験のために作った架空のものです。</p>
+      </div>
+
+      <div class="article-copy">
+        <nav class="toc" aria-label="目次">
+          <p>CONTENTS</p>
+          <ol>
+            <li><a href="#summary">結果の一覧</a></li>
+            <li><a href="#method">試したこと</a></li>
+            <li><a href="#decisions">決まったことは、ほぼ全部書けた</a></li>
+            <li><a href="#added">差が出たのは「書き足し」</a></li>
+            <li><a href="#quote">「根拠を引用して」と頼むと</a></li>
+            <li><a href="#asr">文字起こしの誤変換と、聞き取れなかった期限</a></li>
+            <li><a href="#length">長さ</a></li>
+            <li><a href="#data">実験データ</a></li>
+          </ol>
+        </nav>
+
+        <section>
+          <h2 id="summary">結果の一覧</h2>
+          <p>6通りの頼み方を、10本の会議と3つのモデルで1回ずつ試した。1つの頼み方につき30回になる。答えは、実行前に作った正解表と照らして1件ずつ判定した。</p>
+          <ul class="article-list">
+            <li>満点の回：決まったこと、決定の条件、宿題の担当者と期限、保留にしたことがすべて正しく、引っかけ（わな）に乗らず、書き足しもない回</li>
+            <li>書き足し：会議で話されていないことを、事実として書いたもの。「推測」「要確認」などと断ったものは数えない</li>
+            <li>期限が言い方のまま：「来週の金曜」「明日」のように会議での言い方のまま書き、日付を書かなかったもの。間違いではないが、あとで読むと日付がわからないので、実行前の取り決めどおり正解には数えなかった</li>
+          </ul>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>頼み方</th><th>満点の回（30回中）</th><th>書き足し</th><th>期限が言い方のまま（126件中）</th><th>平均の長さ（字）</th></tr></thead><tbody>
+            <tr><td>何も足さない</td><td class="num">25</td><td class="num">5（4回）</td><td class="num">4</td><td class="num">1,400</td></tr>
+            <tr><td>見出しを指定</td><td class="num">28</td><td class="num">2（2回）</td><td class="num">0</td><td class="num">1,278</td></tr>
+            <tr><td>秘書の役割</td><td class="num">23</td><td class="num">9（7回）</td><td class="num">1</td><td class="num">1,420</td></tr>
+            <tr><td>根拠を引用</td><td class="num">15</td><td class="num">2（2回）</td><td class="num">29</td><td class="num">1,802</td></tr>
+            <tr><td>2段階</td><td class="num">26</td><td class="num">2（2回）</td><td class="num">1</td><td class="num">1,120（全体 2,310）</td></tr>
+            <tr><td>見出し＋根拠</td><td class="num">26</td><td class="num">2（2回）</td><td class="num">6</td><td class="num">1,783</td></tr>
+          </tbody></table></div>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>モデル</th><th>満点の回（60回中）</th><th>書き足し</th><th>期限が言い方のまま（252件中）</th><th>平均の長さ（字）</th></tr></thead><tbody>
+            <tr><td>Opus 5.5</td><td class="num">58</td><td class="num">0</td><td class="num">2</td><td class="num">1,490</td></tr>
+            <tr><td>Sonnet 5.5</td><td class="num">46</td><td class="num">6（5回）</td><td class="num">22</td><td class="num">1,555</td></tr>
+            <tr><td>Haiku 5.5</td><td class="num">39</td><td class="num">16（14回）</td><td class="num">17</td><td class="num">1,356</td></tr>
+          </tbody></table></div>
+          <p>宿題は10本の会議で合わせて42件ある。1つの頼み方を3モデルで試すと期限は126件、1つのモデルで6通り試すと252件になる。期限の列は、そのうち言い方のまま書いた件数。書き足しは件数で、かっこの中は書き足しがあった回の数。長さは議事録1通分の文字数で、2段階の頼み方は2段階目の議事録だけを数えた。</p>
+        </section>
+
+        <section>
+          <h2 id="method">試したこと</h2>
+          <p>架空の会議を10本作った。お菓子屋のクリスマスケーキの相談、アプリ開発の計画、マンションの理事会、PTAのバザー係、出版社の進行会議、観光協会のSNSの打ち合わせ、オフィスの移転、大学の同好会の合宿、図書館の読み聞かせボランティア、会社の勉強会の企画。1本は1,300〜2,400字ほどで、近況報告や雑談もまぜた。</p>
+          <p>どの会議にも、議事録を間違えやすい場面を入れた。</p>
+          <ul class="article-list">
+            <li>一度決めたことを、会議の終わりに変える（予約の受付開始を11月1日から8日へ、など）</li>
+            <li>数字や番号を言い直す（「1品300円……じゃなかった、500円」）</li>
+            <li>担当者が途中で入れ替わる、欠席している人に頼む予定になる</li>
+            <li>「来週の金曜」「受付開始の1週間前」のような期限、期限が言われない宿題</li>
+            <li>条件つきの決定（「見積もりが今と同じか安ければ切り替える」「総会で承認されたら」）</li>
+            <li>冗談（「僕がサンタの格好して配りに行こうか」）</li>
+            <li>自動文字起こしの荒さ（話者が番号だけ、「リール動画」が「ルール動画」になる、音声の途切れ）</li>
+          </ul>
+          <p>頼み方は6通り。どれも書き起こしの前に置いた。全文は記事の最後に載せている。</p>
+          <ul class="article-list">
+            <li>何も足さない：「次の会議の書き起こしから、議事録を作ってください。」</li>
+            <li>見出しを指定：上の1文に、5つの見出し（会議名・日時・参加者／決定事項／宿題と担当者・期限／保留事項／その他）を指定する</li>
+            <li>秘書の役割：「あなたは優秀な秘書です。」と役を与え、上司に出す議事録を頼む</li>
+            <li>根拠を引用：「会議で話されていないことは書かないでください。決定事項と宿題には、根拠になった発言を短く引用してください。」を足す</li>
+            <li>2段階：先に決まったこと・宿題・決まらなかったことを書き出させ、次に議事録にまとめさせる</li>
+            <li>見出し＋根拠：見出しの指定と、根拠を引用する2文の両方を足す</li>
+          </ul>
+          <p>毎回新しい会話で頼み、検索などの道具は使わせなかった。2段階の頼み方は、2段階目の議事録だけを判定の対象にした。</p>
+        </section>
+
+        <section>
+          <h2 id="decisions">決まったことは、ほぼ全部書けた</h2>
+          <p>180回のうち、決まったことを書き落としたのは1回だけだった（決定事項648件中647件）。宿題の担当者は756件すべて正しく、保留にしたことも180回すべて保留として書いた。ひっくり返る前の決定、言い直す前の数字、冗談を、決まったこととして書いた回は0回だった。</p>
+          <p>条件つきの決定も、条件ごと書いていた。マンションの理事会は「理事会としてB社を推薦し、総会にかける」と決めた。どの答えも「B社に決定」とは書かず、決めるのは総会だと書いた。</p>
+          <p>書き落とした1回は、Haiku が2段階の頼み方で、卵の仕入れ先を「見積もり結果次第」とだけ書き、「今の業者と同じか安ければ切り替える」という中身が抜けた回だった。</p>
+          <p>予行で試した易しい会議3本（45回）でも、決まったことはすべて正しく書けていた。会議を長く、紛らわしくしても、この点では差が出なかった。</p>
+        </section>
+
+        <section>
+          <h2 id="added">差が出たのは「書き足し」</h2>
+          <p>書き足しは、Opus 0件、Sonnet 6件、Haiku 16件だった。頼み方では、秘書の役割を与えたときが9件でいちばん多く、何も足さないときが5件、ほかの4通りは2件ずつだった。予行でも、書き足しは Haiku と秘書の役割に多かった。</p>
+          <p>書き足しの多くは小さなずれで、理由を取り違える、人の話を少し言い換える、頼まれていない宿題を足す、といったものだった。</p>
+          <div class="result-table-wrap"><table class="result-table"><thead><tr><th>AIが書いたこと</th><th>会議で話されたこと</th><th>モデル・頼み方</th></tr></thead><tbody>
+            <tr><td>「週4回は現在のフォロワー規模では見送る」</td><td>「4回はちょっと、今の人数だと無理です」</td><td>Haiku・何も足さない</td></tr>
+            <tr><td>「11月5日(木)9:00から町内会の清掃がある」</td><td>「来月の5日、町内会の清掃がありますね」（会議は9月27日）</td><td>Sonnet・秘書の役割</td></tr>
+            <tr><td>「前社の移転では、モニター2台が破損した例がある」</td><td>「去年、別の会社で移転したとき、モニターが2台割れたって聞きました」</td><td>Haiku・何も足さない</td></tr>
+            <tr><td>宿題の表の1行「| 千葉 | 先生の原稿の進捗管理(最終章の書き直し) | 10月末 |」</td><td>原稿は今月末にそろいそうだ、という報告だけ。宿題としては頼まれていない</td><td>Haiku・秘書の役割</td></tr>
+            <tr><td>「林田さんから経理・管理側の月初の締めが終わっていない可能性」</td><td>「うちの部、月初の締めがまだ終わってないかもしれないです」（部署の名前は出ていない）</td><td>Sonnet・秘書の役割</td></tr>
+          </tbody></table></div>
+          <p>観光協会の会議では、Haiku が3つの頼み方で同じ取り違えをした。投稿を週4回に増やさない理由を「フォロワーの規模」や「フォロワー数」と書いた。会議で出た理由は、職員の人数が足りないことだった。</p>
+          <p>判定の線は細かく引いた。たとえば「押さえておきます」を「押さえ済み」と書いた回も、1件に数えている。件数は目安として見てほしい。</p>
+          <p>会議でははっきりしないが、流れから推し量れる担当もあった。お菓子屋の会議で、店主が「原価を出して、次の打ち合わせで決めよう」と言い、提案した店員が「了解です」と答えた場面だ。この店員を原価を出す担当だと断定して書いた回が3回（Opus 2回、Sonnet 1回）あった。書き足しとは分けて数えている。</p>
+        </section>
+
+        <section>
+          <h2 id="quote">「根拠を引用して」と頼むと</h2>
+          <p>「会議で話されていないことは書かないでください。」「根拠になった発言を短く引用してください。」と頼むと、書き足しは30回で2件と少なかった。その代わり、期限を「来週の金曜まで」「明日」のように、会議での言い方のまま書くことが多かった。期限126件のうち29件で、ほかの頼み方は0〜6件だった。Sonnet の言い方のままの期限22件のうち17件も、この頼み方のときだった。</p>
+          <p>会議の日付と言い方から日付は計算できるが、計算した日付も「会議で話されていないこと」と受け取ったのかもしれない。見出しの指定と組み合わせると、言い方のままの期限は6件に減った。どちらも推測で、確かめてはいない。</p>
+          <p>この頼み方の満点の回が30回中15回と少ないのは、ほとんどがこの期限の書き方のためだ。</p>
+        </section>
+
+        <section>
+          <h2 id="asr">文字起こしの誤変換と、聞き取れなかった期限</h2>
+          <p>観光協会の会議は、自動文字起こしの体裁にした。短い動画の「リール」が「ルール」、紅葉が「高揚」になっている。18回のうち、直して書いたのが13回、「ルール動画」のまま載せて「リールの聞き間違いかもしれない」などと注記したのが4回、注記なしで「ルール動画」のまま宿題に書いたのが1回（Haiku・2段階）だった。</p>
+          <p>オンライン会議の勉強会では、資料づくりの期限を言ったところで音声が途切れている。この宿題の期限は、18回すべてが「不明」「要確認」などと書いた。日付を補った回はなかった。</p>
+        </section>
+
+        <section>
+          <h2 id="length">長さ</h2>
+          <p>議事録1通の平均の長さは、見出しを指定したときが1,278字でいちばん短く、根拠を引用する2通りが1,800字前後で長かった。引用の分だけ長くなる。2段階は議事録の部分だけなら1,120字だが、1段階目の書き出しを含めた答え全体は平均2,310字だった。</p>
+        </section>
+
+        <section class="article-conclusion">
+          <p class="kicker">WHAT WE FOUND</p>
+          <h2>決まったことは、どの頼み方でも書けた</h2>
+          <p>架空の会議10本で、決まったこと、担当者、保留は、6通りの頼み方と3つのモデルのどれでも、ほぼ全部正しく書けた。引っかけに乗った回はなかった。</p>
+          <p>違いが出たのは、会議で出ていないことを書き足すかどうかと、期限を日付にするかどうかだった。書き足しは Haiku と、秘書の役割を与えた頼み方に多かった。根拠を引用させると書き足しは減ったが、期限が言い方のままになりやすかった。</p>
+          <p class="conclusion-line">この180回でいちばん満点が多かったのは、見出しを指定する頼み方だった（30回中28回）。</p>
+        </section>
+
+        <section class="experiment-data">
+          <p class="kicker">EXPERIMENT DATA</p>
+          <h2 id="data">実験データ</h2>
+          <dl>
+            <div><dt>実験日</dt><dd>2026年10月23日（予行）、10月24日（本番）</dd></div>
+            <div><dt>実行環境</dt><dd>Claude Code（デスクトップアプリ）。1回の依頼ごとに新しい会話（サブエージェント）を1つ立てた</dd></div>
+            <div><dt>試したモデル</dt><dd>Claude Opus 5.5 <code>claude-opus-5-5</code>、Claude Sonnet 5.5 <code>claude-sonnet-5-5</code>、Claude Haiku 5.5 <code>claude-haiku-5-5</code></dd></div>
+            <div><dt>回数</dt><dd>本番180回。会議10本×頼み方6通り×3モデルを1回ずつ。予行（易しい会議3本×5通り×3モデル=45回）は数えていない</dd></div>
+            <div><dt>道具</dt><dd>180回とも、検索などの道具は使われなかった（呼び出しの記録で確認）</dd></div>
+            <div><dt>会議と正解表</dt><dd>書き起こし10本と、決まったこと・宿題・保留・引っかけの正解表は、実行前に Claude Code が作った</dd></div>
+            <div><dt>判定</dt><dd>Claude Code（Claude Opus 5.5）が180件を1件ずつ読み、正解表と照らして判定した。判定したAIは、試したモデルと同じ Claude の仲間で、人による判定との照合はしていない。判定の線の一部（はっきりしない担当の扱い、「明日」のような期限の扱いなど）は答えを読んでから決め、その記録を残している。正解表は実行前から変えていない</dd></div>
+            <div><dt>期限の判定</dt><dd>「来週の金曜」のような言い方のままの期限は、正解に数えなかった。「今月中」を「10月31日まで」と書いたように、同じ意味の日付に直したものは正解とした</dd></div>
+            <div><dt>呼び出しの条件</dt><dd>呼び出されたAIには、Claude Code の初期設定の指示と、実行日を含む作業環境の情報が付いていた。少なくとも14回は「今日（10月24日）の時点で期限を過ぎている」のように、実行日を議事録に書いた。書き足しには数えていない。一般のチャット画面で同じ結果になるとは限らない</dd></div>
+            <div><dt>回数について</dt><dd>各文面を1回ずつしか試していないため、1〜2件の差は偶然と区別できない</dd></div>
+            <div><dt>他社のAI</dt><dd>ChatGPT など、Claude 以外のAIは試していない</dd></div>
+            <div><dt>役割</dt><dd>企画案・会議と正解表づくり・実行・判定・この記事の下書きはClaude Code。企画の選択、規模の選択、公開の承認は人</dd></div>
+            <div><dt>追加費用</dt><dd>0円 / 今回のための新規契約・購入なし</dd></div>
+          </dl>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>実際に渡した依頼文</summary>
+            <p>送った文面は、次の形にした。</p>
+            <blockquote>道具（検索、ファイルの読み書き、コードの実行など）は使わずに答えてください。<br><br>{頼み方}<br><br>――――<br>{会議の書き起こし}<br>――――</blockquote>
+            <p>何も足さない</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。</blockquote>
+            <p>見出しを指定</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。次の見出しでまとめてください。<br>・会議名、日時、参加者<br>・決定事項<br>・宿題(担当者と期限)<br>・保留事項<br>・その他</blockquote>
+            <p>秘書の役割</p>
+            <blockquote>あなたは優秀な秘書です。次の会議の書き起こしを読み、上司に提出する議事録を作成してください。</blockquote>
+            <p>根拠を引用</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。会議で話されていないことは書かないでください。決定事項と宿題には、根拠になった発言を短く引用してください。</blockquote>
+            <p>2段階</p>
+            <blockquote>次の会議の書き起こしについて、2段階で作業してください。<br>1. まず、会議で決まったこと、宿題(担当者と期限)、決まらなかったことを、発言をもとにすべて書き出してください。<br>2. 次に、1の内容を使って議事録にまとめてください。</blockquote>
+            <p>見出し＋根拠</p>
+            <blockquote>次の会議の書き起こしから、議事録を作ってください。次の見出しでまとめてください。<br>・会議名、日時、参加者<br>・決定事項<br>・宿題(担当者と期限)<br>・保留事項<br>・その他<br>会議で話されていないことは書かないでください。決定事項と宿題には、根拠になった発言を短く引用してください。</blockquote>
+          </details>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>会議の書き起こしの例（山歩き同好会、架空）</summary>
+            <p>10本のうち1本を、渡したとおりに載せています。</p>
+            <blockquote>2026年10月19日(月)18:00〜18:40 山歩き同好会 冬合宿の相談<br>参加者:遠藤(部長)、菊地(副部長)、杉山(会計)、大塚(1年)、小島(2年)<br><br>遠藤:はい、じゃあ冬合宿の話しまーす。その前に、この前の日帰りの山、おつかれ。<br>小島:天気よかったよね。頂上からちゃんと海まで見えた。<br>大塚:僕、初めてだったんですけど、下りで足がガクガクになりました。<br>菊地:(笑)最初はみんなそうだよ。2回目からは慣れる。<br>杉山:あの日の交通費、まだ払ってない人が2人いるから、あとで声かけるね。<br>遠藤:よろしく。で、冬合宿。去年は11月だったけど、今年はみんなの希望で12月にします。で、日程なんだけど、12月19日の土曜からでいい?<br>菊地:いいと思う。テスト終わってるし。<br>小島:2泊3日にしません? 1泊だと移動ばっかりで終わっちゃう気がする。<br>杉山:2泊だと宿代がほぼ倍になるよ。参加費が上がると、1年生が来にくくなると思う。<br>大塚:正直、2泊だと厳しいです。バイトもあるので……。<br>遠藤:だよね。じゃあ1泊2日で。19日の土曜から20日の日曜。2泊はなしで。<br>小島:了解でーす。<br>遠藤:次、宿。民宿と貸し別荘、どっちがいい?<br>菊地:貸し別荘のほうが、夜みんなで集まれるからいいと思う。民宿だと、夜は静かにって言われそう。<br>杉山:それに、私が見つけた貸し別荘、バーベキューができるんだよね。<br>大塚:バーベキュー、やりたいです!<br>小島:貸し別荘って、何人まで泊まれるの?<br>杉山:12人まで。今の部員が11人だから、全員来ても大丈夫。<br>菊地:布団とか、自分たちで用意するの?<br>杉山:布団はあるって書いてあった。タオルは持ってきてくださいって。<br>遠藤:じゃあ貸し別荘にしよう。民宿はなしで。<br>遠藤:次、お金の話。杉山さん、参加費いくらになりそう?<br>杉山:宿代と食費とレンタカーで、1人18,000円くらい。<br>小島:18,000かー。ちょっと高いね。<br>杉山:それで考えたんだけど、部費が少し余ってるから、1人3,000円補助できる。そしたら15,000円。<br>遠藤:いいね。じゃあ参加費は15,000円にしよう。部費から3,000円ずつ出す。<br>大塚:助かります。<br>遠藤:なんなら俺が全員分おごるよ。<br>菊地:(笑)無理でしょ。<br>遠藤:(笑)冗談です。じゃあ担当決めます。杉山さん、集金お願いしていい?<br>杉山:うん。11月いっぱいで集めるね。<br>遠藤:大塚くん、参加するかどうか、みんなに聞いてまとめてくれる?<br>大塚:はい、来週の月曜までにまとめます。<br>遠藤:小島、レンタカーの見積もりお願い。何台いるかは人数次第だけど。<br>小島:いいよ。人数わかってからのほうがいいけど、先に相場だけ見とく。<br>遠藤:菊地、貸し別荘の予約お願いできる? 12月は埋まるの早いらしいから。<br>菊地:じゃあ、あさってまでに予約しとく。<br>遠藤:ありがとう。あと、2日目に山に登るか、観光にするか。<br>小島:登りたい。せっかく山歩き同好会だし。<br>大塚:でも雪だったら危なくないですか。<br>菊地:それは当日近くにならないとわからないよね。<br>遠藤:じゃあ、2日目に登るか観光にするかは、直前に天気を見て決めよう。どっちでもいいように準備しといて。<br>小島:了解。<br>杉山:あ、来月の3日、部室の大掃除あるからみんな来てね。<br>遠藤:あ、そうだった。じゃあ今日は以上! お疲れー。<br>一同:お疲れさまでした。</blockquote>
+          </details>
+        </section>
+
+        <section class="prompt-details">
+          <details>
+            <summary>この会議からAIが作った議事録の例（Sonnet 5.5・秘書の役割）</summary>
+            <p>上の会議から作られた議事録を、AIが書いたとおりに載せています。表や見出しの記号もそのままです。冒頭で紹介した「初参加の大塚さんも無事に歩き通した」は、会議で話されていない書き足しです。</p>
+            <blockquote># 議事録 山歩き同好会 冬合宿の相談<br><br>**日時**:2026年10月19日(月)18:00〜18:40<br>**参加者**:遠藤(部長)、菊地(副部長)、杉山(会計)、大塚(1年)、小島(2年)<br>**議題**:冬合宿の日程・宿・費用・担当・2日目の行程<br><br>## 1. 決定事項<br><br>| 項目 | 決定内容 | 補足 |<br>|---|---|---|<br>| 日程 | 2026年12月19日(土)〜20日(日)、1泊2日 | 去年は11月だったが、部員の希望で12月にした。テスト後の時期。2泊3日は見送り。 |<br>| 宿 | 貸し別荘(バーベキュー可) | 定員12名で、現部員11名は全員泊まれる。布団はあり、タオルは各自持参。民宿は見送り。 |<br>| 参加費 | 1人15,000円 | 見積もりは1人約18,000円(宿代・食費・レンタカー)。部費から1人3,000円を補助する。 |<br>| 2日目 | 登山にするか観光にするかは、直前の天気を見て決める | どちらでも動けるよう準備しておく。 |<br><br>**見送った案とその理由**<br>- 2泊3日:宿代がほぼ倍になる。参加費が上がると1年生が参加しにくい。大塚さんもアルバイトの都合で厳しい。<br>- 民宿:夜は静かにするよう言われそうで、みんなで集まりにくい。貸し別荘のほうが夜に集まれて、バーベキューもできる。<br><br>## 2. 担当と期限<br><br>| 担当 | 内容 | 期限 |<br>|---|---|---|<br>| 菊地 | 貸し別荘の予約(12月は埋まるのが早いため) | 10月21日(水)まで(会議で「あさってまで」) |<br>| 大塚 | 参加の可否を全員に確認してまとめる | 10月26日(月)まで(会議で「来週の月曜まで」) |<br>| 杉山 | 参加費の集金 | 11月末まで |<br>| 小島 | レンタカーの見積もり | 期限の指定なし。台数は人数確定後に決まるため、先に相場だけ確認する。 |<br>| 杉山 | 先日の日帰り登山の交通費で未払いの2名への声かけ | 期限の指定なし |<br><br>## 3. 協議の経過(要点)<br>- **日程**:遠藤部長が12月19日(土)からを提案し、異論なし。小島さんは2泊を希望した。一方、杉山さんは費用増、大塚さんは費用とアルバイトの都合を理由に反対し、1泊2日に決まった。<br>- **宿**:菊地副部長が貸し別荘を推し、杉山さんが見つけた物件(バーベキュー可、定員12名)が候補になった。大塚さんも賛成し、貸し別荘に決まった。<br>- **費用**:杉山さんが、見積もり約18,000円に対し、余っている部費から3,000円を補助して15,000円にすることを提案し、了承された。<br>- **2日目**:小島さんは登山を希望した。大塚さんは雪の場合の安全面を心配した。当日近くにならないと雪の状況がわからないため、直前に天気を見て決めることになった。<br><br>## 4. その他・連絡事項<br>- 11月3日(火)に部室の大掃除がある。全員参加(杉山さんから周知)。<br>- 先日の日帰り登山は天候に恵まれ、頂上から海まで見えた。初参加の大塚さんも無事に歩き通した。<br><br>## 5. 確認が必要な点(秘書より)<br>1. **予約の状況**:菊地さんの予約期限(10月21日)は過ぎている。予約が完了したかを確認したほうがよい。<br>2. **補助の原資**:補助は1人3,000円で、全員参加なら最大33,000円になる。会議では「部費が少し余っている」としか触れておらず、残高は確認されていない。<br>3. **レンタカー**:大塚さんの人数確認(10月26日)が終わらないと台数が決まらず、見積もりも確定しない。<br>4. **2日目の担当**:登山と観光のどちらにも備えるよう指示はあったが、準備や判断の担当者は決まっていない。<br>5. **参加費の前提**:15,000円は約18,000円という概算からの試算で、人数が確定した時点で見直す余地がある。<br><br>以上</blockquote>
+          </details>
+        </section>
+
+        <section class="related-experiments" aria-labelledby="related-title"><h2 id="related-title">ほかの実験</h2><ul class="article-list"><li><a href="/experiments/exp-008/">AIは知らないことを「知らない」と言えるか</a></li><li><a href="/experiments/exp-007/">AIに作らせたWebアプリ35個をセキュリティ検査した結果</a></li><li><a href="/experiments/exp-006/">プロンプトの裏技20個をClaudeで試した</a></li><li><a href="/experiments/exp-005/">AI個人ゲーム開発で直面した10の課題と解決策</a></li><li><a href="/experiments/exp-004/">AIで絵の伝言ゲームを100回やった結果</a></li><li><a href="/experiments/exp-003/">AIに一言で頼んで作れるもの15選</a></li><li><a href="/experiments/exp-002/human-world/">300人の世界をAI Godに任せたら、745年後に人類が絶滅した</a></li><li><a href="/experiments/exp-002/">AIを神にしてみた</a></li><li><a href="/experiments/exp-001/">AIだけでゲームは作れる？Codexに丸投げした結果</a></li></ul></section>
+        <nav class="article-back" aria-label="記事ナビゲーション"><a href="/experiments/">← 実験ログへ戻る</a></nav>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <a class="wordmark wordmark-footer" href="/"><span class="wordmark-dot" aria-hidden="true"></span><span class="wordmark-text">FlowDeskStudio</span></a>
+    <p>Curiosity first. Evidence before claims.</p>
+    <p class="footer-contact">Contact: <a href="mailto:contact@flowdeskstudio.net">contact@flowdeskstudio.net</a></p>
+    <p class="copyright">© 2026 FlowDeskStudio</p>
+  </footer>
+</body>
+</html>
